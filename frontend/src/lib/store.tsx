@@ -507,8 +507,9 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
   const createRecipe = useCallback(
     async (data: NewRecipeInput): Promise<Recipe> => {
+      const id = uid();
       const recipe: Recipe = {
-        id: uid(),
+        id,
         familyId: familyId!,
         title: data.title,
         description: data.description ?? null,
@@ -518,7 +519,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ingredients:
           data.ingredients?.map((ing) => ({
             id: uid(),
-            recipeId: recipe.id,
+            recipeId: id,
             name: ing.name,
             amount: ing.amount,
             unit: ing.unit,
