@@ -1,0 +1,468 @@
+import { useMemo, useState } from "react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ShoppingBasket,
+  CalendarDays,
+  X,
+  Check,
+  UtensilsCrossed,
+  AlertCircle,
+} from "lucide-react";
+import { useAuth } from "../lib/auth";
+import { useData } from "../lib/store";
+import { MEAL_TYPES, MEAL_TYPE_COLORS } from "../lib/types";
+import Modal from "../components/Modal";
+
+const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+function toISO(d: Date) {
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function startOfWeek(d: Date) {
+  const copy = new Date(d);
+  const day = (copy.getDay() + 6) % 7;
+  copy.setDate(copy.getDate() - day);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+function addDays(d: Date, n: number) {
+  const copy = new Date(d);
+  copy.setDate(copy.getDate() + n);
+  return copy;
+}
+
+export default function MealPlanner() {
+  const { user } = useAuth();
+  const {
+    ready,
+    mealPlans,
+    recipes,
+    lists,
+    setMealPlan,
+    removeMealPlan,
+    exportIngredients,
+  } = useData();
+  const [view, setView] = useState<"week" | "month">("week");
+  const [anchor, setAnchor] = useState(() => startOfWeek(new Date()));
+
+  const [cell, setCell] = useState<{ date: string; mealType: string } | null>(null);
+  const [recipeId, setRecipeId] = useState("");
+  const [customTitle, setCustomTitle] = useState("");
+
+  const [exportOpen, setExportOpen] = useState(false);
+  const [exportListId, setExportListId] = useState("");
+  const [exporting, setExporting] = useState(false);
+  const [exportResult, setExportResult] = useState<{
+    listId: string;
+    listName: string;
+    ingredients: { name: string; quantity: string }[];
+  } | null>(null);
+  const [exportError, setExportError] = useState("");
+
+  const dates = useMemo(() => {
+    if (view === "week") {
+      const weekDates = Array.from({ length: 7 }, (_, i) => toISO(addDays(anchor, i)));
+      return { weekDates, start: weekDates[0], end: weekDates[6] };
+    }
+    const year = anchor.getFullYear();
+    const month = anchor.getMonth();
+    const first = new Date(year, month, 1);
+    const last = new Date(year, month + 1, 0);
+    return { weekDates: [], start: toISO(first), end: toISO(last) };
+  }, [view, anchor]);
+
+  const openCell = (date: string, mealType: string) => {
+    const existing = mealPlans.find((m) => m.date === date && m.mealType === mealType);
+    setRecipeId(existing?.recipeId ?? "");
+    setCustomTitle(existing?.customTitle ?? "");
+    setCell({ date, mealType });
+  };
+
+  const saveCell = async () => {
+    if (!cell) return;
+    await setMealPlan({
+      date: cell.date,
+      mealType: cell.mealType,
+      recipeId: recipeId || undefined,
+      customTitle: customTitle || undefined,
+    });
+    setCell(null);
+  };
+
+  const mealLabel = (date: string, mealType: string) => {
+    const found = mealPlans.find((m) => m.date === date && m.mealType === mealType);
+    return found;
+  };
+
+  const rangeLabel =
+    view === "week"
+      ? `${dates.start.slice(8, 10)}/${dates.start.slice(5, 7)} – ${dates.end.slice(8, 10)}/${dates.end.slice(5, 7)}`
+      : new Date(anchor.getFullYear(), anchor.getMonth(), 1).toLocaleDateString("es", {
+          month: "long",
+          year: "numeric",
+        });
+
+  const monthWeeks = useMemo(() => {
+    if (view !== "month") return [];
+    const year = anchor.getFullYear();
+    const month = anchor.getMonth();
+    const first = new Date(year, month, 1);
+    const start = startOfWeek(first);
+    const cells: string[] = [];
+    for (let i = 0; i < 42; i++) {
+      cells.push(toISO(addDays(start, i)));
+    }
+    const weeks: string[][] = [];
+    for (let i = 0; i < 42; i += 7) weeks.push(cells.slice(i, i + 7));
+    return weeks;
+  }, [view, anchor]);
+
+  const navigate = (dir: number) => {
+    if (view === "week") {
+      setAnchor(addDays(anchor, dir * 7));
+    } else {
+      setAnchor(new Date(anchor.getFullYear(), anchor.getMonth() + dir, 1));
+    }
+    setExportResult(null);
+  };
+
+  const runExport = async () => {
+    setExporting(true);
+    setExportError("");
+    setExportResult(null);
+    try {
+      const res = await exportIngredients(dates.start, dates.end, exportListId || undefined);
+      setExportResult({
+        listId: res.list.id,
+        listName: res.list.name,
+        ingredients: res.aggregatedIngredients,
+      });
+      setExportOpen(false);
+    } catch (err: any) {
+      setExportError(err.message);
+    } finally {
+      setExporting(false);
+    }
+  };
+
+  if (!user?.familyId) {
+    return (
+      <div className="rounded-2xl bg-amber-50 p-6 text-amber-700">
+        <div className="flex items-center gap-3">
+          <AlertCircle className="h-6 w-6" />
+          <p className="font-medium">Necesitas un hogar para planificar los menús.</p>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Planificador de menús</h1>
+          <p className="text-sm text-slate-500 capitalize">{rangeLabel}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-100">
+            {(["week", "month"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => {
+                  setView(v);
+                  setExportResult(null);
+                }}
+                className={`rounded-lg px-4 py-1.5 text-sm font-medium transition ${
+                  view === v ? "bg-emerald-500 text-white" : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                {v === "week" ? "Semanal" : "Mensual"}
+              </button>
+            ))}
+          </div>
+          <button
+            onClick={() => setExportOpen(true)}
+            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+          >
+            <ShoppingBasket className="h-4 w-4" />
+            Exportar a compras
+          </button>
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <button
+          onClick={() => navigate(-1)}
+          className="flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
+        >
+          <ChevronLeft className="h-4 w-4" />
+          Anterior
+        </button>
+        <button
+          onClick={() => {
+            setAnchor(view === "week" ? startOfWeek(new Date()) : new Date());
+            setExportResult(null);
+          }}
+          className="rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
+        >
+          Hoy
+        </button>
+        <button
+          onClick={() => navigate(1)}
+          className="flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
+        >
+          Siguiente
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
+
+      {exportResult && (
+        <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+          <div className="flex items-center gap-2 font-semibold text-emerald-700">
+            <Check className="h-5 w-5" />
+            Ingredientes exportados a "{exportResult.listName}"
+          </div>
+          <div className="mt-2 flex flex-wrap gap-2">
+            {exportResult.ingredients.map((ing) => (
+              <span
+                key={ing.name}
+                className="rounded-full bg-white px-3 py-1 text-xs font-medium text-emerald-700 shadow-sm"
+              >
+                {ing.name} · {ing.quantity}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {!ready ? (
+        <p className="text-sm text-slate-400">Cargando...</p>
+      ) : view === "week" ? (
+        <div className="overflow-x-auto">
+          <div className="min-w-[700px]">
+            <div className="grid grid-cols-8 gap-2">
+              <div className="flex items-end justify-center pb-2 text-xs font-bold uppercase text-slate-400">
+                <CalendarDays className="mr-1 h-4 w-4" />
+                Comida
+              </div>
+              {dates.weekDates.map((d, i) => {
+                const today = toISO(new Date());
+                return (
+                  <div key={d} className="pb-2 text-center">
+                    <p className="text-xs font-bold uppercase text-slate-400">{WEEKDAYS[i]}</p>
+                    <p
+                      className={`text-xl font-bold ${
+                        d === today ? "text-emerald-600" : "text-slate-700"
+                      }`}
+                    >
+                      {Number(d.slice(8, 10))}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="space-y-2">
+              {MEAL_TYPES.map((mealType) => (
+                <div key={mealType} className="grid grid-cols-8 gap-2">
+                  <div className="flex items-center">
+                    <span
+                      className={`rounded-lg px-2 py-1 text-xs font-bold ${
+                        MEAL_TYPE_COLORS[mealType] ?? "bg-slate-100 text-slate-600"
+                      }`}
+                    >
+                      {mealType}
+                    </span>
+                  </div>
+                  {dates.weekDates.map((d) => {
+                    const m = mealLabel(d, mealType);
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => openCell(d, mealType)}
+                        className={`min-h-[56px] rounded-xl border-2 border-dashed p-2 text-left transition hover:border-emerald-400 hover:bg-emerald-50 ${
+                          m ? "border-slate-200 bg-white" : "border-slate-200"
+                        }`}
+                      >
+                        {m && (
+                          <div>
+                            {m.recipe && (
+                              <UtensilsCrossed className="mb-1 h-3.5 w-3.5 text-emerald-500" />
+                            )}
+                            <p className="text-xs font-medium leading-tight text-slate-700">
+                              {m.recipe?.title ?? m.customTitle}
+                            </p>
+                          </div>
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : (
+        <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+          <div className="grid grid-cols-7 gap-1 text-center">
+            {WEEKDAYS.map((wd) => (
+              <div key={wd} className="py-1 text-xs font-bold uppercase text-slate-400">
+                {wd}
+              </div>
+            ))}
+          </div>
+          <div className="mt-1 grid grid-cols-7 gap-1">
+            {monthWeeks.flat().map((d) => {
+              const inMonth = d.slice(0, 7) === toISO(new Date(anchor.getFullYear(), anchor.getMonth(), 1)).slice(0, 7);
+              const dayMeals = mealPlans.filter((m) => m.date === d);
+              const today = toISO(new Date());
+              return (
+                <button
+                  key={d}
+                  onClick={() => {
+                    setView("week");
+                    setAnchor(startOfWeek(new Date(`${d}T12:00:00`)));
+                  }}
+                  className={`min-h-[72px] rounded-xl p-1.5 text-left transition ${
+                    inMonth ? "bg-slate-50 hover:bg-emerald-50" : "bg-slate-100/50"
+                  } ${d === today ? "ring-2 ring-emerald-400" : ""}`}
+                >
+                  <p
+                    className={`text-sm font-bold ${d === today ? "text-emerald-600" : "text-slate-600"}`}
+                  >
+                    {Number(d.slice(8, 10))}
+                  </p>
+                  <div className="mt-1 flex flex-wrap gap-0.5">
+                    {dayMeals.slice(0, 4).map((m) => (
+                      <span
+                        key={m.id}
+                        title={m.recipe?.title ?? m.customTitle ?? ""}
+                        className="h-1.5 w-4 rounded-full bg-emerald-400"
+                      />
+                    ))}
+                  </div>
+                  <p className="mt-1 truncate text-[10px] text-slate-500">
+                    {dayMeals.length > 0
+                      ? dayMeals
+                          .map((m) => m.recipe?.title ?? m.customTitle ?? "")
+                          .join(", ")
+                          .slice(0, 30)
+                      : ""}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <Modal
+        open={!!cell}
+        onClose={() => setCell(null)}
+        title={cell ? `${cell.mealType} · ${cell.date}` : ""}
+      >
+        <div className="space-y-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Elegir receta guardada
+            </label>
+            <select
+              value={recipeId}
+              onChange={(e) => {
+                setRecipeId(e.target.value);
+                setCustomTitle("");
+              }}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+            >
+              <option value="">— Sin receta —</option>
+              {recipes.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {r.title}
+                </option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              O escribir una comida personalizada
+            </label>
+            <input
+              type="text"
+              value={customTitle}
+              onChange={(e) => {
+                setCustomTitle(e.target.value);
+                if (e.target.value) setRecipeId("");
+              }}
+              placeholder="Ej: Pizza de la mamá"
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            />
+          </div>
+          <button
+            onClick={saveCell}
+            disabled={!recipeId && !customTitle}
+            className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-40"
+          >
+            Guardar
+          </button>
+          <button
+            onClick={async () => {
+              if (!cell) return;
+              await removeMealPlan(cell.date, cell.mealType);
+              setCell(null);
+            }}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-100"
+          >
+            <X className="h-4 w-4" />
+            Quitar comida
+          </button>
+        </div>
+      </Modal>
+
+      <Modal
+        open={exportOpen}
+        onClose={() => setExportOpen(false)}
+        title="Exportar ingredientes"
+      >
+        <div className="space-y-4">
+          {exportError && (
+            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{exportError}</div>
+          )}
+          <p className="text-sm text-slate-500">
+            Se añadirán a la lista los ingredientes de todas las recetas planificadas en este{" "}
+            {view === "week" ? "período semanal" : "mes"}.
+          </p>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Lista de destino
+            </label>
+            <select
+              value={exportListId}
+              onChange={(e) => setExportListId(e.target.value)}
+              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+            >
+              <option value="">Usar primera lista disponible</option>
+              {lists.map((l) => (
+                <option key={l.id} value={l.id}>
+                  {l.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <button
+            onClick={runExport}
+            disabled={exporting}
+            className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
+          >
+            <ShoppingBasket className="h-4 w-4" />
+            {exporting ? "Exportando..." : "Exportar ahora"}
+          </button>
+        </div>
+      </Modal>
+    </div>
+  );
+}

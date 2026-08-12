@@ -1,0 +1,15 @@
+{
+  "name": "familywall",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Aplicación familiar: listas de compras, recetario y planificador de menús",
+  "scripts": {
+    "dev": "concurrently -n backend,frontend -c blue,green \"npm run dev --prefix backend\" \"npm run dev --prefix frontend\"",
+    "build": "npm run build --prefix frontend",
+    "setup:db": "npm run db:push --prefix backend",
+    "db:studio": "npm run db:studio --prefix backend"
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.0"
+  }
+}

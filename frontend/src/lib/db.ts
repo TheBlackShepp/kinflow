@@ -1,0 +1,47 @@
+import Dexie, { type Table } from "dexie";
+import type { ShoppingList, ListItem, Recipe, Ingredient, MealPlan } from "./types";
+
+export type SyncTable = "lists" | "listItems" | "recipes" | "mealPlans";
+export type SyncAction = "create" | "update" | "delete";
+
+export interface SyncOp {
+  id?: number;
+  table: SyncTable;
+  action: SyncAction;
+  payload: Record<string, unknown>;
+  createdAt: number;
+}
+
+class FamilyWallDB extends Dexie {
+  lists!: Table<ShoppingList, string>;
+  listItems!: Table<ListItem, string>;
+  recipes!: Table<Recipe, string>;
+  ingredients!: Table<Ingredient, string>;
+  mealPlans!: Table<MealPlan, string>;
+  syncQueue!: Table<SyncOp, number>;
+
+  constructor() {
+    super("familywall");
+    this.version(1).stores({
+      lists: "id, name, familyId",
+      listItems: "id, listId, name, completed",
+      recipes: "id, title, familyId",
+      ingredients: "id, recipeId, name",
+      mealPlans: "id, familyId, date, mealType",
+      syncQueue: "++id, createdAt",
+    });
+  }
+}
+
+export const db = new FamilyWallDB();
+
+export function uid(): string {
+  if (typeof crypto !== "undefined" && crypto.randomUUID) {
+    return crypto.randomUUID();
+  }
+  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, (c) => {
+    const r = (Math.random() * 16) | 0;
+    const v = c === "x" ? r : (r & 0x3) | 0x8;
+    return v.toString(16);
+  });
+}
