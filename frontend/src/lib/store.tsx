@@ -7,7 +7,7 @@ import {
   useState,
 } from "react";
 import type { ReactNode } from "react";
-import { api, OfflineError, isNavigatorOnline } from "./api";
+import { api, OfflineError, isNavigatorOnline, getToken } from "./api";
 import { db, uid, type SyncAction, type SyncTable } from "./db";
 import { useAuth } from "./auth";
 import type {
@@ -58,7 +58,7 @@ interface DataContextValue {
     recipeId?: string | null;
     customTitle?: string | null;
   }) => Promise<MealPlan | void>;
-  removeMealPlan: (date: string, mealType: string) => Promise<void>;
+  deleteMealPlan: (id: string) => Promise<void>;
   exportIngredients: (
     start: string,
     end: string,
@@ -233,11 +233,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
           break;
         }
         case "mealPlans": {
+          if (action === "delete") {
+            await api.delete(`/meals/${payload.id}`);
+            await db.mealPlans.delete(payload.id);
+            setMealPlans((s) => s.filter((m) => m.id !== payload.id));
+            break;
+          }
           const meal = await api.post<MealPlan>("/meals", payload);
           await db.mealPlans.delete(payload.id);
           await db.mealPlans.put(meal);
           setMealPlans((s) => [
-            ...s.filter((m) => !(m.date === payload.date && m.mealType === payload.mealType)),
+            ...s.filter((m) => m.id !== meal.id),
             meal,
           ]);
           break;
@@ -345,6 +351,32 @@ export function DataProvider({ children }: { children: ReactNode }) {
       window.removeEventListener("offline", onOffline);
     };
   }, [syncNow]);
+
+  // Real-time: subscribe to family events via SSE and re-sync on changes
+  useEffect(() => {
+    if (!familyId) return;
+    const token = getToken();
+    if (!token) return;
+
+    const source = new EventSource(
+      `/api/events?token=${encodeURIComponent(token)}`
+    );
+
+    source.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.familyId === familyId) {
+          syncNow();
+        }
+      } catch {
+        // ignorar eventos malformados
+      }
+    };
+
+    return () => {
+      source.close();
+    };
+  }, [familyId, syncNow]);
 
   // --- CRUD operations ---
 
@@ -635,23 +667,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const setMealPlan = useCallback(
     async (data: { date: string; mealType: string; recipeId?: string | null; customTitle?: string | null }) => {
       if (!data.recipeId && !data.customTitle) return;
-      const existing = mealPlans.find(
-        (m) => m.date === data.date && m.mealType === data.mealType
-      );
       const meal: MealPlan = {
-        id: existing?.id ?? uid(),
+        id: uid(),
         familyId: familyId!,
         date: data.date,
         mealType: data.mealType,
         recipeId: data.recipeId ?? null,
         recipe: data.recipeId ? recipes.find((r) => r.id === data.recipeId) ?? null : null,
         customTitle: data.customTitle ?? null,
-        createdAt: existing?.createdAt ?? new Date().toISOString(),
+        createdAt: new Date().toISOString(),
       };
-      setMealPlans((s) => [
-        ...s.filter((m) => !(m.date === data.date && m.mealType === data.mealType)),
-        meal,
-      ]);
+      setMealPlans((s) => [...s, meal]);
       await db.mealPlans.put(meal);
       const payload = {
         id: meal.id,
@@ -664,38 +690,29 @@ export function DataProvider({ children }: { children: ReactNode }) {
         const saved = await api.post<MealPlan>("/meals", payload);
         await db.mealPlans.delete(meal.id);
         await db.mealPlans.put(saved);
-        setMealPlans((s) => [
-          ...s.filter((m) => !(m.date === data.date && m.mealType === data.mealType)),
-          saved,
-        ]);
+        setMealPlans((s) => [...s.filter((m) => m.id !== meal.id), saved]);
       } catch (e) {
         if (e instanceof OfflineError) {
-          await cancelPendingFor("mealPlans", (p) => p.date === data.date && p.mealType === data.mealType);
+          await cancelPendingFor("mealPlans", (p) => p.id === meal.id);
           await enqueue("mealPlans", "create", payload);
-          return;
+          return meal;
         }
         throw e;
       }
     },
-    [mealPlans, recipes, familyId, enqueue, cancelPendingFor]
+    [recipes, familyId, enqueue, cancelPendingFor]
   );
 
-  const removeMealPlan = useCallback(
-    async (date: string, mealType: string) => {
-      setMealPlans((s) => s.filter((m) => !(m.date === date && m.mealType === mealType)));
-      await db.mealPlans.where({ date, mealType }).delete();
+  const deleteMealPlan = useCallback(
+    async (id: string) => {
+      setMealPlans((s) => s.filter((m) => m.id !== id));
+      await db.mealPlans.delete(id);
       try {
-        await api.post("/meals", { date, mealType });
+        await api.delete(`/meals/${id}`);
       } catch (e) {
         if (e instanceof OfflineError) {
-          await cancelPendingFor("mealPlans", (p) => p.date === date && p.mealType === mealType);
-          await enqueue("mealPlans", "create", {
-            id: uid(),
-            date,
-            mealType,
-            recipeId: null,
-            customTitle: null,
-          });
+          await cancelPendingFor("mealPlans", (p) => p.id === id);
+          await enqueue("mealPlans", "delete", { id });
           return;
         }
         throw e;
@@ -782,7 +799,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         updateRecipe,
         deleteRecipe,
         setMealPlan,
-        removeMealPlan,
+        deleteMealPlan,
         exportIngredients,
       }}
     >

@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { notifyFamily } from "../events";
 
 const router = Router();
 
@@ -89,6 +90,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       include: { ingredients: true },
     });
 
+    notifyFamily(familyId, "recipe.created", req.user!.userId);
     res.status(201).json(recipe);
   } catch (error) {
     console.error("Error creando receta:", error);
@@ -137,6 +139,7 @@ router.put("/:id", async (req: AuthRequest, res: Response) => {
       include: { ingredients: true },
     });
 
+    notifyFamily(familyId, "recipe.updated", req.user!.userId);
     res.json(recipe);
   } catch (error) {
     console.error("Error actualizando receta:", error);
@@ -156,6 +159,7 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     }
 
     await prisma.recipe.delete({ where: { id: existing.id } });
+    notifyFamily(familyId, "recipe.deleted", req.user!.userId);
     res.json({ message: "Receta eliminada" });
   } catch (error) {
     console.error("Error eliminando receta:", error);

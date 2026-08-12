@@ -45,7 +45,7 @@ export default defineConfig({
         navigateFallbackDenylist: [/^\/api/],
         runtimeCaching: [
           {
-            urlPattern: /^\/api\//,
+            urlPattern: /^\/api\/(?!events)/,
             handler: 'NetworkOnly',
             options: {
               backgroundSync: {

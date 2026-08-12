@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { notifyFamily } from "../events";
 
 const router = Router();
 
@@ -59,6 +60,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       },
     });
 
+    notifyFamily(familyId, "list.created", req.user!.userId);
     res.status(201).json(list);
   } catch (error) {
     console.error("Error creando lista:", error);
@@ -101,6 +103,7 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     }
 
     await prisma.list.delete({ where: { id: list.id } });
+    notifyFamily(familyId, "list.deleted", req.user!.userId);
     res.json({ message: "Lista eliminada" });
   } catch (error) {
     console.error("Error eliminando lista:", error);
@@ -134,6 +137,7 @@ router.post("/:id/items", async (req: AuthRequest, res: Response) => {
       },
     });
 
+    notifyFamily(familyId, "item.created", req.user!.userId);
     res.status(201).json(item);
   } catch (error) {
     console.error("Error agregando artículo:", error);
@@ -166,6 +170,7 @@ router.patch("/items/:itemId", async (req: AuthRequest, res: Response) => {
       },
     });
 
+    notifyFamily(familyId, "item.updated", req.user!.userId);
     res.json(updated);
   } catch (error) {
     console.error("Error actualizando artículo:", error);
@@ -189,6 +194,7 @@ router.delete("/items/:itemId", async (req: AuthRequest, res: Response) => {
     }
 
     await prisma.listItem.delete({ where: { id: item.id } });
+    notifyFamily(familyId, "item.deleted", req.user!.userId);
     res.json({ message: "Artículo eliminado" });
   } catch (error) {
     console.error("Error eliminando artículo:", error);

@@ -4,6 +4,7 @@ import {
   ChevronRight,
   ShoppingBasket,
   CalendarDays,
+  Plus,
   X,
   Check,
   UtensilsCrossed,
@@ -45,7 +46,7 @@ export default function MealPlanner() {
     recipes,
     lists,
     setMealPlan,
-    removeMealPlan,
+    deleteMealPlan,
     exportIngredients,
   } = useData();
   const [view, setView] = useState<"week" | "month">("week");
@@ -78,9 +79,8 @@ export default function MealPlanner() {
   }, [view, anchor]);
 
   const openCell = (date: string, mealType: string) => {
-    const existing = mealPlans.find((m) => m.date === date && m.mealType === mealType);
-    setRecipeId(existing?.recipeId ?? "");
-    setCustomTitle(existing?.customTitle ?? "");
+    setRecipeId("");
+    setCustomTitle("");
     setCell({ date, mealType });
   };
 
@@ -92,13 +92,16 @@ export default function MealPlanner() {
       recipeId: recipeId || undefined,
       customTitle: customTitle || undefined,
     });
-    setCell(null);
+    setRecipeId("");
+    setCustomTitle("");
   };
 
-  const mealLabel = (date: string, mealType: string) => {
-    const found = mealPlans.find((m) => m.date === date && m.mealType === mealType);
-    return found;
-  };
+  const cellMeals = cell
+    ? mealPlans.filter((m) => m.date === cell.date && m.mealType === cell.mealType)
+    : [];
+
+  const mealLabel = (date: string, mealType: string) =>
+    mealPlans.filter((m) => m.date === date && m.mealType === mealType);
 
   const rangeLabel =
     view === "week"
@@ -280,25 +283,30 @@ export default function MealPlanner() {
                     </span>
                   </div>
                   {dates.weekDates.map((d) => {
-                    const m = mealLabel(d, mealType);
+                    const meals = mealLabel(d, mealType);
                     return (
                       <button
                         key={d}
                         onClick={() => openCell(d, mealType)}
                         className={`min-h-[56px] rounded-xl border-2 border-dashed p-2 text-left transition hover:border-emerald-400 hover:bg-emerald-50 ${
-                          m ? "border-slate-200 bg-white" : "border-slate-200"
+                          meals.length > 0 ? "border-slate-200 bg-white" : "border-slate-200"
                         }`}
                       >
-                        {m && (
-                          <div>
+                        {meals.slice(0, 2).map((m) => (
+                          <p
+                            key={m.id}
+                            className="flex items-center gap-1 text-xs font-medium leading-tight text-slate-700"
+                          >
                             {m.recipe && (
-                              <UtensilsCrossed className="mb-1 h-3.5 w-3.5 text-emerald-500" />
+                              <UtensilsCrossed className="h-3 w-3 shrink-0 text-emerald-500" />
                             )}
-                            <p className="text-xs font-medium leading-tight text-slate-700">
-                              {m.recipe?.title ?? m.customTitle}
-                            </p>
-                          </div>
-                        )}
+                            <span className="truncate">{m.recipe?.title ?? m.customTitle}</span>
+                          </p>
+                        ))}
+                        <span className="mt-0.5 flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600">
+                          <Plus className="h-3 w-3" />
+                          {meals.length > 0 ? "Añadir" : "Planificar"}
+                        </span>
                       </button>
                     );
                   })}
@@ -367,59 +375,79 @@ export default function MealPlanner() {
         title={cell ? `${cell.mealType} · ${cell.date}` : ""}
       >
         <div className="space-y-4">
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Elegir receta guardada
-            </label>
-            <select
-              value={recipeId}
-              onChange={(e) => {
-                setRecipeId(e.target.value);
-                setCustomTitle("");
-              }}
-              className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
-            >
-              <option value="">— Sin receta —</option>
-              {recipes.map((r) => (
-                <option key={r.id} value={r.id}>
-                  {r.title}
-                </option>
+          {cellMeals.length > 0 && (
+            <div className="space-y-2">
+              <p className="text-sm font-medium text-slate-700">
+                Comidas planificadas
+              </p>
+              {cellMeals.map((m) => (
+                <div
+                  key={m.id}
+                  className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 px-3 py-2"
+                >
+                  <span className="flex items-center gap-1.5 text-sm text-slate-700">
+                    {m.recipe && <UtensilsCrossed className="h-3.5 w-3.5 text-emerald-500" />}
+                    {m.recipe?.title ?? m.customTitle}
+                  </span>
+                  <button
+                    onClick={() => deleteMealPlan(m.id)}
+                    className="rounded-lg p-1 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                    title="Quitar esta comida"
+                  >
+                    <X className="h-4 w-4" />
+                  </button>
+                </div>
               ))}
-            </select>
+            </div>
+          )}
+
+          <div className="border-t border-slate-100 pt-4">
+            <p className="mb-3 text-sm font-medium text-slate-700">Añadir otra comida</p>
+            <div className="space-y-4">
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  Elegir receta guardada
+                </label>
+                <select
+                  value={recipeId}
+                  onChange={(e) => {
+                    setRecipeId(e.target.value);
+                    setCustomTitle("");
+                  }}
+                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
+                >
+                  <option value="">— Sin receta —</option>
+                  {recipes.map((r) => (
+                    <option key={r.id} value={r.id}>
+                      {r.title}
+                    </option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-slate-700">
+                  O escribir una comida personalizada
+                </label>
+                <input
+                  type="text"
+                  value={customTitle}
+                  onChange={(e) => {
+                    setCustomTitle(e.target.value);
+                    if (e.target.value) setRecipeId("");
+                  }}
+                  placeholder="Ej: Pizza de la mamá"
+                  className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                />
+              </div>
+              <button
+                onClick={saveCell}
+                disabled={!recipeId && !customTitle}
+                className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-40"
+              >
+                Añadir comida
+              </button>
+            </div>
           </div>
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              O escribir una comida personalizada
-            </label>
-            <input
-              type="text"
-              value={customTitle}
-              onChange={(e) => {
-                setCustomTitle(e.target.value);
-                if (e.target.value) setRecipeId("");
-              }}
-              placeholder="Ej: Pizza de la mamá"
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            />
-          </div>
-          <button
-            onClick={saveCell}
-            disabled={!recipeId && !customTitle}
-            className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-40"
-          >
-            Guardar
-          </button>
-          <button
-            onClick={async () => {
-              if (!cell) return;
-              await removeMealPlan(cell.date, cell.mealType);
-              setCell(null);
-            }}
-            className="flex w-full items-center justify-center gap-2 rounded-xl bg-red-50 py-2.5 text-sm font-semibold text-red-500 transition-colors hover:bg-red-100"
-          >
-            <X className="h-4 w-4" />
-            Quitar comida
-          </button>
         </div>
       </Modal>
 

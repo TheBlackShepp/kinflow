@@ -1,6 +1,7 @@
 import { Router, Response } from "express";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { notifyFamily } from "../events";
 
 const router = Router();
 
@@ -44,7 +45,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Set a meal plan entry (upsert by date + mealType)
+// Set a meal plan entry (creates a new entry; several can share date + mealType)
 router.post("/", async (req: AuthRequest, res: Response) => {
   try {
     const familyId = await requireFamily(req, res);
@@ -56,6 +57,10 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Fecha y tipo de comida son requeridos" });
     }
 
+    if (!customTitle && !recipeId) {
+      return res.status(400).json({ message: "Se necesita una receta o un título" });
+    }
+
     if (recipeId) {
       const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
       if (!recipe || recipe.familyId !== familyId) {
@@ -63,38 +68,44 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       }
     }
 
-    const existing = await prisma.mealPlan.findFirst({
-      where: { familyId, date, mealType },
+    const mealPlan = await prisma.mealPlan.create({
+      data: {
+        ...(id ? { id } : {}),
+        familyId,
+        date,
+        mealType,
+        recipeId: recipeId || null,
+        customTitle: customTitle || null,
+      },
+      include: { recipe: true },
     });
 
-    if (!customTitle && !recipeId) {
-      if (existing) {
-        await prisma.mealPlan.delete({ where: { id: existing.id } });
-      }
-      return res.json({ message: "Entrada eliminada" });
-    }
-
-    const mealPlan = existing
-      ? await prisma.mealPlan.update({
-          where: { id: existing.id },
-          data: { recipeId: recipeId || null, customTitle: customTitle || null },
-          include: { recipe: true },
-        })
-      : await prisma.mealPlan.create({
-          data: {
-            ...(id ? { id } : {}),
-            familyId,
-            date,
-            mealType,
-            recipeId: recipeId || null,
-            customTitle: customTitle || null,
-          },
-          include: { recipe: true },
-        });
-
-    res.json(mealPlan);
+    notifyFamily(familyId, "meal.updated", req.user!.userId);
+    res.status(201).json(mealPlan);
   } catch (error) {
     console.error("Error guardando menú:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Delete a single meal plan entry
+router.delete("/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    const familyId = await requireFamily(req, res);
+    if (!familyId) return;
+
+    const meal = await prisma.mealPlan.findUnique({
+      where: { id: String(req.params.id) },
+    });
+    if (!meal || meal.familyId !== familyId) {
+      return res.status(404).json({ message: "Entrada de menú no encontrada" });
+    }
+
+    await prisma.mealPlan.delete({ where: { id: meal.id } });
+    notifyFamily(familyId, "meal.updated", req.user!.userId);
+    res.json({ message: "Entrada eliminada" });
+  } catch (error) {
+    console.error("Error eliminando menú:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   }
 });
@@ -190,6 +201,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
       include: { items: { orderBy: { completed: "asc" } } },
     });
 
+    notifyFamily(familyId, "list.updated", req.user!.userId);
     res.json({
       list: result,
       createdCount,

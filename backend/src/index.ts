@@ -6,6 +6,7 @@ import familyRoutes from "./routes/family";
 import listRoutes from "./routes/lists";
 import recipeRoutes from "./routes/recipes";
 import mealRoutes from "./routes/meals";
+import eventRoutes from "./routes/events";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -22,6 +23,7 @@ app.use("/api/family", familyRoutes);
 app.use("/api/lists", listRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/meals", mealRoutes);
+app.use("/api/events", eventRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Ruta no encontrada" });
