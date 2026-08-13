@@ -3,7 +3,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ShoppingBasket,
-  CalendarDays,
   Plus,
   X,
   Check,
@@ -12,10 +11,41 @@ import {
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
-import { MEAL_TYPES, MEAL_TYPE_COLORS } from "../lib/types";
+import { MEAL_TYPES } from "../lib/types";
 import Modal from "../components/Modal";
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+
+const MEAL_CARD_STYLES: Record<string, { card: string; badge: string; chip: string }> = {
+  Desayuno: {
+    card: "border-amber-400 bg-amber-50/60",
+    badge: "text-amber-600",
+    chip: "bg-amber-100 text-amber-700 ring-amber-300",
+  },
+  Almuerzo: {
+    card: "border-emerald-400 bg-emerald-50/60",
+    badge: "text-emerald-600",
+    chip: "bg-emerald-100 text-emerald-700 ring-emerald-300",
+  },
+  Cena: {
+    card: "border-indigo-400 bg-indigo-50/60",
+    badge: "text-indigo-600",
+    chip: "bg-indigo-100 text-indigo-700 ring-indigo-300",
+  },
+  Snack: {
+    card: "border-pink-400 bg-pink-50/60",
+    badge: "text-pink-600",
+    chip: "bg-pink-100 text-pink-700 ring-pink-300",
+  },
+};
+
+function dateLabel(d: string) {
+  return new Date(`${d}T12:00:00`).toLocaleDateString("es", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
+}
 
 function toISO(d: Date) {
   const y = d.getFullYear();
@@ -100,9 +130,6 @@ export default function MealPlanner() {
     ? mealPlans.filter((m) => m.date === cell.date && m.mealType === cell.mealType)
     : [];
 
-  const mealLabel = (date: string, mealType: string) =>
-    mealPlans.filter((m) => m.date === date && m.mealType === mealType);
-
   const rangeLabel =
     view === "week"
       ? `${dates.start.slice(8, 10)}/${dates.start.slice(5, 7)} – ${dates.end.slice(8, 10)}/${dates.end.slice(5, 7)}`
@@ -167,6 +194,14 @@ export default function MealPlanner() {
 
   return (
     <div className="space-y-6">
+      <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
+        <img
+          src="/images/meals-banner.svg"
+          alt="Planificador de menús"
+          className="h-36 w-full object-cover sm:h-48"
+        />
+      </div>
+
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Planificador de menús</h1>
@@ -247,73 +282,68 @@ export default function MealPlanner() {
       {!ready ? (
         <p className="text-sm text-slate-400">Cargando...</p>
       ) : view === "week" ? (
-        <div className="overflow-x-auto">
-          <div className="min-w-[700px]">
-            <div className="grid grid-cols-8 gap-2">
-              <div className="flex items-end justify-center pb-2 text-xs font-bold uppercase text-slate-400">
-                <CalendarDays className="mr-1 h-4 w-4" />
-                Comida
-              </div>
-              {dates.weekDates.map((d, i) => {
-                const today = toISO(new Date());
-                return (
-                  <div key={d} className="pb-2 text-center">
-                    <p className="text-xs font-bold uppercase text-slate-400">{WEEKDAYS[i]}</p>
-                    <p
-                      className={`text-xl font-bold ${
-                        d === today ? "text-emerald-600" : "text-slate-700"
-                      }`}
-                    >
+        <div className="space-y-5">
+          {dates.weekDates.map((d, i) => {
+            const dayMeals = mealPlans.filter((m) => m.date === d);
+            const today = toISO(new Date());
+            const isToday = d === today;
+            return (
+              <section key={d}>
+                <div className="flex items-center justify-between">
+                  <h3
+                    className={`text-base font-bold ${
+                      isToday ? "text-emerald-600" : "text-slate-800"
+                    }`}
+                  >
+                    {WEEKDAYS[i]}{" "}
+                    <span className="text-sm font-normal text-slate-400">
                       {Number(d.slice(8, 10))}
-                    </p>
-                  </div>
-                );
-              })}
-            </div>
-            <div className="space-y-2">
-              {MEAL_TYPES.map((mealType) => (
-                <div key={mealType} className="grid grid-cols-8 gap-2">
-                  <div className="flex items-center">
-                    <span
-                      className={`rounded-lg px-2 py-1 text-xs font-bold ${
-                        MEAL_TYPE_COLORS[mealType] ?? "bg-slate-100 text-slate-600"
-                      }`}
-                    >
-                      {mealType}
                     </span>
-                  </div>
-                  {dates.weekDates.map((d) => {
-                    const meals = mealLabel(d, mealType);
-                    return (
-                      <button
-                        key={d}
-                        onClick={() => openCell(d, mealType)}
-                        className={`min-h-[56px] rounded-xl border-2 border-dashed p-2 text-left transition hover:border-emerald-400 hover:bg-emerald-50 ${
-                          meals.length > 0 ? "border-slate-200 bg-white" : "border-slate-200"
-                        }`}
-                      >
-                        {meals.slice(0, 2).map((m) => (
-                          <p
-                            key={m.id}
-                            className="flex items-center gap-1 text-xs font-medium leading-tight text-slate-700"
-                          >
+                    {isToday && (
+                      <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                        Hoy
+                      </span>
+                    )}
+                  </h3>
+                  <button
+                    onClick={() => openCell(d, "Almuerzo")}
+                    className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    Añadir
+                  </button>
+                </div>
+                {dayMeals.length === 0 ? (
+                  <p className="mt-2 rounded-xl border-2 border-dashed border-slate-100 px-4 py-3 text-sm text-slate-400">
+                    Sin comidas planificadas
+                  </p>
+                ) : (
+                  <div className="mt-2 grid gap-2 sm:grid-cols-2">
+                    {dayMeals.map((m) => {
+                      const style = MEAL_CARD_STYLES[m.mealType] ?? MEAL_CARD_STYLES.Almuerzo;
+                      return (
+                        <button
+                          key={m.id}
+                          onClick={() => openCell(d, m.mealType)}
+                          className={`rounded-xl border-l-4 px-3 py-2.5 text-left shadow-sm ring-1 ring-slate-100 transition hover:shadow-md ${style.card}`}
+                        >
+                          <span className={`text-[10px] font-bold uppercase ${style.badge}`}>
+                            {m.mealType}
+                          </span>
+                          <p className="mt-0.5 flex items-center gap-1.5 text-sm font-semibold text-slate-700">
                             {m.recipe && (
-                              <UtensilsCrossed className="h-3 w-3 shrink-0 text-emerald-500" />
+                              <UtensilsCrossed className="h-3.5 w-3.5 shrink-0 text-slate-400" />
                             )}
                             <span className="truncate">{m.recipe?.title ?? m.customTitle}</span>
                           </p>
-                        ))}
-                        <span className="mt-0.5 flex items-center gap-0.5 text-[10px] font-semibold text-emerald-600">
-                          <Plus className="h-3 w-3" />
-                          {meals.length > 0 ? "Añadir" : "Planificar"}
-                        </span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ))}
-            </div>
-          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </section>
+            );
+          })}
         </div>
       ) : (
         <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
@@ -326,7 +356,12 @@ export default function MealPlanner() {
           </div>
           <div className="mt-1 grid grid-cols-7 gap-1">
             {monthWeeks.flat().map((d) => {
-              const inMonth = d.slice(0, 7) === toISO(new Date(anchor.getFullYear(), anchor.getMonth(), 1)).slice(0, 7);
+              const inMonth =
+                d.slice(0, 7) ===
+                toISO(new Date(anchor.getFullYear(), anchor.getMonth(), 1)).slice(0, 7);
+              if (!inMonth) {
+                return <div key={d} className="min-h-[72px]" />;
+              }
               const dayMeals = mealPlans.filter((m) => m.date === d);
               const today = toISO(new Date());
               return (
@@ -336,9 +371,9 @@ export default function MealPlanner() {
                     setView("week");
                     setAnchor(startOfWeek(new Date(`${d}T12:00:00`)));
                   }}
-                  className={`min-h-[72px] rounded-xl p-1.5 text-left transition ${
-                    inMonth ? "bg-slate-50 hover:bg-emerald-50" : "bg-slate-100/50"
-                  } ${d === today ? "ring-2 ring-emerald-400" : ""}`}
+                  className={`min-h-[72px] rounded-xl p-1.5 text-left transition bg-slate-50 hover:bg-emerald-50 ${
+                    d === today ? "ring-2 ring-emerald-400" : ""
+                  }`}
                 >
                   <p
                     className={`text-sm font-bold ${d === today ? "text-emerald-600" : "text-slate-600"}`}
@@ -372,13 +407,31 @@ export default function MealPlanner() {
       <Modal
         open={!!cell}
         onClose={() => setCell(null)}
-        title={cell ? `${cell.mealType} · ${cell.date}` : ""}
+        title={cell ? dateLabel(cell.date) : ""}
       >
         <div className="space-y-4">
+          <div className="flex flex-wrap gap-2">
+            {MEAL_TYPES.map((mt) => {
+              const selected = cell?.mealType === mt;
+              const style = MEAL_CARD_STYLES[mt] ?? MEAL_CARD_STYLES.Almuerzo;
+              return (
+                <button
+                  key={mt}
+                  onClick={() => setCell(cell ? { ...cell, mealType: mt } : cell)}
+                  className={`rounded-lg px-3 py-1.5 text-xs font-bold ring-1 transition ${
+                    selected ? style.chip : "bg-slate-50 text-slate-500 ring-slate-200 hover:bg-slate-100"
+                  }`}
+                >
+                  {mt}
+                </button>
+              );
+            })}
+          </div>
+
           {cellMeals.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-slate-700">
-                Comidas planificadas
+                {cell?.mealType}s planificados
               </p>
               {cellMeals.map((m) => (
                 <div
@@ -402,7 +455,7 @@ export default function MealPlanner() {
           )}
 
           <div className="border-t border-slate-100 pt-4">
-            <p className="mb-3 text-sm font-medium text-slate-700">Añadir otra comida</p>
+            <p className="mb-3 text-sm font-medium text-slate-700">Añadir comida</p>
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">

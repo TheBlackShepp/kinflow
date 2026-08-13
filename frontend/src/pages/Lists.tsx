@@ -53,18 +53,19 @@ export default function Lists() {
 
   return (
     <div className="space-y-6">
+      <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
+        <img
+          src="/images/list-banner.svg"
+          alt="Listas de compras"
+          className="h-36 w-full object-cover sm:h-48"
+        />
+      </div>
+
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Listas de compras</h1>
           <p className="text-sm text-slate-500">Compartidas con tu hogar</p>
         </div>
-        <button
-          onClick={() => setCreateOpen(true)}
-          className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
-        >
-          <Plus className="h-5 w-5" />
-          Nueva lista
-        </button>
       </div>
 
       {!ready ? (
@@ -118,6 +119,14 @@ export default function Lists() {
           })}
         </div>
       )}
+
+      <button
+        onClick={() => setCreateOpen(true)}
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
+        aria-label="Nueva lista"
+      >
+        <Plus className="h-7 w-7" />
+      </button>
 
       <Modal open={createOpen} onClose={() => setCreateOpen(false)} title="Nueva lista">
         <form onSubmit={handleCreate} className="space-y-4">

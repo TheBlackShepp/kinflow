@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { NavLink, useNavigate } from "react-router-dom";
+import { Link, NavLink, useLocation, useNavigate } from "react-router-dom";
 import {
   Home,
   ShoppingBasket,
@@ -70,6 +70,8 @@ function StatusBanner() {
 export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+  const isHome = location.pathname === "/";
 
   const handleLogout = () => {
     logout();
@@ -79,6 +81,16 @@ export default function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
       <StatusBanner />
+
+      {!isHome && (
+        <Link
+          to="/"
+          className="fixed left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100 transition hover:scale-105 lg:hidden"
+          aria-label="Ir al inicio"
+        >
+          <Home className="h-5 w-5 text-emerald-600" />
+        </Link>
+      )}
 
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col bg-slate-900 text-white lg:flex">
         <div className="flex items-center gap-3 px-6 py-6">
@@ -132,29 +144,9 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="lg:ml-60 pb-24 lg:pb-8">
+      <main className="lg:ml-60 pb-8">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</div>
       </main>
-
-      <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-slate-200 bg-white lg:hidden">
-        <div className="flex">
-          {navItems.map(({ to, label, icon: Icon, end }) => (
-            <NavLink
-              key={to}
-              to={to}
-              end={end}
-              className={({ isActive }) =>
-                `flex flex-1 flex-col items-center gap-1 py-3 text-[10px] font-medium ${
-                  isActive ? "text-emerald-600" : "text-slate-400"
-                }`
-              }
-            >
-              <Icon className="h-5 w-5" />
-              {label}
-            </NavLink>
-          ))}
-        </div>
-      </nav>
     </div>
   );
 }
