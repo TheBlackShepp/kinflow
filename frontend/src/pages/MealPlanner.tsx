@@ -9,6 +9,7 @@ import {
   UtensilsCrossed,
   AlertCircle,
   CalendarDays,
+  List,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
@@ -82,7 +83,6 @@ export default function MealPlanner() {
   } = useData();
   const [view, setView] = useState<"week" | "month">("week");
   const [anchor, setAnchor] = useState(() => startOfWeek(new Date()));
-  const [menuOpen, setMenuOpen] = useState(false);
 
   const [cell, setCell] = useState<{ date: string; mealType: string } | null>(null);
   const [recipeId, setRecipeId] = useState("");
@@ -532,38 +532,17 @@ export default function MealPlanner() {
         </div>
       </Modal>
 
-      {menuOpen && (
-        <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
-      )}
-
-      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
-        {menuOpen && (
-          <div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-slate-100">
-            {(["week", "month"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => {
-                  setView(v);
-                  setExportResult(null);
-                  setMenuOpen(false);
-                }}
-                className={`px-5 py-2.5 text-left text-sm font-medium transition ${
-                  view === v ? "bg-emerald-500 text-white" : "text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {v === "week" ? "Semanal" : "Mensual"}
-              </button>
-            ))}
-          </div>
-        )}
-        <button
-          onClick={() => setMenuOpen((o) => !o)}
-          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
-          aria-label="Menú de vista"
-        >
-          <CalendarDays className="h-6 w-6" />
-        </button>
-      </div>
+      <button
+        onClick={() => {
+          setView(view === "week" ? "month" : "week");
+          setExportResult(null);
+        }}
+        className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
+        title={view === "week" ? "Cambiar a vista mensual" : "Cambiar a vista semanal"}
+        aria-label={view === "week" ? "Cambiar a vista mensual" : "Cambiar a vista semanal"}
+      >
+        {view === "week" ? <CalendarDays className="h-6 w-6" /> : <List className="h-6 w-6" />}
+      </button>
     </div>
   );
 }
