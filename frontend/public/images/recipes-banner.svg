@@ -7,12 +7,12 @@
   </defs>
   <rect width="1200" height="320" fill="url(#bg)"/>
   <circle cx="1050" cy="60" r="130" fill="#ffffff" opacity="0.08"/>
-  <circle cx="1100" cy="280" r="90" fill="#ffffff" opacity="0.08"/>
-  <circle cx="140" cy="280" r="100" fill="#ffffff" opacity="0.08"/>
-  <circle cx="60" cy="60" r="70" fill="#ffffff" opacity="0.08"/>
+  <circle cx="1120" cy="290" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="80" cy="300" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="30" cy="50" r="60" fill="#ffffff" opacity="0.08"/>
 
   <!-- chef hat -->
-  <g transform="translate(545 90)">
+  <g transform="translate(770 55)">
     <circle cx="70" cy="55" r="30" fill="#ffffff"/>
     <circle cx="100" cy="38" r="34" fill="#ffffff"/>
     <circle cx="130" cy="55" r="30" fill="#ffffff"/>
@@ -21,20 +21,20 @@
   </g>
 
   <!-- floating tomato -->
-  <g transform="translate(300 85)">
+  <g transform="translate(270 250)">
     <circle cx="0" cy="0" r="26" fill="#ef4444"/>
     <circle cx="-8" cy="-8" r="7" fill="#fca5a5" opacity="0.6"/>
     <path d="M -14 -20 L -6 -30 L 0 -20 L 6 -30 L 14 -20 Z" fill="#16a34a"/>
   </g>
 
   <!-- floating egg -->
-  <g transform="translate(875 235)">
+  <g transform="translate(1000 240)">
     <ellipse cx="0" cy="0" rx="24" ry="30" fill="#fef3c7" transform="rotate(-20)"/>
     <ellipse cx="0" cy="0" rx="24" ry="30" fill="none" stroke="#fde68a" stroke-width="3" transform="rotate(-20)"/>
   </g>
 
   <!-- floating leaf -->
-  <g transform="translate(180 235) rotate(-15)">
+  <g transform="translate(120 255) rotate(-15)">
     <path d="M 0 0 Q 30 -30 60 0 Q 30 30 0 0 Z" fill="#22c55e"/>
     <line x1="0" y1="0" x2="56" y2="0" stroke="#166534" stroke-width="3"/>
   </g>
