@@ -21,7 +21,6 @@ export default function Dashboard() {
     .sort((a, b) => a.mealType.localeCompare(b.mealType));
 
   const pendingItems = lists.flatMap((l) => l.items.filter((i) => !i.completed));
-  const totalItems = lists.flatMap((l) => l.items);
 
   if (!user?.familyId) {
     return (
@@ -58,7 +57,7 @@ export default function Dashboard() {
         </p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4">
         <Link
           to="/lists"
           className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
@@ -156,7 +155,7 @@ export default function Dashboard() {
             </div>
           ) : (
             <ul className="space-y-2">
-              {pendingItems.slice(0, 6).map((item) => (
+              {pendingItems.slice(0, 4).map((item) => (
                 <li key={item.id} className="flex items-center gap-3 text-sm">
                   <Circle className="h-4 w-4 shrink-0 text-slate-300" />
                   <span className="font-medium text-slate-700">{item.name}</span>
@@ -166,57 +165,15 @@ export default function Dashboard() {
                   </span>
                 </li>
               ))}
-              {pendingItems.length > 6 && (
+              {pendingItems.length > 4 && (
                 <li className="pt-2 text-center text-sm text-slate-500">
-                  y {pendingItems.length - 6} más...
+                  y {pendingItems.length - 4} más...
                 </li>
               )}
             </ul>
           )}
         </section>
       </div>
-
-      {totalItems.length > 0 && (
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
-          <h2 className="mb-4 font-semibold text-slate-800">Progreso de compras</h2>
-          {lists.map((list) => {
-            const done = list.items.filter((i) => i.completed).length;
-            const total = list.items.length;
-            const pct = total > 0 ? Math.round((done / total) * 100) : 0;
-            return (
-              <div key={list.id} className="mb-3">
-                <div className="mb-1 flex items-center justify-between text-sm">
-                  <span className="font-medium text-slate-700">{list.name}</span>
-                  <span className="text-slate-400">
-                    {done}/{total}
-                  </span>
-                </div>
-                <div className="h-2 overflow-hidden rounded-full bg-slate-100">
-                  <div
-                    className="h-full rounded-full bg-emerald-500 transition-all"
-                    style={{ width: `${pct}%` }}
-                  />
-                </div>
-              </div>
-            );
-          })}
-        </section>
-      )}
-
-      <section className="flex items-center justify-between rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-600 p-6 text-white">
-        <div>
-          <h2 className="text-lg font-bold">Planifica la semana</h2>
-          <p className="text-sm text-emerald-50">
-            Exporta los ingredientes del menú directamente a tu lista de compras.
-          </p>
-        </div>
-        <Link
-          to="/meals"
-          className="shrink-0 rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
-        >
-          Planificar →
-        </Link>
-      </section>
     </div>
   );
 }
