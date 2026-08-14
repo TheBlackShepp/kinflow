@@ -7,12 +7,12 @@
   </defs>
   <rect width="1200" height="320" fill="url(#bg)"/>
   <circle cx="1050" cy="60" r="130" fill="#ffffff" opacity="0.08"/>
-  <circle cx="1100" cy="280" r="90" fill="#ffffff" opacity="0.08"/>
-  <circle cx="140" cy="280" r="100" fill="#ffffff" opacity="0.08"/>
-  <circle cx="60" cy="60" r="70" fill="#ffffff" opacity="0.08"/>
+  <circle cx="1120" cy="290" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="80" cy="300" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="30" cy="50" r="60" fill="#ffffff" opacity="0.08"/>
 
   <!-- shopping basket -->
-  <g transform="translate(560 70)">
+  <g transform="translate(760 75)">
     <path d="M 10 60 Q 10 15 55 15 L 65 15 Q 110 15 110 60 L 100 150 Q 98 165 80 165 L 40 165 Q 22 165 20 150 Z" fill="#ffffff"/>
     <path d="M 40 40 Q 60 10 80 40" fill="none" stroke="#ffffff" stroke-width="9" stroke-linecap="round"/>
     <rect x="52" y="80" width="16" height="12" rx="3" fill="#a7f3d0"/>
@@ -24,10 +24,10 @@
   </g>
 
   <!-- floating apples -->
-  <circle cx="320" cy="90" r="24" fill="#f87171"/>
-  <path d="M 310 72 Q 320 62 330 72" fill="none" stroke="#b91c1c" stroke-width="4" stroke-linecap="round"/>
-  <rect x="317" y="66" width="6" height="10" rx="2" fill="#065f46"/>
-  <circle cx="870" cy="230" r="24" fill="#fbbf24"/>
-  <path d="M 860 212 Q 870 202 880 212" fill="none" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
-  <rect x="867" y="206" width="6" height="10" rx="2" fill="#065f46"/>
+  <circle cx="300" cy="120" r="24" fill="#f87171"/>
+  <path d="M 290 102 Q 300 92 310 102" fill="none" stroke="#b91c1c" stroke-width="4" stroke-linecap="round"/>
+  <rect x="297" y="96" width="6" height="10" rx="2" fill="#065f46"/>
+  <circle cx="930" cy="55" r="24" fill="#fbbf24"/>
+  <path d="M 920 37 Q 930 27 940 37" fill="none" stroke="#b45309" stroke-width="4" stroke-linecap="round"/>
+  <rect x="927" y="31" width="6" height="10" rx="2" fill="#065f46"/>
 </svg>
