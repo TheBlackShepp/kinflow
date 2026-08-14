@@ -128,17 +128,15 @@ export default function Recipes() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
+      <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
         <img
           src="/images/recipes-banner.svg"
           alt="Recetario familiar"
-          className="h-36 w-full object-cover sm:h-48"
+          className="h-48 w-full object-cover sm:h-64"
         />
-      </div>
-
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Recetario familiar</h1>
-        <p className="text-sm text-slate-500">Tus recetas guardadas</p>
+        <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
+          Recetario familiar
+        </h1>
       </div>
 
       {!ready ? (
