@@ -144,7 +144,7 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="lg:ml-60 pb-8">
+      <main className="lg:ml-60">
         <div className="mx-auto max-w-5xl px-4 py-8 sm:px-6">{children}</div>
       </main>
     </div>
