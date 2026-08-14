@@ -60,8 +60,7 @@ interface DataContextValue {
   }) => Promise<MealPlan | void>;
   deleteMealPlan: (id: string) => Promise<void>;
   exportIngredients: (
-    start: string,
-    end: string,
+    mealIds: string[],
     listId?: string
   ) => Promise<{
     list: ShoppingList;
@@ -722,19 +721,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   );
 
   const exportIngredients = useCallback(
-    async (start: string, end: string, listId?: string) => {
-      const inRange = mealPlans.filter(
-        (m) => m.recipeId && m.date >= start && m.date <= end
-      );
-      if (inRange.length === 0) {
-        throw new Error("No hay recetas planificadas en ese rango");
+    async (mealIds: string[], listId?: string) => {
+      const meals = mealPlans.filter((m) => m.recipeId && mealIds.includes(m.id));
+      if (meals.length === 0) {
+        throw new Error("No hay recetas planificadas para exportar");
       }
 
       const aggregated = new Map<
         string,
         { name: string; quantity: string }
       >();
-      for (const mp of inRange) {
+      for (const mp of meals) {
         const recipe = recipes.find((r) => r.id === mp.recipeId);
         if (!recipe) continue;
         for (const ing of recipe.ingredients) {

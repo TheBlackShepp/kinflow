@@ -8,6 +8,7 @@ import {
   Check,
   UtensilsCrossed,
   AlertCircle,
+  CalendarDays,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
@@ -81,12 +82,14 @@ export default function MealPlanner() {
   } = useData();
   const [view, setView] = useState<"week" | "month">("week");
   const [anchor, setAnchor] = useState(() => startOfWeek(new Date()));
+  const [menuOpen, setMenuOpen] = useState(false);
 
   const [cell, setCell] = useState<{ date: string; mealType: string } | null>(null);
   const [recipeId, setRecipeId] = useState("");
   const [customTitle, setCustomTitle] = useState("");
 
   const [exportOpen, setExportOpen] = useState(false);
+  const [exportMealIds, setExportMealIds] = useState<string[]>([]);
   const [exportListId, setExportListId] = useState("");
   const [exporting, setExporting] = useState(false);
   const [exportResult, setExportResult] = useState<{
@@ -167,7 +170,7 @@ export default function MealPlanner() {
     setExportError("");
     setExportResult(null);
     try {
-      const res = await exportIngredients(dates.start, dates.end, exportListId || undefined);
+      const res = await exportIngredients(exportMealIds, exportListId || undefined);
       setExportResult({
         listId: res.list.id,
         listName: res.list.name,
@@ -194,70 +197,46 @@ export default function MealPlanner() {
 
   return (
     <div className="space-y-6">
-      <div className="overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
+      <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
         <img
           src="/images/meals-banner.svg"
           alt="Planificador de menús"
-          className="h-36 w-full object-cover sm:h-48"
+          className="h-48 w-full object-cover sm:h-64"
         />
+        <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
+          Planificador de menús
+        </h1>
       </div>
 
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold text-slate-800">Planificador de menús</h1>
-          <p className="text-sm text-slate-500 capitalize">{rangeLabel}</p>
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-100">
-            {(["week", "month"] as const).map((v) => (
-              <button
-                key={v}
-                onClick={() => {
-                  setView(v);
-                  setExportResult(null);
-                }}
-                className={`rounded-lg px-4 py-1.5 text-sm font-medium transition ${
-                  view === v ? "bg-emerald-500 text-white" : "text-slate-500 hover:text-slate-700"
-                }`}
-              >
-                {v === "week" ? "Semanal" : "Mensual"}
-              </button>
-            ))}
-          </div>
+      <div className="flex w-full justify-center sm:justify-end">
+        <div className="flex w-full max-w-md items-center justify-between rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-100 sm:max-w-none">
           <button
-            onClick={() => setExportOpen(true)}
-            className="flex items-center gap-2 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
+            onClick={() => navigate(-1)}
+            title="Anterior"
+            aria-label="Anterior"
+            className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
-            <ShoppingBasket className="h-4 w-4" />
-            Exportar a compras
+            <ChevronLeft className="h-4 w-4" />
+          </button>
+          <button
+            onClick={() => {
+              setAnchor(view === "week" ? startOfWeek(new Date()) : new Date());
+              setExportResult(null);
+            }}
+            className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
+          >
+            Hoy
+          </button>
+          <span className="px-2 text-sm font-medium text-slate-600 capitalize">{rangeLabel}</span>
+          <button
+            onClick={() => navigate(1)}
+            title="Siguiente"
+            aria-label="Siguiente"
+            className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
+          >
+            <ChevronRight className="h-4 w-4" />
           </button>
         </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <button
-          onClick={() => navigate(-1)}
-          className="flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
-        >
-          <ChevronLeft className="h-4 w-4" />
-          Anterior
-        </button>
-        <button
-          onClick={() => {
-            setAnchor(view === "week" ? startOfWeek(new Date()) : new Date());
-            setExportResult(null);
-          }}
-          className="rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
-        >
-          Hoy
-        </button>
-        <button
-          onClick={() => navigate(1)}
-          className="flex items-center gap-1 rounded-xl bg-white px-3 py-2 text-sm font-medium text-slate-600 shadow-sm ring-1 ring-slate-100 hover:text-slate-900"
-        >
-          Siguiente
-          <ChevronRight className="h-4 w-4" />
-        </button>
       </div>
 
       {exportResult && (
@@ -289,34 +268,29 @@ export default function MealPlanner() {
             const isToday = d === today;
             return (
               <section key={d}>
-                <div className="flex items-center justify-between">
-                  <h3
-                    className={`text-base font-bold ${
-                      isToday ? "text-emerald-600" : "text-slate-800"
-                    }`}
-                  >
-                    {WEEKDAYS[i]}{" "}
-                    <span className="text-sm font-normal text-slate-400">
-                      {Number(d.slice(8, 10))}
+                <h3
+                  className={`text-base font-bold ${
+                    isToday ? "text-emerald-600" : "text-slate-800"
+                  }`}
+                >
+                  {WEEKDAYS[i]}{" "}
+                  <span className="text-sm font-normal text-slate-400">
+                    {Number(d.slice(8, 10))}
+                  </span>
+                  {isToday && (
+                    <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
+                      Hoy
                     </span>
-                    {isToday && (
-                      <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                        Hoy
-                      </span>
-                    )}
-                  </h3>
+                  )}
+                </h3>
+                {dayMeals.length === 0 ? (
                   <button
                     onClick={() => openCell(d, "Almuerzo")}
-                    className="flex items-center gap-1 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-600 transition hover:bg-emerald-100"
+                    className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-3 text-sm font-medium text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600"
                   >
-                    <Plus className="h-3.5 w-3.5" />
-                    Añadir
+                    <Plus className="h-4 w-4" />
+                    Planificar comida
                   </button>
-                </div>
-                {dayMeals.length === 0 ? (
-                  <p className="mt-2 rounded-xl border-2 border-dashed border-slate-100 px-4 py-3 text-sm text-slate-400">
-                    Sin comidas planificadas
-                  </p>
                 ) : (
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {dayMeals.map((m) => {
@@ -454,6 +428,20 @@ export default function MealPlanner() {
             </div>
           )}
 
+          {cellMeals.some((m) => m.recipeId) && (
+            <button
+              onClick={() => {
+                setExportMealIds(cellMeals.filter((m) => m.recipeId).map((m) => m.id));
+                setCell(null);
+                setExportOpen(true);
+              }}
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+            >
+              <ShoppingBasket className="h-4 w-4" />
+              Exportar a compras
+            </button>
+          )}
+
           <div className="border-t border-slate-100 pt-4">
             <p className="mb-3 text-sm font-medium text-slate-700">Añadir comida</p>
             <div className="space-y-4">
@@ -514,8 +502,7 @@ export default function MealPlanner() {
             <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{exportError}</div>
           )}
           <p className="text-sm text-slate-500">
-            Se añadirán a la lista los ingredientes de todas las recetas planificadas en este{" "}
-            {view === "week" ? "período semanal" : "mes"}.
+            Se añadirán a la lista los ingredientes de las recetas de esta comida.
           </p>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">
@@ -544,6 +531,39 @@ export default function MealPlanner() {
           </button>
         </div>
       </Modal>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+      )}
+
+      <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3">
+        {menuOpen && (
+          <div className="flex flex-col overflow-hidden rounded-xl bg-white shadow-lg ring-1 ring-slate-100">
+            {(["week", "month"] as const).map((v) => (
+              <button
+                key={v}
+                onClick={() => {
+                  setView(v);
+                  setExportResult(null);
+                  setMenuOpen(false);
+                }}
+                className={`px-5 py-2.5 text-left text-sm font-medium transition ${
+                  view === v ? "bg-emerald-500 text-white" : "text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {v === "week" ? "Semanal" : "Mensual"}
+              </button>
+            ))}
+          </div>
+        )}
+        <button
+          onClick={() => setMenuOpen((o) => !o)}
+          className="flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
+          aria-label="Menú de vista"
+        >
+          <CalendarDays className="h-6 w-6" />
+        </button>
+      </div>
     </div>
   );
 }
