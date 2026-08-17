@@ -96,13 +96,14 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     if (!familyId) return;
     const userId = req.user!.userId;
 
-    const { name, icon, id, visibility, memberIds, type } = req.body;
+    const { name, icon, id, visibility, memberIds, type, color } = req.body;
     if (!name) {
       return res.status(400).json({ message: "El nombre de la lista es requerido" });
     }
 
     const vis = VISIBILITIES.includes(visibility) ? visibility : "family";
     const listType = LIST_TYPES.includes(type) ? type : "shopping";
+    const listColor = typeof color === "string" && color ? color : "emerald";
     let validMemberIds: string[] = [];
     if (vis === "custom" && Array.isArray(memberIds)) {
       const users = await prisma.user.findMany({
@@ -116,6 +117,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
         ...(id ? { id } : {}),
         name,
         icon: icon || "shopping-bag",
+        color: listColor,
         type: listType,
         familyId,
         ownerId: userId,
@@ -234,6 +236,9 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     }
     if (req.body.pinned !== undefined) {
       data.pinned = Boolean(req.body.pinned);
+    }
+    if (req.body.color !== undefined) {
+      data.color = String(req.body.color);
     }
 
     if (Array.isArray(req.body.memberIds)) {
