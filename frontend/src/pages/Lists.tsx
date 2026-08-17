@@ -35,6 +35,7 @@ import { useAuth } from "../lib/auth";
 import type { ShoppingList, ListType, ListVisibility } from "../lib/types";
 import { VISIBILITY_OPTIONS } from "../lib/listVisibility";
 import { LIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
+import { LIST_COLORS, getListColor } from "../lib/listColors";
 import { useLongPress } from "../lib/useLongPress";
 import BottomSheet from "../components/BottomSheet";
 import EditListSheet from "../components/EditListSheet";
@@ -59,6 +60,82 @@ function VisibilityBadge({ visibility }: { visibility?: ListVisibility }) {
     );
   }
   return null;
+}
+
+function PinnedCard({
+  list,
+  onLongPress,
+}: {
+  list: ShoppingList;
+  onLongPress: (list: ShoppingList, x: number, y: number) => void;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: list.id });
+
+  const justFiredRef = useRef(false);
+
+  const handleLongPress = useCallback(
+    (x: number, y: number) => {
+      justFiredRef.current = true;
+      onLongPress(list, x, y);
+    },
+    [list, onLongPress]
+  );
+
+  const { pressing, handlers } = useLongPress(handleLongPress);
+
+  const total = list.items.length;
+  const done = list.items.filter((i) => i.completed).length;
+  const pending = total - done;
+  const complete = total > 0 && pending === 0;
+  const listColor = getListColor(list.color);
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={{ transform: CSS.Transform.toString(transform), transition }}
+      className={`flex items-center gap-2.5 rounded-xl px-3 py-2.5 ring-1 transition-all duration-150 ${listColor.pinned} ${
+        isDragging ? `z-50 opacity-40 ${listColor.pinnedRing}` : listColor.pinnedRing
+      } ${pressing ? `scale-[0.97] ${listColor.pinnedRing}` : ""}`}
+      {...handlers}
+    >
+      <Link
+        to={`/lists/${list.id}`}
+        className="flex min-w-0 flex-1 items-center gap-2.5 touch-none select-none"
+        {...attributes}
+        {...listeners}
+        onClickCapture={(e) => {
+          if (justFiredRef.current || pressing) {
+            e.preventDefault();
+            e.stopPropagation();
+            justFiredRef.current = false;
+          }
+        }}
+        onContextMenu={(e) => {
+          e.preventDefault();
+          onLongPress(list, e.clientX, e.clientY);
+        }}
+      >
+        <Pin className="h-3.5 w-3.5 shrink-0 fill-emerald-500 text-emerald-500" />
+        <span className="truncate text-sm font-medium text-slate-700">{list.name}</span>
+      </Link>
+      <span
+        className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-[11px] font-bold ${
+          complete
+            ? "bg-emerald-500 text-white"
+            : "bg-slate-200 text-slate-500"
+        }`}
+      >
+        {complete ? <Check className="h-3.5 w-3.5" strokeWidth={3} /> : pending}
+      </span>
+    </div>
+  );
 }
 
 function ListCard({
@@ -102,6 +179,7 @@ function ListCard({
   const pending = total - done;
   const complete = total > 0 && pending === 0;
   const listType = list.type ?? "shopping";
+  const listColor = getListColor(list.color);
 
   const circumference = 2 * Math.PI * 18;
   const strokeDashoffset = circumference * (1 - progress);
@@ -134,7 +212,7 @@ function ListCard({
       >
         <div className="flex items-center gap-3">
           <div className="relative shrink-0">
-            <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-lg">
+            <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${listColor.icon} text-lg`}>
               {LIST_TYPE_ICON[listType]}
             </div>
             {pressing && (
@@ -193,11 +271,12 @@ function ListCardOverlay({ list }: { list: ShoppingList }) {
   const pending = total - done;
   const complete = total > 0 && pending === 0;
   const listType = list.type ?? "shopping";
+  const listColor = getListColor(list.color);
 
   return (
     <div className="w-full rounded-2xl bg-white p-3.5 shadow-2xl ring-2 ring-emerald-400">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-lg">
+        <div className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${listColor.icon} text-lg`}>
           {LIST_TYPE_ICON[listType]}
         </div>
         <div className="min-w-0 flex-1">
@@ -229,6 +308,7 @@ export default function Lists() {
   const [createStep, setCreateStep] = useState<"type" | "form">("type");
   const [name, setName] = useState("");
   const [icon, setIcon] = useState(ICONS[0]);
+  const [color, setColor] = useState("emerald");
   const [type, setType] = useState<ListType>("shopping");
   const [visibility, setVisibility] = useState<ListVisibility>("family");
   const [memberIds, setMemberIds] = useState<string[]>([]);
@@ -266,11 +346,19 @@ export default function Lists() {
   const sortedLists = useMemo(() => {
     return [...filteredLists].sort(
       (a, b) =>
-        Number(b.pinned) - Number(a.pinned) ||
         (a.order ?? 0) - (b.order ?? 0) ||
         b.createdAt.localeCompare(a.createdAt)
     );
   }, [filteredLists]);
+
+  const pinnedLists = useMemo(
+    () => sortedLists.filter((l) => l.pinned),
+    [sortedLists]
+  );
+  const unpinnedLists = useMemo(
+    () => sortedLists.filter((l) => !l.pinned),
+    [sortedLists]
+  );
 
   const listIds = useMemo(() => sortedLists.map((l) => l.id), [sortedLists]);
   const activeList = activeId ? sortedLists.find((l) => l.id === activeId) ?? null : null;
@@ -279,11 +367,12 @@ export default function Lists() {
     e.preventDefault();
     setError("");
     try {
-      const list = await createList(name, icon, type, visibility, memberIds);
+      const list = await createList(name, icon, type, visibility, memberIds, color);
       setCreateOpen(false);
       setCreateStep("type");
       setName("");
       setIcon(ICONS[0]);
+      setColor("emerald");
       setType("shopping");
       setVisibility("family");
       setMemberIds([]);
@@ -311,6 +400,7 @@ export default function Lists() {
     updateList(listId, {
       name: list.name,
       icon: list.icon,
+      color: list.color,
       type: list.type ?? "shopping",
       visibility: list.visibility ?? "family",
       memberIds: list.members?.map((m) => m.userId) ?? [],
@@ -468,7 +558,30 @@ export default function Lists() {
             onDragEnd={handleDragEnd}
           >
             <SortableContext items={listIds} strategy={rectSortingStrategy}>
-              <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="sm:hidden">
+                {pinnedLists.length > 0 && (
+                  <div className={`mb-3 grid gap-2 ${pinnedLists.length === 1 ? "grid-cols-1" : "grid-cols-2"}`}>
+                    {pinnedLists.map((list) => (
+                      <PinnedCard
+                        key={list.id}
+                        list={list}
+                        onLongPress={handleLongPress}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className={`grid gap-3 ${pinnedLists.length > 0 ? "grid-cols-1" : "grid-cols-2"}`}>
+                  {unpinnedLists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      isDragging={activeId === list.id}
+                      onLongPress={handleLongPress}
+                    />
+                  ))}
+                </div>
+              </div>
+              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
                 {sortedLists.map((list) => (
                   <ListCard
                     key={list.id}
@@ -657,6 +770,25 @@ export default function Lists() {
                     {ic === "home" && "🏠"}
                     {ic === "car" && "🚗"}
                     {ic === "baby" && "🍼"}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="mb-1 block text-sm font-medium text-slate-700">Color</label>
+              <div className="grid grid-cols-6 gap-2">
+                {LIST_COLORS.map((c) => (
+                  <button
+                    key={c.name}
+                    type="button"
+                    onClick={() => setColor(c.name)}
+                    className={`flex h-9 w-full items-center justify-center rounded-xl border-2 transition ${
+                      color === c.name
+                        ? `${c.icon} ${c.ring} border-current`
+                        : "border-transparent hover:opacity-80"
+                    }`}
+                  >
+                    <span className={`h-5 w-5 rounded-full ${c.icon}`} />
                   </button>
                 ))}
               </div>

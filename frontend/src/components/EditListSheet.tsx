@@ -5,6 +5,7 @@ import { useAuth } from "../lib/auth";
 import type { ShoppingList, ListType, ListVisibility } from "../lib/types";
 import { VISIBILITY_OPTIONS } from "../lib/listVisibility";
 import { LIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
+import { LIST_COLORS } from "../lib/listColors";
 import BottomSheet from "./BottomSheet";
 
 const ICONS = ["shopping-bag", "pill", "apple", "home", "car", "baby"];
@@ -23,6 +24,7 @@ export default function EditListSheet({
   const [step, setStep] = useState<"type" | "form">("type");
   const [editName, setEditName] = useState(list.name);
   const [editIcon, setEditIcon] = useState(list.icon || "shopping-bag");
+  const [editColor, setEditColor] = useState(list.color || "emerald");
   const [editType, setEditType] = useState<ListType>(list.type ?? "shopping");
   const [editVis, setEditVis] = useState<ListVisibility>(list.visibility ?? "family");
   const [editMemberIds, setEditMemberIds] = useState<string[]>(
@@ -41,6 +43,7 @@ export default function EditListSheet({
       await updateList(list.id, {
         name: editName.trim(),
         icon: editIcon,
+        color: editColor,
         type: editType,
         visibility: editVis,
         memberIds: editMemberIds,
@@ -138,6 +141,25 @@ export default function EditListSheet({
                   {ic === "home" && "🏠"}
                   {ic === "car" && "🚗"}
                   {ic === "baby" && "🍼"}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">Color</label>
+            <div className="grid grid-cols-6 gap-2">
+              {LIST_COLORS.map((c) => (
+                <button
+                  key={c.name}
+                  type="button"
+                  onClick={() => setEditColor(c.name)}
+                  className={`flex h-9 w-full items-center justify-center rounded-xl border-2 transition ${
+                    editColor === c.name
+                      ? `${c.icon} ${c.ring} border-current`
+                      : "border-transparent hover:opacity-80"
+                  }`}
+                >
+                  <span className={`h-5 w-5 rounded-full ${c.icon}`} />
                 </button>
               ))}
             </div>

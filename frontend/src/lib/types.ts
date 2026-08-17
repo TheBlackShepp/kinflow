@@ -45,6 +45,7 @@ export interface ShoppingList {
   id: string;
   name: string;
   icon: string;
+  color?: string;
   type?: ListType;
   familyId: string;
   ownerId?: string | null;

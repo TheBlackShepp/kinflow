@@ -45,13 +45,15 @@ interface DataContextValue {
     icon: string,
     type: ListType,
     visibility?: ListVisibility,
-    memberIds?: string[]
+    memberIds?: string[],
+    color?: string
   ) => Promise<ShoppingList>;
   updateList: (
     id: string,
     data: {
       name: string;
       icon: string;
+      color?: string;
       type: ListType;
       visibility: ListVisibility;
       memberIds: string[];
@@ -438,12 +440,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
       icon: string,
       type: ListType = "shopping",
       visibility: ListVisibility = "family",
-      memberIds: string[] = []
+      memberIds: string[] = [],
+      color: string = "emerald"
     ): Promise<ShoppingList> => {
       const list: ShoppingList = {
         id: uid(),
         name,
         icon,
+        color,
         type,
         familyId: familyId!,
         ownerId: user?.id ?? null,
@@ -454,7 +458,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       };
       setLists((s) => [list, ...s]);
       await db.lists.put(list);
-      const payload = { id: list.id, name, icon, type, visibility, memberIds };
+      const payload = { id: list.id, name, icon, color, type, visibility, memberIds };
       try {
         const created = await api.post<ShoppingList>("/lists", payload);
         const normalized = { ...created, items: created.items ?? [] };
@@ -478,6 +482,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
       data: {
         name: string;
         icon: string;
+        color?: string;
         type: ListType;
         visibility: ListVisibility;
         memberIds: string[];
@@ -490,6 +495,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         ...prev,
         name: data.name,
         icon: data.icon,
+        color: data.color ?? prev.color,
         type: data.type,
         visibility: data.visibility,
         members: data.memberIds.map((userId) => ({ userId })),
