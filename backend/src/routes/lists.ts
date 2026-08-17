@@ -79,7 +79,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
         ],
       },
       include: listInclude,
-      orderBy: { createdAt: "desc" },
+      orderBy: [{ pinned: "desc" }, { order: "asc" }, { createdAt: "desc" }],
     });
 
     res.json(lists);
@@ -131,6 +131,46 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     res.status(201).json(list);
   } catch (error) {
     console.error("Error creando lista:", error);
+    res.status(500).json({ message: "Error interno del servidor" });
+  }
+});
+
+// Reorder lists (must be before /:id)
+router.patch("/reorder", async (req: AuthRequest, res: Response) => {
+  try {
+    const familyId = await requireFamily(req, res);
+    if (!familyId) return;
+    const userId = req.user!.userId;
+    const { ids } = req.body;
+    if (!Array.isArray(ids) || !ids.every((id: unknown) => typeof id === "string")) {
+      return res.status(400).json({ message: "Se espera un array de IDs" });
+    }
+
+    await prisma.$transaction(
+      ids.map((id: string, i: number) =>
+        prisma.list.update({
+          where: { id },
+          data: { order: i },
+        })
+      )
+    );
+
+    const lists = await prisma.list.findMany({
+      where: {
+        familyId,
+        OR: [
+          { visibility: "family" },
+          { ownerId: userId },
+          { visibility: "custom", members: { some: { userId } } },
+        ],
+      },
+      include: listInclude,
+      orderBy: [{ pinned: "desc" }, { order: "asc" }, { createdAt: "desc" }],
+    });
+
+    res.json(lists);
+  } catch (error) {
+    console.error("Error reordenando listas:", error);
     res.status(500).json({ message: "Error interno del servidor" });
   }
 });
@@ -191,6 +231,9 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
         return res.status(400).json({ message: "Visibilidad no válida" });
       }
       data.visibility = req.body.visibility;
+    }
+    if (req.body.pinned !== undefined) {
+      data.pinned = Boolean(req.body.pinned);
     }
 
     if (Array.isArray(req.body.memberIds)) {

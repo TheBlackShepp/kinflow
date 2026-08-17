@@ -37,6 +37,8 @@ model List {
   family     Family       @relation(fields: [familyId], references: [id], onDelete: Cascade)
   ownerId    String?
   visibility String       @default("family")
+  pinned     Boolean      @default(false)
+  order      Int          @default(0)
   items      ListItem[]
   members    ListMember[]
   createdAt  DateTime     @default(now())

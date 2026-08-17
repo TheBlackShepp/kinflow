@@ -49,6 +49,8 @@ export interface ShoppingList {
   familyId: string;
   ownerId?: string | null;
   visibility?: ListVisibility;
+  pinned?: boolean;
+  order?: number;
   members?: { userId: string }[];
   createdAt: string;
   items: ListItem[];

@@ -55,8 +55,10 @@ interface DataContextValue {
       type: ListType;
       visibility: ListVisibility;
       memberIds: string[];
+      pinned?: boolean;
     }
   ) => Promise<void>;
+  reorderLists: (ids: string[]) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
   addItem: (
     listId: string,
@@ -479,6 +481,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         type: ListType;
         visibility: ListVisibility;
         memberIds: string[];
+        pinned?: boolean;
       }
     ) => {
       const prev = lists.find((l) => l.id === id);
@@ -490,6 +493,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         type: data.type,
         visibility: data.visibility,
         members: data.memberIds.map((userId) => ({ userId })),
+        ...(data.pinned !== undefined ? { pinned: data.pinned } : {}),
       };
       setLists((s) => s.map((l) => (l.id === id ? next : l)));
       await db.lists.put(next);
@@ -526,6 +530,42 @@ export function DataProvider({ children }: { children: ReactNode }) {
       }
     },
     [enqueue, cancelPendingFor]
+  );
+
+  const reorderLists = useCallback(
+    async (ids: string[]) => {
+      const prev = lists;
+      const reordered = ids
+        .map((id) => lists.find((l) => l.id === id))
+        .filter(Boolean)
+        .map((l, i) => ({ ...l!, order: i }));
+      const others = lists.filter((l) => !ids.includes(l.id));
+      const merged = [...reordered, ...others].sort(
+        (a, b) =>
+          Number(b.pinned) - Number(a.pinned) ||
+          (a.order ?? 0) - (b.order ?? 0) ||
+          b.createdAt.localeCompare(a.createdAt)
+      );
+      setLists(merged);
+      for (const l of reordered) await db.lists.put(l);
+      try {
+        const updated = await api.patch<ShoppingList[]>("/lists/reorder", { ids });
+        const normalized = updated.map((u) => ({
+          ...u,
+          items: u.items ?? lists.find((l) => l.id === u.id)?.items ?? [],
+        }));
+        setLists(normalized);
+        await db.lists.bulkPut(normalized);
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await enqueue("lists", "update", { id: ids[0] });
+          return;
+        }
+        setLists(prev);
+        throw e;
+      }
+    },
+    [lists, enqueue]
   );
 
   const addItem = useCallback(
@@ -919,6 +959,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         syncNow,
         createList,
         updateList,
+        reorderLists,
         deleteList,
         addItem,
         updateItem,
