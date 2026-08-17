@@ -18,34 +18,64 @@ model Family {
 }
 
 model User {
-  id        String   @id @default(uuid())
-  email     String   @unique
-  password  String
-  name      String
-  familyId  String?
-  family    Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  id       String   @id @default(uuid())
+  email    String   @unique
+  password String
+  name     String
+  familyId String?
+  family   Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  lists    ListMember[]
   createdAt DateTime @default(now())
 }
 
 model List {
-  id        String     @id @default(uuid())
-  name      String
-  icon      String     @default("shopping-bag")
-  familyId  String
-  family    Family     @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  items     ListItem[]
-  createdAt DateTime   @default(now())
+  id         String       @id @default(uuid())
+  name       String
+  icon       String       @default("shopping-bag")
+  type       String       @default("shopping")
+  familyId   String
+  family     Family       @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  ownerId    String?
+  visibility String       @default("family")
+  items      ListItem[]
+  members    ListMember[]
+  createdAt  DateTime     @default(now())
+}
+
+model ListMember {
+  id     String @id @default(uuid())
+  listId String
+  list   List   @relation(fields: [listId], references: [id], onDelete: Cascade)
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([listId, userId])
 }
 
 model ListItem {
-  id        String   @id @default(uuid())
-  listId    String
-  list      List     @relation(fields: [listId], references: [id], onDelete: Cascade)
-  name      String
-  quantity  String   @default("1")
-  category  String   @default("General")
-  completed Boolean  @default(false)
-  createdAt DateTime @default(now())
+  id         String        @id @default(uuid())
+  listId     String
+  list       List          @relation(fields: [listId], references: [id], onDelete: Cascade)
+  name       String
+  quantity   String        @default("1")
+  category   String        @default("General")
+  price      String        @default("")
+  note       String        @default("")
+  assigneeId String?
+  dueDate    String?
+  priority   String?
+  status     String        @default("pendiente")
+  completed  Boolean       @default(false)
+  createdAt  DateTime      @default(now())
+  priceHistory PriceEntry[]
+}
+
+model PriceEntry {
+  id         String   @id @default(uuid())
+  itemId     String
+  item       ListItem @relation(fields: [itemId], references: [id], onDelete: Cascade)
+  price      String
+  recordedAt DateTime @default(now())
 }
 
 model Recipe {

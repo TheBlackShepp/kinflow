@@ -38,3 +38,18 @@ export function notifyFamily(familyId: string, type: string, byUserId: string) {
     }
   }
 }
+
+export function notifyUsers(familyId: string, userIds: string[], type: string, byUserId: string) {
+  const set = clientsByFamily.get(familyId);
+  if (!set || set.size === 0 || userIds.length === 0) return;
+  const targets = new Set(userIds);
+  const payload = `data: ${JSON.stringify({ type, familyId, byUserId })}\n\n`;
+  for (const client of set) {
+    if (!targets.has(client.userId)) continue;
+    try {
+      client.res.write(payload);
+    } catch {
+      // cliente desconectado, se limpiará en "close"
+    }
+  }
+}

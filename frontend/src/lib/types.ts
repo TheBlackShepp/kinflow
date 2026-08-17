@@ -13,21 +13,43 @@ export interface Family {
   users?: { id: string; name: string; email: string }[];
 }
 
+export interface PriceEntry {
+  id: string;
+  itemId: string;
+  price: string;
+  recordedAt: string;
+}
+
 export interface ListItem {
   id: string;
   listId: string;
   name: string;
   quantity: string;
   category: string;
+  price?: string | null;
+  note?: string | null;
+  assigneeId?: string | null;
+  dueDate?: string | null;
+  priority?: string | null;
+  status?: string;
   completed: boolean;
   createdAt: string;
+  priceHistory?: PriceEntry[];
 }
+
+export type ListVisibility = "private" | "family" | "custom";
+
+export type ListType = "shopping" | "todo" | "packing" | "wishlist" | "media";
 
 export interface ShoppingList {
   id: string;
   name: string;
   icon: string;
+  type?: ListType;
   familyId: string;
+  ownerId?: string | null;
+  visibility?: ListVisibility;
+  members?: { userId: string }[];
   createdAt: string;
   items: ListItem[];
 }

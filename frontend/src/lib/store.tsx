@@ -16,6 +16,8 @@ import type {
   Recipe,
   Ingredient,
   MealPlan,
+  ListVisibility,
+  ListType,
 } from "./types";
 
 export type SyncStatus = "online" | "offline" | "syncing";
@@ -38,15 +40,55 @@ interface DataContextValue {
   recipes: Recipe[];
   mealPlans: MealPlan[];
   syncNow: () => Promise<void>;
-  createList: (name: string, icon: string) => Promise<ShoppingList>;
+  createList: (
+    name: string,
+    icon: string,
+    type: ListType,
+    visibility?: ListVisibility,
+    memberIds?: string[]
+  ) => Promise<ShoppingList>;
+  updateList: (
+    id: string,
+    data: {
+      name: string;
+      icon: string;
+      type: ListType;
+      visibility: ListVisibility;
+      memberIds: string[];
+    }
+  ) => Promise<void>;
   deleteList: (id: string) => Promise<void>;
   addItem: (
     listId: string,
-    data: { name: string; quantity: string; category: string }
+    data: {
+      name: string;
+      quantity: string;
+      category: string;
+      price?: string;
+      note?: string;
+      assigneeId?: string;
+      dueDate?: string;
+      priority?: string;
+      status?: string;
+    }
   ) => Promise<ListItem>;
   updateItem: (
     item: ListItem,
-    data: Partial<Pick<ListItem, "name" | "quantity" | "category" | "completed">>
+    data: Partial<
+      Pick<
+        ListItem,
+        | "name"
+        | "quantity"
+        | "category"
+        | "price"
+        | "note"
+        | "assigneeId"
+        | "dueDate"
+        | "priority"
+        | "status"
+        | "completed"
+      >
+    >
   ) => Promise<void>;
   deleteItem: (item: ListItem) => Promise<void>;
   createRecipe: (data: NewRecipeInput) => Promise<Recipe>;
@@ -172,6 +214,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
             await db.lists.delete(payload.id);
             await db.listItems.where("listId").equals(payload.id).delete();
             setLists((s) => s.filter((l) => l.id !== payload.id));
+          } else if (action === "update") {
+            const body: Record<string, unknown> = { ...payload };
+            delete body.id;
+            const list = await api.patch<ShoppingList>(`/lists/${payload.id}`, body);
+            const normalized = { ...list, items: list.items ?? [] };
+            await db.lists.put(normalized);
+            setLists((s) =>
+              s.map((l) => (l.id === normalized.id ? normalized : l))
+            );
           }
           break;
         }
@@ -380,36 +431,82 @@ export function DataProvider({ children }: { children: ReactNode }) {
   // --- CRUD operations ---
 
   const createList = useCallback(
-    async (name: string, icon: string): Promise<ShoppingList> => {
+    async (
+      name: string,
+      icon: string,
+      type: ListType = "shopping",
+      visibility: ListVisibility = "family",
+      memberIds: string[] = []
+    ): Promise<ShoppingList> => {
       const list: ShoppingList = {
         id: uid(),
         name,
         icon,
+        type,
         familyId: familyId!,
+        ownerId: user?.id ?? null,
+        visibility,
+        members: memberIds.map((userId) => ({ userId })),
         createdAt: new Date().toISOString(),
         items: [],
       };
       setLists((s) => [list, ...s]);
       await db.lists.put(list);
+      const payload = { id: list.id, name, icon, type, visibility, memberIds };
       try {
-        const created = await api.post<ShoppingList>("/lists", {
-          id: list.id,
-          name,
-          icon,
-        });
+        const created = await api.post<ShoppingList>("/lists", payload);
         const normalized = { ...created, items: created.items ?? [] };
         await db.lists.put(normalized);
         setLists((s) => [normalized, ...s.filter((l) => l.id !== list.id)]);
         return normalized;
       } catch (e) {
         if (e instanceof OfflineError) {
-          await enqueue("lists", "create", { id: list.id, name, icon });
+          await enqueue("lists", "create", payload);
           return list;
         }
         throw e;
       }
     },
-    [familyId, enqueue]
+    [familyId, user, enqueue]
+  );
+
+  const updateList = useCallback(
+    async (
+      id: string,
+      data: {
+        name: string;
+        icon: string;
+        type: ListType;
+        visibility: ListVisibility;
+        memberIds: string[];
+      }
+    ) => {
+      const prev = lists.find((l) => l.id === id);
+      if (!prev) return;
+      const next: ShoppingList = {
+        ...prev,
+        name: data.name,
+        icon: data.icon,
+        type: data.type,
+        visibility: data.visibility,
+        members: data.memberIds.map((userId) => ({ userId })),
+      };
+      setLists((s) => s.map((l) => (l.id === id ? next : l)));
+      await db.lists.put(next);
+      try {
+        const updated = await api.patch<ShoppingList>(`/lists/${id}`, data);
+        const normalized = { ...updated, items: updated.items ?? prev.items };
+        await db.lists.put(normalized);
+        setLists((s) => s.map((l) => (l.id === id ? normalized : l)));
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await enqueue("lists", "update", { id, ...data });
+          return;
+        }
+        throw e;
+      }
+    },
+    [lists, enqueue]
   );
 
   const deleteList = useCallback(
@@ -434,7 +531,17 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const addItem = useCallback(
     async (
       listId: string,
-      data: { name: string; quantity: string; category: string }
+      data: {
+        name: string;
+        quantity: string;
+        category: string;
+        price?: string;
+        note?: string;
+        assigneeId?: string;
+        dueDate?: string;
+        priority?: string;
+        status?: string;
+      }
     ): Promise<ListItem> => {
       const item: ListItem = {
         id: uid(),
@@ -442,8 +549,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
         name: data.name,
         quantity: data.quantity,
         category: data.category,
+        price: data.price ?? "",
+        note: data.note ?? "",
+        ...(data.assigneeId !== undefined ? { assigneeId: data.assigneeId } : {}),
+        ...(data.dueDate !== undefined ? { dueDate: data.dueDate } : {}),
+        ...(data.priority !== undefined ? { priority: data.priority } : {}),
+        ...(data.status !== undefined ? { status: data.status } : {}),
         completed: false,
         createdAt: new Date().toISOString(),
+        priceHistory: [],
       };
       setLists((s) => s.map((l) => (l.id === listId ? { ...l, items: [item, ...l.items] } : l)));
       await db.listItems.put(item);
@@ -452,18 +566,19 @@ export function DataProvider({ children }: { children: ReactNode }) {
           id: item.id,
           ...data,
         });
-        await db.listItems.put(created);
+        const merged = { ...created, priceHistory: item.priceHistory ?? [] };
+        await db.listItems.put(merged);
         setLists((s) =>
           s.map((l) =>
             l.id === listId
               ? {
                   ...l,
-                  items: [created, ...l.items.filter((i) => i.id !== item.id)],
+                  items: [merged, ...l.items.filter((i) => i.id !== item.id)],
                 }
               : l
           )
         );
-        return created;
+        return merged;
       } catch (e) {
         if (e instanceof OfflineError) {
           await enqueue("listItems", "create", { id: item.id, listId, ...data });
@@ -478,7 +593,21 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const updateItem = useCallback(
     async (
       item: ListItem,
-      data: Partial<Pick<ListItem, "name" | "quantity" | "category" | "completed">>
+      data: Partial<
+        Pick<
+          ListItem,
+          | "name"
+          | "quantity"
+          | "category"
+          | "price"
+          | "note"
+          | "assigneeId"
+          | "dueDate"
+          | "priority"
+          | "status"
+          | "completed"
+        >
+      >
     ) => {
       const next = { ...item, ...data };
       setLists((s) =>
@@ -491,11 +620,12 @@ export function DataProvider({ children }: { children: ReactNode }) {
       await db.listItems.put(next);
       try {
         const updated = await api.patch<ListItem>(`/lists/items/${item.id}`, data);
-        await db.listItems.put(updated);
+        const merged = { ...updated, priceHistory: next.priceHistory ?? [] };
+        await db.listItems.put(merged);
         setLists((s) =>
           s.map((l) =>
             l.id === item.listId
-              ? { ...l, items: l.items.map((i) => (i.id === item.id ? updated : i)) }
+              ? { ...l, items: l.items.map((i) => (i.id === item.id ? merged : i)) }
               : l
           )
         );
@@ -788,6 +918,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
         mealPlans,
         syncNow,
         createList,
+        updateList,
         deleteList,
         addItem,
         updateItem,

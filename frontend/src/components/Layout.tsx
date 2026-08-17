@@ -82,7 +82,7 @@ export default function Layout({ children }: { children: ReactNode }) {
     <div className="min-h-screen">
       <StatusBanner />
 
-      {!isHome && (
+      {!isHome && !location.pathname.startsWith("/lists/") && (
         <Link
           to="/"
           className="fixed left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100 transition hover:scale-105 lg:hidden"
