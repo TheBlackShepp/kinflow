@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Plus, Trash2, AlertCircle, Lock, Users, ChevronRight } from "lucide-react";
+import { Plus, Trash2, AlertCircle, Lock, Users, ChevronRight, SlidersHorizontal } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import type { ListType, ListVisibility } from "../lib/types";
@@ -42,13 +42,18 @@ export default function Lists() {
   const [visibility, setVisibility] = useState<ListVisibility>("family");
   const [memberIds, setMemberIds] = useState<string[]>([]);
   const [typeFilter, setTypeFilter] = useState<ListType | "all">("all");
+  const [nameFilter, setNameFilter] = useState("");
+  const [filterOpen, setFilterOpen] = useState(false);
   const [error, setError] = useState("");
 
   const familyUsers = user?.family?.users ?? [];
-  const filteredLists =
-    typeFilter === "all"
-      ? lists
-      : lists.filter((l) => (l.type ?? "shopping") === typeFilter);
+  const hasFilters = typeFilter !== "all" || nameFilter.trim() !== "";
+  const filteredLists = lists.filter((l) => {
+    if (typeFilter !== "all" && (l.type ?? "shopping") !== typeFilter) return false;
+    if (nameFilter.trim() && !l.name.toLowerCase().includes(nameFilter.trim().toLowerCase()))
+      return false;
+    return true;
+  });
 
   const handleCreate = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,6 +76,11 @@ export default function Lists() {
   const handleDelete = async (id: string) => {
     if (!confirm("¿Eliminar esta lista?")) return;
     await deleteList(id);
+  };
+
+  const resetFilters = () => {
+    setTypeFilter("all");
+    setNameFilter("");
   };
 
   if (!user?.familyId) {
@@ -102,6 +112,69 @@ export default function Lists() {
       </h1>
       </div>
 
+      <div className="fixed right-4 top-4 z-50">
+        {filterOpen && (
+          <div className="fixed inset-0 z-40" onClick={() => setFilterOpen(false)} />
+        )}
+        <button
+          onClick={() => setFilterOpen((v) => !v)}
+          className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/90 text-slate-600 shadow-sm backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white"
+          aria-label="Filtros"
+        >
+          <SlidersHorizontal className="h-5 w-5" />
+          {hasFilters && (
+            <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-emerald-500 ring-2 ring-white" />
+          )}
+        </button>
+        {filterOpen && (
+          <div className="absolute right-0 top-12 z-50 w-72 rounded-2xl bg-white p-4 shadow-xl ring-1 ring-slate-100">
+            <input
+              type="text"
+              value={nameFilter}
+              onChange={(e) => setNameFilter(e.target.value)}
+              placeholder="Buscar por nombre..."
+              className="mb-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
+            />
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
+              Tipo
+            </p>
+            <div className="grid grid-cols-2 gap-1.5">
+              <button
+                onClick={() => setTypeFilter("all")}
+                className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                  typeFilter === "all"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                }`}
+              >
+                Todas
+              </button>
+              {LIST_TYPES.map((t) => (
+                <button
+                  key={t.value}
+                  onClick={() => setTypeFilter(t.value)}
+                  className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
+                    typeFilter === t.value
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                  }`}
+                >
+                  {t.icon} {t.label}
+                </button>
+              ))}
+            </div>
+            {hasFilters && (
+              <button
+                onClick={resetFilters}
+                className="mt-3 w-full rounded-xl bg-slate-100 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+              >
+                Limpiar filtros
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
       {!ready ? (
         <p className="text-sm text-slate-400">Cargando...</p>
       ) : lists.length === 0 ? (
@@ -112,31 +185,6 @@ export default function Lists() {
         </div>
       ) : (
         <>
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => setTypeFilter("all")}
-              className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                typeFilter === "all"
-                  ? "bg-emerald-500 text-white"
-                  : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-              }`}
-            >
-              Todas
-            </button>
-            {LIST_TYPES.map((t) => (
-              <button
-                key={t.value}
-                onClick={() => setTypeFilter(t.value)}
-                className={`rounded-full px-3.5 py-1.5 text-xs font-semibold transition ${
-                  typeFilter === t.value
-                    ? "bg-emerald-500 text-white"
-                    : "bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                {t.icon} {t.label}
-              </button>
-            ))}
-          </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {filteredLists.map((list) => {
               const total = list.items.length;
@@ -184,7 +232,9 @@ export default function Lists() {
           </div>
           {filteredLists.length === 0 && (
             <p className="text-center text-sm text-slate-400">
-              No hay listas de este tipo todavía.
+              {hasFilters
+                ? "No hay listas que coincidan con los filtros."
+                : "Aún no hay listas. Crea tu primera lista."}
             </p>
           )}
         </>
