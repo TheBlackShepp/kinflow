@@ -13,7 +13,7 @@ import { MEAL_TYPE_COLORS } from "../lib/types";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { lists, recipes, mealPlans, ready } = useData();
+  const { lists, mealPlans, ready } = useData();
 
   const today = new Date().toISOString().slice(0, 10);
   const todayMeals = mealPlans
@@ -66,9 +66,8 @@ export default function Dashboard() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
               <ShoppingBasket className="h-5 w-5 text-emerald-600" />
             </div>
-            <span className="text-2xl font-bold text-slate-800">{pendingItems.length}</span>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Compras pendientes</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">Listas</p>
         </Link>
         <Link
           to="/recipes"
@@ -78,9 +77,8 @@ export default function Dashboard() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
               <BookOpen className="h-5 w-5 text-violet-600" />
             </div>
-            <span className="text-2xl font-bold text-slate-800">{recipes.length}</span>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Recetas guardadas</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">Recetas</p>
         </Link>
         <Link
           to="/meals"
@@ -90,9 +88,8 @@ export default function Dashboard() {
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
               <CalendarDays className="h-5 w-5 text-amber-600" />
             </div>
-            <span className="text-2xl font-bold text-slate-800">{todayMeals.length}</span>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Comidas de hoy</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">Menús</p>
         </Link>
       </div>
 
