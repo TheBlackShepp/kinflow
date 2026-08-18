@@ -9,18 +9,25 @@ import {
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
-import { MEAL_TYPE_COLORS } from "../lib/types";
+import { MEAL_TYPE_COLORS, type ListItem } from "../lib/types";
 
 export default function Dashboard() {
   const { user } = useAuth();
-  const { lists, mealPlans, ready } = useData();
+  const { lists, mealPlans, ready, updateItem } = useData();
 
   const today = new Date().toISOString().slice(0, 10);
   const todayMeals = mealPlans
     .filter((m) => m.date === today)
     .sort((a, b) => a.mealType.localeCompare(b.mealType));
 
-  const pendingItems = lists.flatMap((l) => l.items.filter((i) => !i.completed));
+  const shoppingLists = lists.filter((l) => (l.type ?? "shopping") === "shopping");
+  const pendingItems = shoppingLists.flatMap((l) =>
+    l.items.filter((i) => !i.completed).map((i) => ({ ...i, listName: l.name }))
+  );
+
+  const toggleItem = (item: ListItem) => {
+    updateItem(item, { completed: !item.completed });
+  };
 
   if (!user?.familyId) {
     return (
@@ -93,7 +100,7 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-3 lg:grid-cols-2">
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="mb-4 flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5 text-emerald-600" />
@@ -152,19 +159,26 @@ export default function Dashboard() {
             </div>
           ) : (
             <ul className="space-y-2">
-              {pendingItems.slice(0, 4).map((item) => (
+              {pendingItems.slice(0, 8).map((item) => (
                 <li key={item.id} className="flex items-center gap-3 text-sm">
-                  <Circle className="h-4 w-4 shrink-0 text-slate-300" />
+                  <button
+                    onClick={() => toggleItem(item)}
+                    className="shrink-0"
+                  >
+                    <Circle className="h-4 w-4 text-slate-300 transition hover:text-emerald-500" />
+                  </button>
                   <span className="font-medium text-slate-700">{item.name}</span>
-                  <span className="text-slate-400">· {item.quantity}</span>
+                  {item.quantity && (
+                    <span className="text-slate-400">· {item.quantity}</span>
+                  )}
                   <span className="ml-auto text-xs text-slate-400">
-                    {lists.find((l) => l.id === item.listId)?.name}
+                    {item.listName}
                   </span>
                 </li>
               ))}
-              {pendingItems.length > 4 && (
+              {pendingItems.length > 8 && (
                 <li className="pt-2 text-center text-sm text-slate-500">
-                  y {pendingItems.length - 4} más...
+                  y {pendingItems.length - 8} más...
                 </li>
               )}
             </ul>
