@@ -1,6 +1,6 @@
 import { Link } from "react-router-dom";
 import {
-  ShoppingBasket,
+  ListTodo,
   CalendarDays,
   BookOpen,
   Users,
@@ -64,7 +64,7 @@ export default function Dashboard() {
         >
           <div className="flex items-center justify-between">
             <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
-              <ShoppingBasket className="h-5 w-5 text-emerald-600" />
+              <ListTodo className="h-5 w-5 text-emerald-600" />
             </div>
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600">Listas</p>
@@ -135,7 +135,7 @@ export default function Dashboard() {
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="mb-4 flex items-center gap-2">
-            <ShoppingBasket className="h-5 w-5 text-emerald-600" />
+            <ListTodo className="h-5 w-5 text-emerald-600" />
             <h2 className="font-semibold text-slate-800">Compras pendientes</h2>
           </div>
           {!ready ? (
