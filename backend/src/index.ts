@@ -7,6 +7,8 @@ import listRoutes from "./routes/lists";
 import recipeRoutes from "./routes/recipes";
 import mealRoutes from "./routes/meals";
 import eventRoutes from "./routes/events";
+import productRoutes from "./routes/products";
+import supermarketRoutes from "./routes/supermarkets";
 
 const app = express();
 const port = process.env.PORT || 4000;
@@ -24,6 +26,8 @@ app.use("/api/lists", listRoutes);
 app.use("/api/recipes", recipeRoutes);
 app.use("/api/meals", mealRoutes);
 app.use("/api/events", eventRoutes);
+app.use("/api/products", productRoutes);
+app.use("/api/supermarkets", supermarketRoutes);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Ruta no encontrada" });
