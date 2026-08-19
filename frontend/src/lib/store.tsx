@@ -18,6 +18,9 @@ import type {
   MealPlan,
   ListVisibility,
   ListType,
+  Product,
+  Supermarket,
+  ProductPrice,
 } from "./types";
 
 export type SyncStatus = "online" | "offline" | "syncing";
@@ -39,6 +42,8 @@ interface DataContextValue {
   lists: ShoppingList[];
   recipes: Recipe[];
   mealPlans: MealPlan[];
+  products: Product[];
+  supermarkets: Supermarket[];
   syncNow: () => Promise<void>;
   createList: (
     name: string,
@@ -113,6 +118,14 @@ interface DataContextValue {
     createdCount: number;
     aggregatedIngredients: { name: string; quantity: string }[];
   }>;
+  createProduct: (data: { name: string; category?: string; unit?: string }) => Promise<Product>;
+  updateProduct: (id: string, data: { name: string; category: string; unit: string }) => Promise<void>;
+  deleteProduct: (id: string) => Promise<void>;
+  searchProducts: (q: string) => Promise<Product[]>;
+  addProductPrice: (productId: string, supermarketId: string, price: string) => Promise<ProductPrice>;
+  deleteProductPrice: (priceId: string) => Promise<void>;
+  createSupermarket: (name: string) => Promise<Supermarket>;
+  deleteSupermarket: (id: string) => Promise<void>;
 }
 
 const DataContext = createContext<DataContextValue | undefined>(undefined);
@@ -141,6 +154,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
   const [lists, setLists] = useState<ShoppingList[]>([]);
   const [recipes, setRecipes] = useState<Recipe[]>([]);
   const [mealPlans, setMealPlans] = useState<MealPlan[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [supermarkets, setSupermarkets] = useState<Supermarket[]>([]);
 
   const syncingRef = useRef(false);
   const familyRef = useRef(familyId);
@@ -150,24 +165,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const loadLocal = useCallback(async () => {
-    const [ls, items, recs, ings, meals] = await Promise.all([
+    const [ls, items, recs, ings, meals, prods, sups] = await Promise.all([
       db.lists.toArray(),
       db.listItems.toArray(),
       db.recipes.toArray(),
       db.ingredients.toArray(),
       db.mealPlans.toArray(),
+      db.products.toArray(),
+      db.supermarkets.toArray(),
     ]);
     setLists(nestLists(ls, items));
     setRecipes(nestRecipes(recs, ings));
     setMealPlans(meals);
+    setProducts(prods);
+    setSupermarkets(sups);
     await refreshPendingCount();
   }, [refreshPendingCount]);
 
   const pullAll = useCallback(async () => {
-    const [ls, recs, meals] = await Promise.all([
+    const [ls, recs, meals, prods, sups] = await Promise.all([
       api.get<ShoppingList[]>("/lists"),
       api.get<Recipe[]>("/recipes"),
       api.get<MealPlan[]>("/meals"),
+      api.get<Product[]>("/products"),
+      api.get<Supermarket[]>("/supermarkets"),
     ]);
 
     const items = ls.flatMap((l) => l.items);
@@ -175,28 +196,30 @@ export function DataProvider({ children }: { children: ReactNode }) {
 
     await db.transaction(
       "rw",
-      db.lists,
-      db.listItems,
-      db.recipes,
-      db.ingredients,
-      db.mealPlans,
+      [db.lists, db.listItems, db.recipes, db.ingredients, db.mealPlans, db.products, db.supermarkets],
       async () => {
         await db.lists.clear();
         await db.listItems.clear();
         await db.recipes.clear();
         await db.ingredients.clear();
         await db.mealPlans.clear();
+        await db.products.clear();
+        await db.supermarkets.clear();
         for (const l of ls) await db.lists.put(l);
         for (const i of items) await db.listItems.put(i);
         for (const r of recs) await db.recipes.put(r);
         for (const ing of ings) await db.ingredients.put(ing);
         for (const m of meals) await db.mealPlans.put(m);
+        for (const p of prods) await db.products.put(p);
+        for (const s of sups) await db.supermarkets.put(s);
       }
     );
 
     setLists(nestLists(ls, items));
     setRecipes(nestRecipes(recs, ings));
     setMealPlans(meals);
+    setProducts(prods);
+    setSupermarkets(sups);
   }, []);
 
   const executeOp = useCallback(
@@ -302,6 +325,34 @@ export function DataProvider({ children }: { children: ReactNode }) {
           ]);
           break;
         }
+        case "products": {
+          if (action === "create") {
+            const product = await api.post<Product>("/products", payload);
+            await db.products.put(product);
+            setProducts((s) => [product, ...s.filter((p) => p.id !== product.id)]);
+          } else if (action === "update") {
+            const product = await api.patch<Product>(`/products/${payload.id}`, payload);
+            await db.products.put(product);
+            setProducts((s) => s.map((p) => (p.id === product.id ? product : p)));
+          } else if (action === "delete") {
+            await api.delete(`/products/${payload.id}`);
+            await db.products.delete(payload.id);
+            setProducts((s) => s.filter((p) => p.id !== payload.id));
+          }
+          break;
+        }
+        case "supermarkets": {
+          if (action === "create") {
+            const supermarket = await api.post<Supermarket>("/supermarkets", payload);
+            await db.supermarkets.put(supermarket);
+            setSupermarkets((s) => [...s, supermarket]);
+          } else if (action === "delete") {
+            await api.delete(`/supermarkets/${payload.id}`);
+            await db.supermarkets.delete(payload.id);
+            setSupermarkets((s) => s.filter((s) => s.id !== payload.id));
+          }
+          break;
+        }
       }
     },
     []
@@ -377,13 +428,15 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (prev !== null && prev !== familyId) {
       db.transaction(
         "rw",
-        [db.lists, db.listItems, db.recipes, db.ingredients, db.mealPlans, db.syncQueue],
+        [db.lists, db.listItems, db.recipes, db.ingredients, db.mealPlans, db.products, db.supermarkets, db.syncQueue],
         async () => {
           await db.lists.clear();
           await db.listItems.clear();
           await db.recipes.clear();
           await db.ingredients.clear();
           await db.mealPlans.clear();
+          await db.products.clear();
+          await db.supermarkets.clear();
           await db.syncQueue.clear();
         }
       ).then(() => loadLocal());
@@ -896,6 +949,174 @@ export function DataProvider({ children }: { children: ReactNode }) {
     [enqueue, cancelPendingFor]
   );
 
+  const createProduct = useCallback(
+    async (data: { name: string; category?: string; unit?: string }): Promise<Product> => {
+      const product: Product = {
+        id: uid(),
+        familyId: familyId!,
+        name: data.name.trim(),
+        category: data.category?.trim() || "General",
+        unit: data.unit?.trim() || "u",
+        createdAt: new Date().toISOString(),
+        prices: [],
+      };
+      setProducts((s) => [product, ...s]);
+      await db.products.put(product);
+      try {
+        const created = await api.post<Product>("/products", {
+          id: product.id,
+          name: product.name,
+          category: product.category,
+          unit: product.unit,
+        });
+        await db.products.put(created);
+        setProducts((s) => [created, ...s.filter((p) => p.id !== product.id)]);
+        return created;
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await enqueue("products", "create", { id: product.id, ...data });
+          return product;
+        }
+        throw e;
+      }
+    },
+    [familyId, enqueue]
+  );
+
+  const updateProduct = useCallback(
+    async (id: string, data: { name: string; category: string; unit: string }) => {
+      const prev = products.find((p) => p.id === id);
+      if (!prev) return;
+      const next: Product = { ...prev, ...data };
+      setProducts((s) => s.map((p) => (p.id === id ? next : p)));
+      await db.products.put(next);
+      try {
+        const updated = await api.patch<Product>(`/products/${id}`, data);
+        await db.products.put(updated);
+        setProducts((s) => s.map((p) => (p.id === id ? updated : p)));
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await enqueue("products", "update", { id, ...data });
+          return;
+        }
+        throw e;
+      }
+    },
+    [products, enqueue]
+  );
+
+  const deleteProduct = useCallback(
+    async (id: string) => {
+      setProducts((s) => s.filter((p) => p.id !== id));
+      await db.products.delete(id);
+      try {
+        await api.delete(`/products/${id}`);
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await cancelPendingFor("products", (p) => p.id === id);
+          await enqueue("products", "delete", { id });
+          return;
+        }
+        throw e;
+      }
+    },
+    [enqueue, cancelPendingFor]
+  );
+
+  const searchProducts = useCallback(
+    async (q: string): Promise<Product[]> => {
+      if (!q.trim()) return [];
+      try {
+        return await api.get<Product[]>(`/products/search?q=${encodeURIComponent(q.trim())}`);
+      } catch {
+        const lower = q.toLowerCase();
+        return products.filter((p) => p.name.toLowerCase().includes(lower));
+      }
+    },
+    [products]
+  );
+
+  const addProductPrice = useCallback(
+    async (productId: string, supermarketId: string, price: string): Promise<ProductPrice> => {
+      const pp = await api.post<ProductPrice>(`/products/${productId}/prices`, {
+        supermarketId,
+        price,
+      });
+      setProducts((s) =>
+        s.map((p) => {
+          if (p.id !== productId) return p;
+          const existing = p.prices?.find((pr) => pr.supermarketId === supermarketId);
+          const newPrices = existing
+            ? (p.prices ?? []).map((pr) => (pr.supermarketId === supermarketId ? pp : pr))
+            : [...(p.prices ?? []), pp];
+          return { ...p, prices: newPrices };
+        })
+      );
+      return pp;
+    },
+    []
+  );
+
+  const deleteProductPrice = useCallback(
+    async (priceId: string) => {
+      await api.delete(`/products/prices/${priceId}`);
+      setProducts((s) =>
+        s.map((p) => ({
+          ...p,
+          prices: (p.prices ?? []).filter((pr) => pr.id !== priceId),
+        }))
+      );
+    },
+    []
+  );
+
+  const createSupermarket = useCallback(
+    async (name: string): Promise<Supermarket> => {
+      const supermarket: Supermarket = {
+        id: uid(),
+        familyId: familyId!,
+        name: name.trim(),
+        createdAt: new Date().toISOString(),
+      };
+      setSupermarkets((s) => [...s, supermarket]);
+      await db.supermarkets.put(supermarket);
+      try {
+        const created = await api.post<Supermarket>("/supermarkets", {
+          id: supermarket.id,
+          name: supermarket.name,
+        });
+        await db.supermarkets.put(created);
+        setSupermarkets((s) => [...s.filter((s) => s.id !== supermarket.id), created]);
+        return created;
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await enqueue("supermarkets", "create", { id: supermarket.id, name });
+          return supermarket;
+        }
+        throw e;
+      }
+    },
+    [familyId, enqueue]
+  );
+
+  const deleteSupermarket = useCallback(
+    async (id: string) => {
+      setSupermarkets((s) => s.filter((s) => s.id !== id));
+      await db.supermarkets.delete(id);
+      try {
+        await api.delete(`/supermarkets/${id}`);
+      } catch (e) {
+        if (e instanceof OfflineError) {
+          await cancelPendingFor("supermarkets", (p) => p.id === id);
+          await enqueue("supermarkets", "delete", { id });
+          return;
+        }
+        throw e;
+      }
+    },
+    [enqueue, cancelPendingFor]
+  );
+
   const exportIngredients = useCallback(
     async (mealIds: string[], listId?: string) => {
       const meals = mealPlans.filter((m) => m.recipeId && mealIds.includes(m.id));
@@ -962,6 +1183,8 @@ export function DataProvider({ children }: { children: ReactNode }) {
         lists,
         recipes,
         mealPlans,
+        products,
+        supermarkets,
         syncNow,
         createList,
         updateList,
@@ -976,6 +1199,14 @@ export function DataProvider({ children }: { children: ReactNode }) {
         setMealPlan,
         deleteMealPlan,
         exportIngredients,
+        createProduct,
+        updateProduct,
+        deleteProduct,
+        searchProducts,
+        addProductPrice,
+        deleteProductPrice,
+        createSupermarket,
+        deleteSupermarket,
       }}
     >
       {children}

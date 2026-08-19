@@ -1,7 +1,7 @@
 import Dexie, { type Table } from "dexie";
-import type { ShoppingList, ListItem, Recipe, Ingredient, MealPlan } from "./types";
+import type { ShoppingList, ListItem, Recipe, Ingredient, MealPlan, Product, Supermarket, ProductPrice } from "./types";
 
-export type SyncTable = "lists" | "listItems" | "recipes" | "mealPlans";
+export type SyncTable = "lists" | "listItems" | "recipes" | "mealPlans" | "products" | "supermarkets";
 export type SyncAction = "create" | "update" | "delete";
 
 export interface SyncOp {
@@ -18,16 +18,22 @@ class FamilyWallDB extends Dexie {
   recipes!: Table<Recipe, string>;
   ingredients!: Table<Ingredient, string>;
   mealPlans!: Table<MealPlan, string>;
+  products!: Table<Product, string>;
+  supermarkets!: Table<Supermarket, string>;
+  productPrices!: Table<ProductPrice, string>;
   syncQueue!: Table<SyncOp, number>;
 
   constructor() {
     super("familywall");
-    this.version(1).stores({
+    this.version(2).stores({
       lists: "id, name, familyId",
       listItems: "id, listId, name, completed",
       recipes: "id, title, familyId",
       ingredients: "id, recipeId, name",
       mealPlans: "id, familyId, date, mealType",
+      products: "id, familyId, name, category",
+      supermarkets: "id, familyId, name",
+      productPrices: "id, productId, supermarketId",
       syncQueue: "++id, createdAt",
     });
   }

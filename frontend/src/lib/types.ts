@@ -88,6 +88,32 @@ export interface MealPlan {
   createdAt: string;
 }
 
+export interface Product {
+  id: string;
+  familyId: string;
+  name: string;
+  category: string;
+  unit: string;
+  createdAt: string;
+  prices?: ProductPrice[];
+}
+
+export interface Supermarket {
+  id: string;
+  familyId: string;
+  name: string;
+  createdAt: string;
+}
+
+export interface ProductPrice {
+  id: string;
+  productId: string;
+  supermarketId: string;
+  supermarket?: Supermarket;
+  price: string;
+  recordedAt: string;
+}
+
 export const MEAL_TYPES = ["Desayuno", "Almuerzo", "Cena", "Snack"] as const;
 
 export const MEAL_TYPE_COLORS: Record<string, string> = {
