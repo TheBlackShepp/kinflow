@@ -6,6 +6,7 @@ import {
   Users,
   UtensilsCrossed,
   Circle,
+  Package,
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
@@ -75,6 +76,17 @@ export default function Dashboard() {
             </div>
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600">Listas</p>
+        </Link>
+        <Link
+          to="/products"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100">
+              <Package className="h-5 w-5 text-cyan-600" />
+            </div>
+          </div>
+          <p className="mt-3 text-sm font-medium text-slate-600">Productos</p>
         </Link>
         <Link
           to="/recipes"
