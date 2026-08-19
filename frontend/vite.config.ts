@@ -12,8 +12,8 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['icons/icon.svg'],
       manifest: {
-        name: 'FamilyWall - Hogar en familia',
-        short_name: 'FamilyWall',
+        name: 'Kinflow',
+        short_name: 'Kinflow',
         description: 'Listas de compras, recetario y planificador de menús para tu familia. Funciona sin conexión.',
         theme_color: '#10b981',
         background_color: '#10b981',
@@ -49,7 +49,7 @@ export default defineConfig({
             handler: 'NetworkOnly',
             options: {
               backgroundSync: {
-                name: 'familywall-sync',
+                name: 'kinflow-sync',
                 options: {
                   maxRetentionTime: 60 * 60 * 24,
                 },

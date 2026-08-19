@@ -1,23 +1,27 @@
+import i18n from "i18next";
 import type { ListVisibility } from "./types";
 
-export const VISIBILITY_OPTIONS: {
-  value: ListVisibility;
-  label: string;
-  description: string;
-}[] = [
-  {
-    value: "family",
-    label: "Todos",
-    description: "Visible para toda la familia",
-  },
-  {
-    value: "private",
-    label: "Solo yo",
-    description: "Solo tú puedes verla y editarla",
-  },
-  {
-    value: "custom",
-    label: "Personas concretas",
-    description: "Elige quién la ve",
-  },
-];
+const t = i18n.t.bind(i18n);
+
+export function getVISIBILITY_OPTIONS() {
+  return [
+    {
+      value: "family" as ListVisibility,
+      label: t("visibility.family.label"),
+      description: t("visibility.family.description"),
+    },
+    {
+      value: "private" as ListVisibility,
+      label: t("visibility.private.label"),
+      description: t("visibility.private.description"),
+    },
+    {
+      value: "custom" as ListVisibility,
+      label: t("visibility.custom.label"),
+      description: t("visibility.custom.description"),
+    },
+  ];
+}
+
+// For backward compatibility
+export const VISIBILITY_OPTIONS = getVISIBILITY_OPTIONS();

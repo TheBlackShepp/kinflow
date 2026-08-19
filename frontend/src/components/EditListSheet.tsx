@@ -1,10 +1,11 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { ChevronRight } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import type { ShoppingList, ListType, ListVisibility } from "../lib/types";
-import { VISIBILITY_OPTIONS } from "../lib/listVisibility";
-import { LIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
+import { getVISIBILITY_OPTIONS } from "../lib/listVisibility";
+import { getLIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
 import { LIST_COLORS } from "../lib/listColors";
 import BottomSheet from "./BottomSheet";
 
@@ -19,6 +20,7 @@ export default function EditListSheet({
   onClose: () => void;
   list: ShoppingList;
 }) {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const { updateList } = useData();
   const [step, setStep] = useState<"type" | "form">("type");
@@ -34,6 +36,8 @@ export default function EditListSheet({
   const [saving, setSaving] = useState(false);
 
   const familyUsers = user?.family?.users ?? [];
+  const LIST_TYPES = getLIST_TYPES();
+  const VISIBILITY_OPTIONS = getVISIBILITY_OPTIONS();
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -60,32 +64,32 @@ export default function EditListSheet({
     <BottomSheet
       open={open}
       onClose={onClose}
-      title={step === "type" ? "Tipo de lista" : "Editar lista"}
+      title={step === "type" ? t("lists.editTypeTitle") : t("lists.editFormTitle")}
       onBack={step === "form" ? () => setStep("type") : undefined}
       step={step === "type" ? 1 : 2}
       steps={2}
     >
       {step === "type" ? (
         <div className="grid grid-cols-2 gap-3">
-          {LIST_TYPES.map((t) => (
+          {LIST_TYPES.map((t_item) => (
             <button
-              key={t.value}
+              key={t_item.value}
               type="button"
               onClick={() => {
-                setEditType(t.value);
+                setEditType(t_item.value);
                 setSaveError("");
                 setStep("form");
               }}
               className={`flex flex-col items-center rounded-2xl border-2 p-4 text-center transition ${
-                editType === t.value
+                editType === t_item.value
                   ? "border-emerald-500 bg-emerald-50"
                   : "border-slate-200 hover:border-emerald-400 hover:bg-emerald-50"
               }`}
             >
-              <span className="text-3xl">{t.icon}</span>
-              <span className="mt-2 text-sm font-semibold text-slate-700">{t.label}</span>
+              <span className="text-3xl">{t_item.icon}</span>
+              <span className="mt-2 text-sm font-semibold text-slate-700">{t_item.label}</span>
               <span className="mt-0.5 text-[11px] leading-tight text-slate-400">
-                {t.description}
+                {t_item.description}
               </span>
             </button>
           ))}
@@ -102,27 +106,27 @@ export default function EditListSheet({
           >
             <span className="text-xl">{LIST_TYPE_ICON[editType]}</span>
             <span className="flex-1 text-sm font-semibold text-slate-700">
-              {LIST_TYPES.find((t) => t.value === editType)?.label}
+              {LIST_TYPES.find((t_item) => t_item.value === editType)?.label}
             </span>
             <span className="flex items-center text-xs font-medium text-emerald-600">
-              Cambiar
+              {t("lists.change")}
               <ChevronRight className="h-3.5 w-3.5" />
             </span>
           </button>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.listName")}</label>
             <input
               type="text"
               required
               autoFocus
               value={editName}
               onChange={(e) => setEditName(e.target.value)}
-              placeholder="Nombre de la lista"
+              placeholder={t("lists.namePlaceholder")}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Icono</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.icon")}</label>
             <div className="flex gap-2">
               {ICONS.map((ic) => (
                 <button
@@ -146,7 +150,7 @@ export default function EditListSheet({
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Color</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.color")}</label>
             <div className="grid grid-cols-6 gap-2">
               {LIST_COLORS.map((c) => (
                 <button
@@ -165,7 +169,7 @@ export default function EditListSheet({
             </div>
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">¿Quién la ve?</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.whoSeesIt")}</label>
             <div className="grid gap-2">
               {VISIBILITY_OPTIONS.map((opt) => (
                 <button
@@ -187,7 +191,7 @@ export default function EditListSheet({
           {editVis === "custom" && (
             <div>
               <label className="mb-1 block text-sm font-medium text-slate-700">
-                Miembros de la familia
+                {t("lists.familyMembers")}
               </label>
               <div className="space-y-2">
                 {familyUsers
@@ -215,7 +219,7 @@ export default function EditListSheet({
                   ))}
                 {familyUsers.length <= 1 && (
                   <p className="text-xs text-slate-400">
-                    No hay otros miembros en el hogar todavía.
+                    {t("lists.noOtherMembers")}
                   </p>
                 )}
               </div>
@@ -226,7 +230,7 @@ export default function EditListSheet({
             disabled={saving}
             className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
           >
-            {saving ? "Guardando..." : "Guardar cambios"}
+            {saving ? t("app.saving") : t("lists.saveChanges")}
           </button>
         </form>
       )}

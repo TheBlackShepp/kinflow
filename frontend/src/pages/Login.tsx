@@ -1,10 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
 import AuthShell from "../components/AuthShell";
 
 export default function Login() {
+  const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -27,13 +29,13 @@ export default function Login() {
   };
 
   return (
-    <AuthShell title="Iniciar sesión" subtitle="Organiza tu hogar en familia">
+    <AuthShell title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Correo electrónico</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.login.email")}</label>
           <input
             type="email"
             required
@@ -44,7 +46,7 @@ export default function Login() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Contraseña</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.login.password")}</label>
           <input
             type="password"
             required
@@ -59,12 +61,12 @@ export default function Login() {
           disabled={loading}
           className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
         >
-          {loading ? "Ingresando..." : "Ingresar"}
+          {loading ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
         <p className="text-center text-sm text-slate-500">
-          ¿No tienes cuenta?{" "}
+          {t("auth.login.noAccount")}{" "}
           <Link to="/register" className="font-medium text-emerald-600 hover:underline">
-            Regístrate
+            {t("auth.login.register")}
           </Link>
         </p>
       </form>

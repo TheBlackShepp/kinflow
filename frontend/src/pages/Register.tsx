@@ -1,10 +1,12 @@
 import { useState } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
 import AuthShell from "../components/AuthShell";
 
 export default function Register() {
+  const { t } = useTranslation();
   const { register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
@@ -28,13 +30,13 @@ export default function Register() {
   };
 
   return (
-    <AuthShell title="Crear cuenta" subtitle="Crea tu hogar y comparte listas y menús">
+    <AuthShell title={t("auth.register.title")} subtitle={t("auth.register.subtitle")}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
           <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.name")}</label>
           <input
             type="text"
             required
@@ -45,7 +47,7 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Correo electrónico</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.email")}</label>
           <input
             type="email"
             required
@@ -56,7 +58,7 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">Contraseña</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.password")}</label>
           <input
             type="password"
             required
@@ -71,12 +73,12 @@ export default function Register() {
           disabled={loading}
           className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
         >
-          {loading ? "Creando cuenta..." : "Crear cuenta"}
+          {loading ? t("auth.register.submitting") : t("auth.register.submit")}
         </button>
         <p className="text-center text-sm text-slate-500">
-          ¿Ya tienes cuenta?{" "}
+          {t("auth.register.hasAccount")}{" "}
           <Link to="/login" className="font-medium text-emerald-600 hover:underline">
-            Inicia sesión
+            {t("auth.register.login")}
           </Link>
         </p>
       </form>

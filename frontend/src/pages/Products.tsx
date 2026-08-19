@@ -1,4 +1,5 @@
 import { useState, useMemo } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Search,
   Plus,
@@ -19,6 +20,8 @@ const SHOPPING_CATEGORIES = LIST_TYPE_CATEGORIES.shopping;
 const UNITS = ["u", "kg", "g", "l", "ml", "paq", "docena"];
 
 export default function Products() {
+  const { t } = useTranslation();
+
   const {
     products,
     supermarkets,
@@ -119,7 +122,7 @@ export default function Products() {
   if (!ready) {
     return (
       <div className="flex items-center justify-center py-20">
-        <p className="text-sm text-slate-400">Cargando productos...</p>
+        <p className="text-sm text-slate-400">{t("products.loading")}</p>
       </div>
     );
   }
@@ -127,9 +130,9 @@ export default function Products() {
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Productos</h1>
+        <h1 className="text-2xl font-bold text-slate-800">{t("products.title")}</h1>
         <p className="text-sm text-slate-500">
-          Catálogo de productos del hogar
+          {t("products.subtitle")}
         </p>
       </div>
 
@@ -143,7 +146,7 @@ export default function Products() {
           }`}
         >
           <Package className="mr-1.5 inline h-4 w-4" />
-          Productos
+          {t("products.tabProducts")}
         </button>
         <button
           onClick={() => setTab("supermarkets")}
@@ -154,7 +157,7 @@ export default function Products() {
           }`}
         >
           <Store className="mr-1.5 inline h-4 w-4" />
-          Supermercados
+          {t("products.tabSupermarkets")}
         </button>
       </div>
 
@@ -166,7 +169,7 @@ export default function Products() {
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Buscar producto..."
+              placeholder={t("products.searchPlaceholder")}
               className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
             {search && (
@@ -187,14 +190,14 @@ export default function Products() {
             className="flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 py-3 text-sm font-medium text-slate-500 transition hover:border-emerald-300 hover:text-emerald-600"
           >
             <Plus className="h-4 w-4" />
-            Nuevo producto
+            {t("products.newProduct")}
           </button>
 
           {showForm && (
             <div className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
               <div className="mb-3 flex items-center justify-between">
                 <h3 className="text-sm font-semibold text-slate-700">
-                  {editing ? "Editar producto" : "Nuevo producto"}
+                  {editing ? t("products.editProduct") : t("products.newProduct")}
                 </h3>
                 <button onClick={resetForm}>
                   <X className="h-4 w-4 text-slate-400" />
@@ -205,14 +208,14 @@ export default function Products() {
                   type="text"
                   value={formName}
                   onChange={(e) => setFormName(e.target.value)}
-                  placeholder="Nombre del producto"
+                  placeholder={t("products.namePlaceholder")}
                   className="w-full rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                   autoFocus
                 />
                 <div className="grid grid-cols-2 gap-3">
                   <div>
                     <label className="mb-1 block text-xs font-medium text-slate-500">
-                      Categoría
+                      {t("products.category")}
                     </label>
                     <select
                       value={formCategory}
@@ -228,7 +231,7 @@ export default function Products() {
                   </div>
                   <div>
                     <label className="mb-1 block text-xs font-medium text-slate-500">
-                      Unidad
+                      {t("products.unit")}
                     </label>
                     <select
                       value={formUnit}
@@ -248,7 +251,7 @@ export default function Products() {
                   disabled={!formName.trim()}
                   className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:opacity-50"
                 >
-                  {editing ? "Guardar cambios" : "Crear producto"}
+                  {editing ? t("products.saveChanges") : t("products.createProduct")}
                 </button>
               </div>
             </div>
@@ -258,12 +261,12 @@ export default function Products() {
             <div className="rounded-2xl border-2 border-dashed border-slate-200 py-12 text-center">
               <Package className="mx-auto mb-3 h-10 w-10 text-slate-300" />
               <p className="font-medium text-slate-600">
-                {search ? "No se encontraron productos" : "No hay productos"}
+                {search ? t("products.noProductsSearch") : t("products.noProducts")}
               </p>
               <p className="text-sm text-slate-400">
                 {search
-                  ? "Prueba con otra búsqueda"
-                  : "Crea tu primer producto para empezar"}
+                  ? t("products.tryOtherSearch")
+                  : t("products.createFirst")}
               </p>
             </div>
           ) : (
@@ -321,7 +324,7 @@ export default function Products() {
                               onClick={() => {
                                 if (
                                   confirm(
-                                    `¿Eliminar "${product.name}"?`
+                                    t("products.confirmDelete", { name: product.name })
                                   )
                                 ) {
                                   deleteProduct(product.id);
@@ -337,7 +340,7 @@ export default function Products() {
                         {expandedId === product.id && (
                           <div className="mt-3 rounded-xl bg-slate-50 p-3">
                             <p className="mb-2 text-xs font-semibold text-slate-500">
-                              Precios por supermercado
+                              {t("products.pricesBySupermarket")}
                             </p>
                             {product.prices && product.prices.length > 0 ? (
                               <ul className="mb-2 space-y-1">
@@ -365,7 +368,7 @@ export default function Products() {
                               </ul>
                             ) : (
                               <p className="mb-2 text-xs text-slate-400">
-                                Sin precios registrados
+                                {t("products.noPrices")}
                               </p>
                             )}
                             {supermarkets.length > 0 && (
@@ -378,7 +381,7 @@ export default function Products() {
                                   }}
                                   className="flex-1 rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none"
                                 >
-                                  <option value="">Supermercado...</option>
+                                  <option value="">{t("products.supermarketPlaceholder")}</option>
                                   {supermarkets.map((s) => (
                                     <option key={s.id} value={s.id}>
                                       {s.name}
@@ -393,7 +396,7 @@ export default function Products() {
                                     setPriceProductId(product.id);
                                     setPriceValue(e.target.value);
                                   }}
-                                  placeholder="Precio"
+                                  placeholder={t("products.pricePlaceholder")}
                                   className="w-20 rounded-lg border border-slate-200 px-2 py-1.5 text-xs outline-none"
                                 />
                                 <button
@@ -428,7 +431,7 @@ export default function Products() {
               type="text"
               value={newSupermarket}
               onChange={(e) => setNewSupermarket(e.target.value)}
-              placeholder="Nuevo supermercado..."
+              placeholder={t("products.newSupermarket")}
               className="flex-1 rounded-xl border border-slate-200 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               onKeyDown={(e) => e.key === "Enter" && handleAddSupermarket()}
             />
@@ -445,10 +448,10 @@ export default function Products() {
             <div className="rounded-2xl border-2 border-dashed border-slate-200 py-12 text-center">
               <Store className="mx-auto mb-3 h-10 w-10 text-slate-300" />
               <p className="font-medium text-slate-600">
-                No hay supermercados
+                {t("products.noSupermarkets")}
               </p>
               <p className="text-sm text-slate-400">
-                Añade supermercados para guardar precios
+                {t("products.addSupermarkets")}
               </p>
             </div>
           ) : (
@@ -468,14 +471,16 @@ export default function Products() {
                           {s.name}
                         </p>
                         <p className="text-xs text-slate-400">
-                          {count} producto{count !== 1 ? "s" : ""} con precio
+                          {count === 1
+                            ? t("products.productWithPrice", { count })
+                            : t("products.productWithPricePlural", { count })}
                         </p>
                       </div>
                       <button
                         onClick={() => {
                           if (
                             confirm(
-                              `¿Eliminar "${s.name}"?`
+                              t("products.confirmDelete", { name: s.name })
                             )
                           ) {
                             deleteSupermarket(s.id);

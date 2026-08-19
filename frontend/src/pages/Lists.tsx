@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   DndContext,
   closestCenter,
@@ -33,8 +34,8 @@ import {
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import type { ShoppingList, ListType, ListVisibility } from "../lib/types";
-import { VISIBILITY_OPTIONS } from "../lib/listVisibility";
-import { LIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
+import { getVISIBILITY_OPTIONS } from "../lib/listVisibility";
+import { getLIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
 import { LIST_COLORS, getListColor } from "../lib/listColors";
 import { useLongPress } from "../lib/useLongPress";
 import BottomSheet from "../components/BottomSheet";
@@ -43,11 +44,12 @@ import EditListSheet from "../components/EditListSheet";
 const ICONS = ["shopping-bag", "pill", "apple", "home", "car", "baby"];
 
 function VisibilityBadge({ visibility }: { visibility?: ListVisibility }) {
+  const { t } = useTranslation();
   if (visibility === "private") {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
         <Lock className="h-3 w-3" />
-        Privada
+        {t("lists.private")}
       </span>
     );
   }
@@ -55,7 +57,7 @@ function VisibilityBadge({ visibility }: { visibility?: ListVisibility }) {
     return (
       <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-500">
         <Users className="h-3 w-3" />
-        Compartida
+        {t("lists.shared")}
       </span>
     );
   }
@@ -301,6 +303,10 @@ function ListCardOverlay({ list }: { list: ShoppingList }) {
 }
 
 export default function Lists() {
+  const { t } = useTranslation();
+  const LIST_TYPES = getLIST_TYPES();
+  const VISIBILITY_OPTIONS = getVISIBILITY_OPTIONS();
+
   const { user } = useAuth();
   const { lists, ready, createList, deleteList, reorderLists, updateList } = useData();
   const navigate = useNavigate();
@@ -453,9 +459,9 @@ export default function Lists() {
         <div className="flex items-center gap-3">
           <AlertCircle className="h-6 w-6" />
           <p className="font-medium">
-            Necesitas un hogar para crear listas.{" "}
+            {t("lists.needsHome")}{" "}
             <Link to="/family" className="underline">
-              Configurar hogar
+              {t("lists.setupHome")}
             </Link>
           </p>
         </div>
@@ -470,11 +476,11 @@ export default function Lists() {
       <div className="relative -mx-4 -mt-8 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-slate-100">
         <img
           src="/images/list-banner.svg"
-          alt="Listas de compras"
+          alt={t("lists.bannerAlt")}
           className="h-56 w-full object-cover sm:h-64"
         />
         <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
-          Listas
+          {t("lists.title")}
         </h1>
       </div>
 
@@ -485,7 +491,7 @@ export default function Lists() {
         <button
           onClick={() => setFilterOpen((v) => !v)}
           className="relative flex h-10 w-10 items-center justify-center rounded-xl bg-white/90 text-slate-600 shadow-sm backdrop-blur-sm ring-1 ring-white/20 transition hover:bg-white"
-          aria-label="Filtros"
+          aria-label={t("app.filters")}
         >
           <SlidersHorizontal className="h-5 w-5" />
           {hasFilters && (
@@ -498,11 +504,11 @@ export default function Lists() {
               type="text"
               value={nameFilter}
               onChange={(e) => setNameFilter(e.target.value)}
-              placeholder="Buscar por nombre..."
+              placeholder={t("lists.searchPlaceholder")}
               className="mb-3 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:bg-white focus:ring-2 focus:ring-emerald-200"
             />
             <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-slate-400">
-              Tipo
+              {t("lists.type")}
             </p>
             <div className="grid grid-cols-2 gap-1.5">
               <button
@@ -513,19 +519,19 @@ export default function Lists() {
                     : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                 }`}
               >
-                Todas
+                {t("lists.allTypes")}
               </button>
-              {LIST_TYPES.map((t) => (
+              {LIST_TYPES.map((lt) => (
                 <button
-                  key={t.value}
-                  onClick={() => setTypeFilter(t.value)}
+                  key={lt.value}
+                  onClick={() => setTypeFilter(lt.value)}
                   className={`rounded-lg px-3 py-2 text-xs font-semibold transition ${
-                    typeFilter === t.value
+                    typeFilter === lt.value
                       ? "bg-emerald-500 text-white"
                       : "bg-slate-100 text-slate-600 hover:bg-slate-200"
                   }`}
                 >
-                  {t.icon} {t.label}
+                  {lt.icon} {lt.label}
                 </button>
               ))}
             </div>
@@ -534,7 +540,7 @@ export default function Lists() {
                 onClick={resetFilters}
                 className="mt-3 w-full rounded-xl bg-slate-100 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
               >
-                Limpiar filtros
+                {t("lists.clearFilters")}
               </button>
             )}
           </div>
@@ -542,12 +548,12 @@ export default function Lists() {
       </div>
 
       {!ready ? (
-        <p className="text-sm text-slate-400">Cargando...</p>
+        <p className="text-sm text-slate-400">{t("app.loading")}</p>
       ) : lists.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
           <span className="mx-auto mb-3 block h-10 w-10 text-3xl">📝</span>
-          <p className="font-medium text-slate-600">Aún no hay listas</p>
-          <p className="text-sm text-slate-400">Crea tu primera lista</p>
+          <p className="font-medium text-slate-600">{t("lists.empty")}</p>
+          <p className="text-sm text-slate-400">{t("lists.emptyDesc")}</p>
         </div>
       ) : (
         <>
@@ -599,8 +605,8 @@ export default function Lists() {
           {sortedLists.length === 0 && (
             <p className="text-center text-sm text-slate-400">
               {hasFilters
-                ? "No hay listas que coincidan con los filtros."
-                : "Aún no hay listas. Crea tu primera lista."}
+                ? t("lists.noMatchFilters")
+                : t("lists.noListsYet")}
             </p>
           )}
         </>
@@ -613,7 +619,7 @@ export default function Lists() {
           setCreateOpen(true);
         }}
         className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
-        aria-label="Nueva lista"
+        aria-label={t("lists.newList")}
       >
         <Plus className="h-7 w-7" />
       </button>
@@ -635,14 +641,14 @@ export default function Lists() {
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               <Pin className={`h-4 w-4 ${ctxList.pinned ? "fill-emerald-500 text-emerald-500" : ""}`} />
-              {ctxList.pinned ? "Desfijar" : "Fijar arriba"}
+              {ctxList.pinned ? t("lists.unpin") : t("lists.pin")}
             </button>
             <button
               onClick={() => handleEdit(ctxList.id)}
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
             >
               <Pencil className="h-4 w-4" />
-              Editar
+              {t("lists.editList")}
             </button>
             <div className="my-1 border-t border-slate-100" />
             <button
@@ -650,7 +656,7 @@ export default function Lists() {
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
             >
               <Trash2 className="h-4 w-4" />
-              Eliminar
+              {t("lists.deleteList")}
             </button>
           </div>
         </div>
@@ -660,22 +666,22 @@ export default function Lists() {
         <div className="fixed inset-0 z-[70] flex items-center justify-center p-4">
           <div className="absolute inset-0 bg-slate-900/50" onClick={() => setDeleteConfirmId(null)} />
           <div className="relative z-10 w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
-            <h3 className="text-lg font-bold text-slate-800">Eliminar lista</h3>
+            <h3 className="text-lg font-bold text-slate-800">{t("lists.confirmDelete")}</h3>
             <p className="mt-2 text-sm text-slate-600">
-              ¿Seguro que quieres eliminar esta lista? Esta acción no se puede deshacer.
+              {t("lists.confirmDeleteDesc")}
             </p>
             <div className="mt-5 flex gap-3">
               <button
                 onClick={() => setDeleteConfirmId(null)}
                 className="flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
               >
-                Cancelar
+                {t("app.cancel")}
               </button>
               <button
                 onClick={confirmDelete}
                 className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600"
               >
-                Eliminar
+                {t("lists.deleteList")}
               </button>
             </div>
           </div>
@@ -693,28 +699,28 @@ export default function Lists() {
       <BottomSheet
         open={createOpen}
         onClose={() => setCreateOpen(false)}
-        title={createStep === "type" ? "¿Qué tipo de lista?" : "Nueva lista"}
+        title={createStep === "type" ? t("lists.createTypeTitle") : t("lists.createList")}
         onBack={createStep === "form" ? () => setCreateStep("type") : undefined}
         step={createStep === "type" ? 1 : 2}
         steps={2}
       >
         {createStep === "type" ? (
           <div className="grid grid-cols-2 gap-3">
-            {LIST_TYPES.map((t) => (
+            {LIST_TYPES.map((lt) => (
               <button
-                key={t.value}
+                key={lt.value}
                 type="button"
                 onClick={() => {
-                  setType(t.value);
+                  setType(lt.value);
                   setError("");
                   setCreateStep("form");
                 }}
                 className="flex flex-col items-center rounded-2xl border-2 border-slate-200 p-4 text-center transition hover:border-emerald-400 hover:bg-emerald-50"
               >
-                <span className="text-3xl">{t.icon}</span>
-                <span className="mt-2 text-sm font-semibold text-slate-700">{t.label}</span>
+                <span className="text-3xl">{lt.icon}</span>
+                <span className="mt-2 text-sm font-semibold text-slate-700">{lt.label}</span>
                 <span className="mt-0.5 text-[11px] leading-tight text-slate-400">
-                  {t.description}
+                  {lt.description}
                 </span>
               </button>
             ))}
@@ -731,27 +737,27 @@ export default function Lists() {
             >
               <span className="text-xl">{LIST_TYPE_ICON[type]}</span>
               <span className="flex-1 text-sm font-semibold text-slate-700">
-                {LIST_TYPES.find((t) => t.value === type)?.label}
+                {LIST_TYPES.find((lt) => lt.value === type)?.label}
               </span>
               <span className="flex items-center text-xs font-medium text-emerald-600">
-                Cambiar
+                {t("lists.change")}
                 <ChevronRight className="h-3.5 w-3.5" />
               </span>
             </button>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Nombre</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.listName")}</label>
               <input
                 type="text"
                 required
                 autoFocus
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                placeholder="Ej: Supermercado, Farmacia, Fretería..."
+                placeholder={t("lists.listNamePlaceholder")}
                 className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Icono</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.icon")}</label>
               <div className="flex gap-2">
                 {ICONS.map((ic) => (
                   <button
@@ -775,7 +781,7 @@ export default function Lists() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">Color</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.color")}</label>
               <div className="grid grid-cols-6 gap-2">
                 {LIST_COLORS.map((c) => (
                   <button
@@ -794,7 +800,7 @@ export default function Lists() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">¿Quién la ve?</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700">{t("lists.whoSeesIt")}</label>
               <div className="grid gap-2">
                 {VISIBILITY_OPTIONS.map((opt) => (
                   <button
@@ -816,7 +822,7 @@ export default function Lists() {
             {visibility === "custom" && (
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Miembros de la familia
+                  {t("lists.familyMembers")}
                 </label>
                 <div className="space-y-2">
                   {familyUsers
@@ -844,7 +850,7 @@ export default function Lists() {
                     ))}
                   {familyUsers.length <= 1 && (
                     <p className="text-xs text-slate-400">
-                      No hay otros miembros en el hogar todavía.
+                      {t("lists.noOtherMembers")}
                     </p>
                   )}
                 </div>
@@ -854,7 +860,7 @@ export default function Lists() {
               type="submit"
               className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
             >
-              Crear lista
+              {t("lists.createList")}
             </button>
           </form>
         )}

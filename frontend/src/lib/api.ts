@@ -1,4 +1,4 @@
-const TOKEN_KEY = "familywall_token";
+const TOKEN_KEY = "kinflow_token";
 
 export function getToken(): string | null {
   return localStorage.getItem(TOKEN_KEY);
@@ -14,7 +14,7 @@ export function clearToken() {
 
 export class OfflineError extends Error {
   constructor() {
-    super("Sin conexión");
+    super("Offline");
     this.name = "OfflineError";
   }
 }

@@ -1,4 +1,6 @@
-import { Link } from "react-router-dom";
+import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ListTodo,
   CalendarDays,
@@ -7,14 +9,19 @@ import {
   UtensilsCrossed,
   Circle,
   Package,
+  LogOut,
+  Globe,
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import { MEAL_TYPE_COLORS, type ListItem } from "../lib/types";
 
 export default function Dashboard() {
-  const { user } = useAuth();
+  const { t, i18n } = useTranslation();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
   const { lists, mealPlans, ready, updateItem } = useData();
+  const [settingsOpen, setSettingsOpen] = useState(false);
 
   const today = new Date().toISOString().slice(0, 10);
   const todayMeals = mealPlans
@@ -30,6 +37,18 @@ export default function Dashboard() {
     updateItem(item, { completed: !item.completed });
   };
 
+  const toggleLanguage = () => {
+    const next = i18n.language === "es" ? "en" : "es";
+    i18n.changeLanguage(next);
+    localStorage.setItem("kinflow_lang", next);
+  };
+
+  const handleLogout = () => {
+    setSettingsOpen(false);
+    logout();
+    navigate("/login");
+  };
+
   if (!user?.familyId) {
     return (
       <div className="mx-auto max-w-xl py-16 text-center">
@@ -38,17 +57,16 @@ export default function Dashboard() {
             <Users className="h-10 w-10 text-emerald-600" />
           </div>
         </div>
-        <h1 className="text-2xl font-bold text-slate-800">¡Bienvenido a FamilyWall!</h1>
+        <h1 className="text-2xl font-bold text-slate-800">{t("dashboard.welcome")}</h1>
         <p className="mt-3 text-slate-500">
-          Crea un hogar para compartir listas de compras, recetas y planificar los menús de la
-          familia, o únete al hogar de alguien con su código de invitación.
+          {t("dashboard.welcomeDesc")}
         </p>
         <Link
           to="/family"
           className="mt-8 inline-flex items-center gap-2 rounded-xl bg-emerald-500 px-6 py-3 font-semibold text-white transition-colors hover:bg-emerald-600"
         >
           <Users className="h-5 w-5" />
-          Configurar mi hogar
+          {t("dashboard.setupHome")}
         </Link>
       </div>
     );
@@ -56,13 +74,46 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">
-          Hola, {user?.name.split(" ")[0]} 👋
-        </h1>
-        <p className="text-sm text-slate-500">
-          Hogar: <span className="font-medium text-slate-700">{user?.family?.name}</span>
-        </p>
+      <div className="sticky top-0 z-30 -mx-4 bg-white/80 px-4 py-4 backdrop-blur-md sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">
+              {t("dashboard.hello", { name: user?.name.split(" ")[0] })}
+            </h1>
+            <p className="text-sm text-slate-500">
+              {t("dashboard.home", { name: user?.family?.name })}
+            </p>
+          </div>
+          <button
+            onClick={() => setSettingsOpen(!settingsOpen)}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white shadow-md transition hover:scale-105 hover:bg-emerald-600"
+          >
+            {user?.name?.charAt(0).toUpperCase()}
+          </button>
+        </div>
+
+        {settingsOpen && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
+            <div className="absolute right-0 top-14 z-50 w-56 overflow-hidden rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-100">
+              <button
+                onClick={toggleLanguage}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+              >
+                <Globe className="h-4 w-4" />
+                {i18n.language === "es" ? "English" : "Español"}
+              </button>
+              <div className="my-1 border-t border-slate-100" />
+              <button
+                onClick={handleLogout}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+              >
+                <LogOut className="h-4 w-4" />
+                {t("nav.logout")}
+              </button>
+            </div>
+          </>
+        )}
       </div>
 
       <div className="grid grid-cols-2 gap-4">
@@ -75,7 +126,7 @@ export default function Dashboard() {
               <ListTodo className="h-5 w-5 text-emerald-600" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Listas</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.lists")}</p>
         </Link>
         <Link
           to="/products"
@@ -86,7 +137,7 @@ export default function Dashboard() {
               <Package className="h-5 w-5 text-cyan-600" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Productos</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.products")}</p>
         </Link>
         <Link
           to="/recipes"
@@ -97,7 +148,7 @@ export default function Dashboard() {
               <BookOpen className="h-5 w-5 text-violet-600" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Recetas</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.recipes")}</p>
         </Link>
         <Link
           to="/meals"
@@ -108,7 +159,7 @@ export default function Dashboard() {
               <CalendarDays className="h-5 w-5 text-amber-600" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">Menús</p>
+          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.meals")}</p>
         </Link>
       </div>
 
@@ -116,18 +167,18 @@ export default function Dashboard() {
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="mb-4 flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">¿Qué hay de comer hoy?</h2>
+            <h2 className="font-semibold text-slate-800">{t("dashboard.whatsForDinner")}</h2>
           </div>
           {!ready ? (
-            <p className="text-sm text-slate-400">Cargando...</p>
+            <p className="text-sm text-slate-400">{t("app.loading")}</p>
           ) : todayMeals.length === 0 ? (
             <div className="py-6 text-center">
-              <p className="text-sm text-slate-500">Aún no has planificado el menú de hoy.</p>
+              <p className="text-sm text-slate-500">{t("dashboard.noMealsPlanned")}</p>
               <Link
                 to="/meals"
                 className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline"
               >
-                Planificar menú →
+                {t("dashboard.planMenu")}
               </Link>
             </div>
           ) : (
@@ -155,18 +206,18 @@ export default function Dashboard() {
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="mb-4 flex items-center gap-2">
             <ListTodo className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">Compras pendientes</h2>
+            <h2 className="font-semibold text-slate-800">{t("dashboard.pendingShopping")}</h2>
           </div>
           {!ready ? (
-            <p className="text-sm text-slate-400">Cargando...</p>
+            <p className="text-sm text-slate-400">{t("app.loading")}</p>
           ) : pendingItems.length === 0 ? (
             <div className="py-6 text-center">
-              <p className="text-sm text-slate-500">¡Nada pendiente por ahora!</p>
+              <p className="text-sm text-slate-500">{t("dashboard.nothingPending")}</p>
               <Link
                 to="/lists"
                 className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline"
               >
-                Ir a las listas →
+                {t("dashboard.goToLists")}
               </Link>
             </div>
           ) : (
@@ -190,7 +241,7 @@ export default function Dashboard() {
               ))}
               {pendingItems.length > 8 && (
                 <li className="pt-2 text-center text-sm text-slate-500">
-                  y {pendingItems.length - 8} más...
+                  {t("dashboard.andMore", { count: pendingItems.length - 8 })}
                 </li>
               )}
             </ul>

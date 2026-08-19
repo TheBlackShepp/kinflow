@@ -3,7 +3,7 @@ import type { ReactNode } from "react";
 import { api, clearToken, getToken, setToken, OfflineError } from "./api";
 import type { User } from "./types";
 
-const USER_KEY = "familywall_user";
+const USER_KEY = "kinflow_user";
 
 function readCachedUser(): User | null {
   try {

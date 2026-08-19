@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
   ChevronRight,
@@ -13,10 +14,9 @@ import {
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
+import type { TFunction } from "i18next";
 import { MEAL_TYPES } from "../lib/types";
 import Modal from "../components/Modal";
-
-const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
 const MEAL_CARD_STYLES: Record<string, { card: string; badge: string; chip: string }> = {
   Desayuno: {
@@ -40,6 +40,10 @@ const MEAL_CARD_STYLES: Record<string, { card: string; badge: string; chip: stri
     chip: "bg-pink-100 text-pink-700 ring-pink-300",
   },
 };
+
+function getWeekdays(t: TFunction) {
+  return [t("meals.lun"), t("meals.mar"), t("meals.mie"), t("meals.jue"), t("meals.vie"), t("meals.sab"), t("meals.dom")];
+}
 
 function dateLabel(d: string) {
   return new Date(`${d}T12:00:00`).toLocaleDateString("es", {
@@ -71,6 +75,7 @@ function addDays(d: Date, n: number) {
 }
 
 export default function MealPlanner() {
+  const { t } = useTranslation();
   const { user } = useAuth();
   const {
     ready,
@@ -98,6 +103,8 @@ export default function MealPlanner() {
     ingredients: { name: string; quantity: string }[];
   } | null>(null);
   const [exportError, setExportError] = useState("");
+
+  const WEEKDAYS = useMemo(() => getWeekdays(t), [t]);
 
   const dates = useMemo(() => {
     if (view === "week") {
@@ -189,7 +196,7 @@ export default function MealPlanner() {
       <div className="rounded-2xl bg-amber-50 p-6 text-amber-700">
         <div className="flex items-center gap-3">
           <AlertCircle className="h-6 w-6" />
-          <p className="font-medium">Necesitas un hogar para planificar los menús.</p>
+          <p className="font-medium">{t("meals.needsHome")}</p>
         </div>
       </div>
     );
@@ -200,11 +207,11 @@ export default function MealPlanner() {
       <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
         <img
           src="/images/meals-banner.svg"
-          alt="Planificador de menús"
+          alt={t("meals.bannerAlt")}
           className="h-48 w-full object-cover sm:h-64"
         />
         <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
-          Planificador de menús
+          {t("meals.title")}
         </h1>
       </div>
 
@@ -212,8 +219,8 @@ export default function MealPlanner() {
         <div className="flex w-full max-w-md items-center justify-between rounded-xl bg-white p-1 shadow-sm ring-1 ring-slate-100 sm:max-w-none">
           <button
             onClick={() => navigate(-1)}
-            title="Anterior"
-            aria-label="Anterior"
+            title={t("meals.previous")}
+            aria-label={t("meals.previous")}
             className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
             <ChevronLeft className="h-4 w-4" />
@@ -225,13 +232,13 @@ export default function MealPlanner() {
             }}
             className="rounded-lg px-3 py-1.5 text-sm font-medium text-slate-500 transition hover:text-slate-700"
           >
-            Hoy
+            {t("meals.today")}
           </button>
           <span className="px-2 text-sm font-medium text-slate-600 capitalize">{rangeLabel}</span>
           <button
             onClick={() => navigate(1)}
-            title="Siguiente"
-            aria-label="Siguiente"
+            title={t("meals.next")}
+            aria-label={t("meals.next")}
             className="flex items-center justify-center rounded-lg p-1.5 text-slate-500 transition hover:bg-slate-100 hover:text-slate-700"
           >
             <ChevronRight className="h-4 w-4" />
@@ -243,7 +250,7 @@ export default function MealPlanner() {
         <div className="rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
           <div className="flex items-center gap-2 font-semibold text-emerald-700">
             <Check className="h-5 w-5" />
-            Ingredientes exportados a "{exportResult.listName}"
+            {t("meals.exportedTo", { name: exportResult.listName })}
           </div>
           <div className="mt-2 flex flex-wrap gap-2">
             {exportResult.ingredients.map((ing) => (
@@ -259,7 +266,7 @@ export default function MealPlanner() {
       )}
 
       {!ready ? (
-        <p className="text-sm text-slate-400">Cargando...</p>
+        <p className="text-sm text-slate-400">{t("app.loading")}</p>
       ) : view === "week" ? (
         <div className="space-y-5">
           {dates.weekDates.map((d, i) => {
@@ -279,7 +286,7 @@ export default function MealPlanner() {
                   </span>
                   {isToday && (
                     <span className="ml-2 rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold text-emerald-700">
-                      Hoy
+                      {t("meals.today")}
                     </span>
                   )}
                 </h3>
@@ -289,7 +296,7 @@ export default function MealPlanner() {
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-3 text-sm font-medium text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600"
                   >
                     <Plus className="h-4 w-4" />
-                    Planificar comida
+                    {t("meals.planMeal")}
                   </button>
                 ) : (
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
@@ -405,7 +412,7 @@ export default function MealPlanner() {
           {cellMeals.length > 0 && (
             <div className="space-y-2">
               <p className="text-sm font-medium text-slate-700">
-                {cell?.mealType}s planificados
+                {t("meals.plannedMeals", { count: cellMeals.length, mealType: cell?.mealType })}
               </p>
               {cellMeals.map((m) => (
                 <div
@@ -419,7 +426,7 @@ export default function MealPlanner() {
                   <button
                     onClick={() => deleteMealPlan(m.id)}
                     className="rounded-lg p-1 text-slate-400 transition hover:bg-red-50 hover:text-red-500"
-                    title="Quitar esta comida"
+                    title={t("meals.removeMeal")}
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -438,16 +445,16 @@ export default function MealPlanner() {
               className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-50 py-2.5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
             >
               <ShoppingBasket className="h-4 w-4" />
-              Exportar a compras
+              {t("meals.exportToShopping")}
             </button>
           )}
 
           <div className="border-t border-slate-100 pt-4">
-            <p className="mb-3 text-sm font-medium text-slate-700">Añadir comida</p>
+            <p className="mb-3 text-sm font-medium text-slate-700">{t("meals.addMeal")}</p>
             <div className="space-y-4">
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  Elegir receta guardada
+                  {t("meals.chooseRecipe")}
                 </label>
                 <select
                   value={recipeId}
@@ -457,7 +464,7 @@ export default function MealPlanner() {
                   }}
                   className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
                 >
-                  <option value="">— Sin receta —</option>
+                  <option value="">{t("meals.noRecipe")}</option>
                   {recipes.map((r) => (
                     <option key={r.id} value={r.id}>
                       {r.title}
@@ -467,7 +474,7 @@ export default function MealPlanner() {
               </div>
               <div>
                 <label className="mb-1 block text-sm font-medium text-slate-700">
-                  O escribir una comida personalizada
+                  {t("meals.orCustom")}
                 </label>
                 <input
                   type="text"
@@ -476,7 +483,7 @@ export default function MealPlanner() {
                     setCustomTitle(e.target.value);
                     if (e.target.value) setRecipeId("");
                   }}
-                  placeholder="Ej: Pizza de la mamá"
+                  placeholder={t("meals.customPlaceholder")}
                   className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
                 />
               </div>
@@ -485,7 +492,7 @@ export default function MealPlanner() {
                 disabled={!recipeId && !customTitle}
                 className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-40"
               >
-                Añadir comida
+                {t("meals.addMealButton")}
               </button>
             </div>
           </div>
@@ -495,25 +502,25 @@ export default function MealPlanner() {
       <Modal
         open={exportOpen}
         onClose={() => setExportOpen(false)}
-        title="Exportar ingredientes"
+        title={t("meals.exportTitle")}
       >
         <div className="space-y-4">
           {exportError && (
             <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{exportError}</div>
           )}
           <p className="text-sm text-slate-500">
-            Se añadirán a la lista los ingredientes de las recetas de esta comida.
+            {t("meals.exportDesc")}
           </p>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">
-              Lista de destino
+              {t("meals.destinationList")}
             </label>
             <select
               value={exportListId}
               onChange={(e) => setExportListId(e.target.value)}
               className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
             >
-              <option value="">Usar primera lista disponible</option>
+              <option value="">{t("meals.useFirstAvailable")}</option>
               {lists.map((l) => (
                 <option key={l.id} value={l.id}>
                   {l.name}
@@ -527,7 +534,7 @@ export default function MealPlanner() {
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
           >
             <ShoppingBasket className="h-4 w-4" />
-            {exporting ? "Exportando..." : "Exportar ahora"}
+            {exporting ? t("meals.exporting") : t("meals.exportNow")}
           </button>
         </div>
       </Modal>
@@ -538,8 +545,8 @@ export default function MealPlanner() {
           setExportResult(null);
         }}
         className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
-        title={view === "week" ? "Cambiar a vista mensual" : "Cambiar a vista semanal"}
-        aria-label={view === "week" ? "Cambiar a vista mensual" : "Cambiar a vista semanal"}
+        title={view === "week" ? t("meals.switchToMonthly") : t("meals.switchToWeekly")}
+        aria-label={view === "week" ? t("meals.switchToMonthly") : t("meals.switchToWeekly")}
       >
         {view === "week" ? <CalendarDays className="h-6 w-6" /> : <List className="h-6 w-6" />}
       </button>

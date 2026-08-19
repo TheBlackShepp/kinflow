@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import { AuthProvider, useAuth } from "./lib/auth";
 import { DataProvider } from "./lib/store";
 import Layout from "./components/Layout";import Login from "./pages/Login";
@@ -13,10 +14,11 @@ import Family from "./pages/Family";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
+  const { t } = useTranslation();
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
-        <div className="text-slate-400">Cargando...</div>
+        <div className="text-slate-400">{t("app.loading")}</div>
       </div>
     );
   }

@@ -12,7 +12,7 @@ export interface SyncOp {
   createdAt: number;
 }
 
-class FamilyWallDB extends Dexie {
+class KinflowDB extends Dexie {
   lists!: Table<ShoppingList, string>;
   listItems!: Table<ListItem, string>;
   recipes!: Table<Recipe, string>;
@@ -24,7 +24,7 @@ class FamilyWallDB extends Dexie {
   syncQueue!: Table<SyncOp, number>;
 
   constructor() {
-    super("familywall");
+    super("kinflow");
     this.version(2).stores({
       lists: "id, name, familyId",
       listItems: "id, listId, name, completed",
@@ -39,7 +39,7 @@ class FamilyWallDB extends Dexie {
   }
 }
 
-export const db = new FamilyWallDB();
+export const db = new KinflowDB();
 
 export function uid(): string {
   if (typeof crypto !== "undefined" && crypto.randomUUID) {

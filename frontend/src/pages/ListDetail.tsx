@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
+import { useTranslation } from "react-i18next";
 import {
   ArrowLeft,
   ArrowUpDown,
@@ -32,17 +33,21 @@ const UNITS = ["u", "g", "kg", "ml", "L"];
 type SortMode = "category" | "name" | "added";
 type FilterMode = "all" | "pending" | "done";
 
-const SORT_OPTIONS: { value: SortMode; label: string }[] = [
-  { value: "category", label: "Por categoría" },
-  { value: "name", label: "Nombre (A-Z)" },
-  { value: "added", label: "Recién añadidos" },
-];
+function getSortOptions(t: (key: string) => string): { value: SortMode; label: string }[] {
+  return [
+    { value: "category", label: t("listDetail.sortCategory") },
+    { value: "name", label: t("listDetail.sortName") },
+    { value: "added", label: t("listDetail.sortRecently") },
+  ];
+}
 
-const FILTER_OPTIONS: { value: FilterMode; label: string }[] = [
-  { value: "all", label: "Todos" },
-  { value: "pending", label: "Solo pendientes" },
-  { value: "done", label: "Solo comprados" },
-];
+function getFilterOptions(t: (key: string) => string): { value: FilterMode; label: string }[] {
+  return [
+    { value: "all", label: t("app.all") },
+    { value: "pending", label: t("listDetail.filterPending") },
+    { value: "done", label: t("listDetail.filterDone") },
+  ];
+}
 
 const MEDIA_STATUS_STYLE: Record<string, string> = {
   pendiente: "bg-amber-100 text-amber-700",
@@ -59,6 +64,7 @@ const TODO_PRIORITY_STYLE: Record<string, string> = {
 const formatDate = (iso: string) => iso.split("-").reverse().join("/");
 
 export default function ListDetail() {
+  const { t } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -202,7 +208,7 @@ export default function ListDetail() {
       priceTrim &&
       Number.isNaN(Number(priceTrim.replace(",", ".")))
     ) {
-      setPriceError("El precio no es válido. Escribe un número, ej: 2,50");
+      setPriceError(t("listDetail.priceNotValid"));
       return;
     }
     await addItem(id, buildItemData());
@@ -247,7 +253,7 @@ export default function ListDetail() {
     if (!priceEdit) return;
     const v = priceEdit.value.trim();
     if (v && Number.isNaN(Number(v.replace(",", ".")))) {
-      setPriceEditError("El precio no es válido. Escribe un número, ej: 2,50");
+      setPriceEditError(t("listDetail.priceNotValid"));
       return;
     }
     const modified = { ...priceEdit.item, price: v };
@@ -291,7 +297,7 @@ export default function ListDetail() {
     const groups = new Map<string, ListItem[]>();
     if (listType === "todo" || hideCategories) {
       if (ordered.length > 0)
-        groups.set(listType === "todo" ? "Tareas" : "Todos los artículos", ordered);
+        groups.set(listType === "todo" ? t("listDetail.tasks") : t("listDetail.allItems"), ordered);
       return Array.from(groups.entries());
     }
     for (const cat of cats) groups.set(cat, []);
@@ -300,7 +306,7 @@ export default function ListDetail() {
       if (groups.has(cat)) groups.get(cat)?.push(item);
     });
     return Array.from(groups.entries()).filter(([, items]) => items.length > 0);
-  }, [ordered, hideCategories, listType, cats]);
+  }, [ordered, hideCategories, listType, cats, t]);
 
   const done = list?.items.filter(isDone).length ?? 0;
   const total = list?.items.length ?? 0;
@@ -317,7 +323,7 @@ export default function ListDetail() {
     : 0;
 
   const assigneeName = (uid: string) =>
-    familyUsers.find((u) => u.id === uid)?.name ?? "Asignado";
+    familyUsers.find((u) => u.id === uid)?.name ?? t("listDetail.assigned");
 
   const renderItemFields = () => {
     switch (listType) {
@@ -325,7 +331,7 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Categoría</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -340,7 +346,7 @@ export default function ListDetail() {
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Cantidad</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.quantity")}</label>
                 <input
                   type="number"
                   min="0"
@@ -353,7 +359,7 @@ export default function ListDetail() {
                 />
               </div>
               <div className="w-28">
-                <label className="mb-1 block text-xs font-semibold text-slate-500">Unidad</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.unit")}</label>
                 <select
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
@@ -361,14 +367,14 @@ export default function ListDetail() {
                 >
                   {UNITS.map((u) => (
                     <option key={u} value={u}>
-                      {u === "u" ? "unid." : u}
+                      {u === "u" ? t("listDetail.unitShort") : u}
                     </option>
                   ))}
                 </select>
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Precio (€)</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.price")}</label>
               <input
                 type="number"
                 min="0"
@@ -389,13 +395,13 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Asignado a</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.assignedTo")}</label>
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               >
-                <option value="">Sin asignar</option>
+                <option value="">{t("listDetail.unassigned")}</option>
                 {familyUsers.map((u) => (
                   <option key={u.id} value={u.id}>
                     {u.name}
@@ -404,13 +410,13 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Prioridad</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.priority")}</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               >
-                <option value="">Sin prioridad</option>
+                <option value="">{t("listDetail.noPriority")}</option>
                 {TODO_PRIORITIES.map((p) => (
                   <option key={p} value={p}>
                     {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -420,7 +426,7 @@ export default function ListDetail() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-500">
-                Fecha límite
+                {t("listDetail.dueDate")}
               </label>
               <input
                 type="date"
@@ -430,12 +436,12 @@ export default function ListDetail() {
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Nota</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.note")}</label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Detalles de la tarea..."
+                placeholder={t("listDetail.taskDetails")}
                 className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
             </div>
@@ -445,7 +451,7 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Categoría</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -459,7 +465,7 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Cantidad</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.quantity")}</label>
               <input
                 type="number"
                 min="0"
@@ -477,7 +483,7 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Categoría</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -491,7 +497,7 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Precio (€)</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.price")}</label>
               <input
                 type="number"
                 min="0"
@@ -508,7 +514,7 @@ export default function ListDetail() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-500">
-                ¿Para quién es?
+                {t("listDetail.forWhom")}
               </label>
               <input
                 type="text"
@@ -524,7 +530,7 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">Categoría</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
@@ -539,7 +545,7 @@ export default function ListDetail() {
             </div>
             <div>
               <label className="mb-1 block text-xs font-semibold text-slate-500">
-                ¿Quién lo recomendó?
+                {t("listDetail.whoRecommended")}
               </label>
               <input
                 type="text"
@@ -554,8 +560,8 @@ export default function ListDetail() {
     }
   };
 
-  if (!ready) return <p className="text-sm text-slate-400">Cargando...</p>;
-  if (!list) return <p className="text-sm text-red-500">Lista no encontrada</p>;
+  if (!ready) return <p className="text-sm text-slate-400">{t("app.loading")}</p>;
+  if (!list) return <p className="text-sm text-red-500">{t("listDetail.notFound")}</p>;
 
   return (
     <div className="space-y-6 pb-36 lg:pb-0">
@@ -573,18 +579,18 @@ export default function ListDetail() {
             {list.visibility === "private" && (
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                 <Lock className="h-3 w-3" />
-                Privada
+                {t("lists.private")}
               </span>
             )}
             {list.visibility === "custom" && (
               <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
                 <Users className="h-3 w-3" />
-                Compartida
+                {t("lists.shared")}
               </span>
             )}
           </div>
           <p className="text-sm text-slate-500">
-            {done}/{total} {done === 1 ? "completado" : "completados"}
+            {done}/{total} {done === 1 ? t("listDetail.completed", { count: done }) : t("listDetail.completedPlural", { count: done })}
           </p>
         </div>
 
@@ -595,7 +601,7 @@ export default function ListDetail() {
           <button
             onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
             className="rounded-xl bg-white p-2 text-slate-500 shadow-sm ring-1 ring-slate-100 hover:text-slate-700"
-            aria-label="Opciones de la lista"
+            aria-label={t("listDetail.optionsLabel")}
           >
             <MoreVertical className="h-5 w-5" />
           </button>
@@ -609,7 +615,7 @@ export default function ListDetail() {
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                     >
                       <Pencil className="h-4 w-4" />
-                      Editar lista
+                      {t("listDetail.editList")}
                     </button>
                   )}
                   <button
@@ -617,14 +623,14 @@ export default function ListDetail() {
                     className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                   >
                     <ArrowUpDown className="h-4 w-4" />
-                    Ordenar
+                    {t("listDetail.sort")}
                   </button>
                   <button
                     onClick={() => setMenuPanel("filter")}
                     className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
                   >
                     <Filter className="h-4 w-4" />
-                    Filtrar
+                    {t("listDetail.filter")}
                   </button>
                   {listType !== "todo" && (
                     <button
@@ -637,7 +643,7 @@ export default function ListDetail() {
                       }`}
                     >
                       <Layers className="h-4 w-4" />
-                      <span className="flex-1 text-left">Ocultar categorías</span>
+                      <span className="flex-1 text-left">{t("listDetail.hideCategories")}</span>
                       {hideCategories && <Check className="h-4 w-4" />}
                     </button>
                   )}
@@ -650,7 +656,7 @@ export default function ListDetail() {
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
                     >
                       <Trash2 className="h-4 w-4" />
-                      Eliminar lista
+                      {t("listDetail.deleteList")}
                     </button>
                   </div>
                 </>
@@ -661,9 +667,9 @@ export default function ListDetail() {
                     className="flex w-full items-center gap-2 border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
                   >
                     <ArrowLeft className="h-4 w-4" />
-                    {menuPanel === "sort" ? "Ordenar por" : "Filtrar"}
+                    {menuPanel === "sort" ? t("listDetail.sortBy") : t("listDetail.filterBy")}
                   </button>
-                  {(menuPanel === "sort" ? SORT_OPTIONS : FILTER_OPTIONS).map((opt) => (
+                  {(menuPanel === "sort" ? getSortOptions(t) : getFilterOptions(t)).map((opt) => (
                     <button
                       key={opt.value}
                       onClick={() => {
@@ -695,7 +701,7 @@ export default function ListDetail() {
 
       {isShopping && totalPrice > 0 && (
         <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5 ring-1 ring-emerald-100">
-          <span className="text-sm font-medium text-emerald-700">Total estimado</span>
+          <span className="text-sm font-medium text-emerald-700">{t("listDetail.totalEstimated")}</span>
           <span className="text-lg font-bold text-emerald-800">
             {totalPrice.toFixed(2).replace(".", ",")} €
           </span>
@@ -714,13 +720,13 @@ export default function ListDetail() {
             type="text"
             value={name}
             onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
-            placeholder={isShopping ? "Buscar o agregar artículo..." : "Agregar artículo..."}
+            placeholder={isShopping ? t("listDetail.searchOrAdd") : t("listDetail.addArticle")}
             className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           />
           {catalogOpen && catalogResults.length > 0 && (
             <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
               <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                Catálogo de productos
+                {t("listDetail.productCatalog")}
               </p>
               <ul className="max-h-48 overflow-y-auto">
                 {catalogResults.map((product) => (
@@ -751,7 +757,7 @@ export default function ListDetail() {
             className="flex items-center justify-center gap-2 rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
           >
             <Plus className="h-4 w-4" />
-            Agregar
+            {t("listDetail.add")}
           </button>
         </div>
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -763,14 +769,14 @@ export default function ListDetail() {
       {total === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
           <span className="mx-auto mb-3 block text-5xl opacity-60">{LIST_TYPE_ICON[listType]}</span>
-          <p className="font-medium text-slate-600">Esta lista está vacía</p>
-          <p className="text-sm text-slate-400">Agrega artículos para empezar</p>
+          <p className="font-medium text-slate-600">{t("listDetail.empty")}</p>
+          <p className="text-sm text-slate-400">{t("listDetail.emptyDesc")}</p>
         </div>
       ) : grouped.length === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
           <Filter className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-          <p className="font-medium text-slate-600">No hay artículos que coincidan</p>
-          <p className="text-sm text-slate-400">Prueba a cambiar el filtro</p>
+          <p className="font-medium text-slate-600">{t("listDetail.noMatchFilter")}</p>
+          <p className="text-sm text-slate-400">{t("listDetail.noMatchFilterDesc")}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -841,7 +847,7 @@ export default function ListDetail() {
                             }
                             className="text-emerald-600 hover:underline"
                           >
-                            historial
+                            {t("listDetail.history")}
                           </button>
                         </div>
                       ) : (
@@ -855,7 +861,7 @@ export default function ListDetail() {
                       {listType === "wishlist" && expandedId === item.id && (
                         <div className="mt-2 rounded-lg bg-slate-50 p-2.5">
                           {(item.priceHistory ?? []).length === 0 ? (
-                            <p className="text-xs text-slate-400">Sin historial todavía.</p>
+                            <p className="text-xs text-slate-400">{t("listDetail.noHistory")}</p>
                           ) : (
                             <ul className="space-y-0.5">
                               {(item.priceHistory ?? []).map((ph) => (
@@ -875,7 +881,7 @@ export default function ListDetail() {
                             onClick={() => openPriceEdit(item)}
                             className="mt-1.5 text-xs font-semibold text-emerald-600 hover:underline"
                           >
-                            Cambiar precio
+                            {t("listDetail.changePrice")}
                           </button>
                         </div>
                       )}
@@ -903,13 +909,13 @@ export default function ListDetail() {
                 value={name}
                 onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
                 onFocus={() => setAddExpanded(true)}
-                placeholder={isShopping ? "Buscar o agregar artículo..." : listType === "todo" ? "Agregar tarea..." : "Agregar artículo..."}
+                placeholder={isShopping ? t("listDetail.searchOrAdd") : listType === "todo" ? t("listDetail.addTask") : t("listDetail.addArticle")}
                 className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
               {catalogOpen && catalogResults.length > 0 && (
                 <div className="absolute left-0 bottom-full z-50 mb-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
                   <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
-                    Catálogo de productos
+                    {t("listDetail.productCatalog")}
                   </p>
                   <ul className="max-h-48 overflow-y-auto">
                     {catalogResults.map((product) => (
@@ -940,7 +946,7 @@ export default function ListDetail() {
                 className="flex shrink-0 items-center justify-center gap-1.5 rounded-xl bg-emerald-500 px-4 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
               >
                 <Plus className="h-4 w-4" />
-                Agregar
+                {t("listDetail.add")}
               </button>
             </div>
             {addExpanded && (
@@ -960,14 +966,14 @@ export default function ListDetail() {
       <Modal
         open={!!priceEdit}
         onClose={() => setPriceEdit(null)}
-        title="Cambiar precio"
+        title={t("listDetail.changePrice")}
       >
         <div className="space-y-4">
           {priceEdit && (
             <p className="text-sm text-slate-500">{priceEdit.item.name}</p>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">Precio (€)</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700">{t("listDetail.price")}</label>
             <input
               type="number"
               min="0"
@@ -991,28 +997,27 @@ export default function ListDetail() {
             onClick={handleSavePrice}
             className="w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600"
           >
-            Guardar precio
+            {t("listDetail.savePrice")}
           </button>
         </div>
       </Modal>
 
-      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title="Eliminar lista">
+      <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t("listDetail.confirmDeleteTitle")}>
         <p className="text-sm text-slate-600">
-          ¿Seguro que quieres eliminar la lista <b>“{list.name}”</b>? Esta acción no se puede
-          deshacer.
+          {t("listDetail.confirmDeleteDesc", { name: list?.name })}
         </p>
         <div className="mt-5 flex gap-3">
           <button
             onClick={() => setDeleteOpen(false)}
             className="flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
           >
-            Cancelar
+            {t("app.cancel")}
           </button>
           <button
             onClick={handleDeleteList}
             className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white transition hover:bg-red-600"
           >
-            Eliminar
+            {t("app.delete")}
           </button>
         </div>
       </Modal>

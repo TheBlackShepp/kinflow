@@ -1,10 +1,12 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Users, UserPlus, Copy, Check, Home as HomeIcon, ArrowRight } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import type { Family } from "../lib/types";
 
 export default function Family() {
+  const { t } = useTranslation();
   const { user, refreshUser } = useAuth();
   const [createName, setCreateName] = useState("");
   const [joinCode, setJoinCode] = useState("");
@@ -53,8 +55,8 @@ export default function Family() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mi hogar</h1>
-          <p className="text-sm text-slate-500">Crea o únete a un hogar para compartir</p>
+          <h1 className="text-2xl font-bold text-slate-800">{t("family.title")}</h1>
+          <p className="text-sm text-slate-500">{t("family.subtitle")}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
@@ -65,9 +67,9 @@ export default function Family() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
               <HomeIcon className="h-6 w-6 text-emerald-600" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-800">Crear un hogar</h2>
+            <h2 className="text-lg font-semibold text-slate-800">{t("family.createHome")}</h2>
             <p className="mb-4 text-sm text-slate-500">
-              Crea un hogar y comparte un código de invitación con tu familia.
+              {t("family.createHomeDesc")}
             </p>
             {error && (
               <div className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -79,7 +81,7 @@ export default function Family() {
               required
               value={createName}
               onChange={(e) => setCreateName(e.target.value)}
-              placeholder="Ej: Hogar de los Pérez"
+              placeholder={t("family.homeNamePlaceholder")}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
             <button
@@ -87,7 +89,7 @@ export default function Family() {
               disabled={loading}
               className="mt-3 w-full rounded-xl bg-emerald-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-600 disabled:opacity-50"
             >
-              Crear hogar
+              {t("family.createHomeButton")}
             </button>
           </form>
 
@@ -98,9 +100,9 @@ export default function Family() {
             <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100">
               <UserPlus className="h-6 w-6 text-violet-600" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-800">Unirme a un hogar</h2>
+            <h2 className="text-lg font-semibold text-slate-800">{t("family.joinHome")}</h2>
             <p className="mb-4 text-sm text-slate-500">
-              Ingresa el código de invitación que compartió tu familia.
+              {t("family.joinHomeDesc")}
             </p>
             {error && (
               <div className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
@@ -112,7 +114,7 @@ export default function Family() {
               required
               value={joinCode}
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
-              placeholder="XXXXXX"
+              placeholder={t("family.inviteCodePlaceholder")}
               maxLength={6}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm uppercase tracking-[0.3em] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
@@ -121,7 +123,7 @@ export default function Family() {
               disabled={loading}
               className="mt-3 w-full rounded-xl bg-violet-500 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-violet-600 disabled:opacity-50"
             >
-              Unirme
+              {t("family.joinButton")}
             </button>
           </form>
         </div>
@@ -134,8 +136,8 @@ export default function Family() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">Mi hogar</h1>
-        <p className="text-sm text-slate-500">Familia y código de invitación</p>
+        <h1 className="text-2xl font-bold text-slate-800">{t("family.title")}</h1>
+        <p className="text-sm text-slate-500">{t("family.homeAndCode")}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -144,7 +146,7 @@ export default function Family() {
             <HomeIcon className="h-6 w-6" />
             <h2 className="text-lg font-bold">{family.name}</h2>
           </div>
-          <p className="mt-4 text-sm text-emerald-50">Código de invitación para tu familia:</p>
+          <p className="mt-4 text-sm text-emerald-50">{t("family.inviteCodeTitle")}</p>
           <div className="mt-2 flex items-center gap-3">
             <div className="rounded-2xl bg-white/20 px-6 py-4 text-3xl font-black tracking-[0.4em] backdrop-blur">
               {family.inviteCode}
@@ -154,19 +156,19 @@ export default function Family() {
               className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
             >
               {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? "Copiado" : "Copiar"}
+              {copied ? t("family.copied") : t("family.copy")}
             </button>
           </div>
           <p className="mt-3 flex items-center gap-1 text-xs text-emerald-100">
             <ArrowRight className="h-3 w-3" />
-            Comparte este código para que se unan a tu hogar
+            {t("family.shareCode")}
           </p>
         </section>
 
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
           <div className="mb-4 flex items-center gap-2">
             <Users className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">Miembros del hogar</h2>
+            <h2 className="font-semibold text-slate-800">{t("family.homeMembers")}</h2>
           </div>
           <ul className="space-y-3">
             {family.users?.map((member) => (
@@ -179,7 +181,7 @@ export default function Family() {
                     {member.name}
                     {member.id === user.id && (
                       <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
-                        Tú
+                        {t("family.you")}
                       </span>
                     )}
                   </p>
