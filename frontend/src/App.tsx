@@ -6,6 +6,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import Lists from "./pages/Lists";
 import ListDetail from "./pages/ListDetail";
+import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import MealPlanner from "./pages/MealPlanner";
 import Family from "./pages/Family";
@@ -78,6 +79,16 @@ export default function App() {
                 <ProtectedRoute>
                   <Layout>
                     <ListDetail />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/products"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <Products />
                   </Layout>
                 </ProtectedRoute>
               }

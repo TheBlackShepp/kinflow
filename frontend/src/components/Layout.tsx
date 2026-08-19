@@ -11,6 +11,7 @@ import {
   Wifi,
   WifiOff,
   RefreshCw,
+  Package,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
@@ -18,6 +19,7 @@ import { useData } from "../lib/store";
 const navItems = [
   { to: "/", label: "Inicio", icon: Home, end: true },
   { to: "/lists", label: "Listas", icon: ShoppingBasket, end: false },
+  { to: "/products", label: "Productos", icon: Package, end: false },
   { to: "/recipes", label: "Recetas", icon: BookOpen, end: false },
   { to: "/meals", label: "Menús", icon: CalendarDays, end: false },
   { to: "/family", label: "Familia", icon: Users, end: false },
