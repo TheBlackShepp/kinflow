@@ -1,6 +1,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
+import path from "path";
 import authRoutes from "./routes/auth";
 import familyRoutes from "./routes/family";
 import listRoutes from "./routes/lists";
@@ -29,8 +30,10 @@ app.use("/api/events", eventRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/supermarkets", supermarketRoutes);
 
-app.use((req, res) => {
-  res.status(404).json({ message: "Ruta no encontrada" });
+const frontendDist = path.join(__dirname, "../../frontend/dist");
+app.use(express.static(frontendDist));
+app.get("/{*path}", (_req, res) => {
+  res.sendFile(path.join(frontendDist, "index.html"));
 });
 
 app.listen(port, () => {
