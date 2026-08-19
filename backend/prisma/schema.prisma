@@ -7,14 +7,52 @@ datasource db {
 }
 
 model Family {
-  id         String     @id @default(uuid())
+  id          String        @id @default(uuid())
+  name        String
+  inviteCode  String        @unique
+  createdAt   DateTime      @default(now())
+  users       User[]
+  lists       List[]
+  recipes     Recipe[]
+  mealPlans   MealPlan[]
+  products    Product[]
+  supermarkets Supermarket[]
+}
+
+model Product {
+  id         String          @id @default(uuid())
+  familyId   String
+  family     Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
   name       String
-  inviteCode String     @unique
-  createdAt  DateTime   @default(now())
-  users      User[]
-  lists      List[]
-  recipes    Recipe[]
-  mealPlans  MealPlan[]
+  category   String          @default("General")
+  unit       String          @default("u")
+  createdAt  DateTime        @default(now())
+  prices     ProductPrice[]
+
+  @@unique([familyId, name])
+}
+
+model Supermarket {
+  id         String          @id @default(uuid())
+  familyId   String
+  family     Family          @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  name       String
+  createdAt  DateTime        @default(now())
+  prices     ProductPrice[]
+
+  @@unique([familyId, name])
+}
+
+model ProductPrice {
+  id             String      @id @default(uuid())
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  supermarketId  String
+  supermarket    Supermarket @relation(fields: [supermarketId], references: [id], onDelete: Cascade)
+  price          String
+  recordedAt     DateTime    @default(now())
+
+  @@unique([productId, supermarketId])
 }
 
 model User {
