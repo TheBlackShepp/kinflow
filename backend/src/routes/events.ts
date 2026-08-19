@@ -16,7 +16,7 @@ router.get("/", async (req: any, res: Response) => {
     return res.status(401).json({ message: "Token de acceso no proporcionado" });
   }
 
-  const secret = process.env.JWT_SECRET || "familywall_secret_key";
+  const secret = process.env.JWT_SECRET || "kinflow_secret_key";
   let decoded: any;
   try {
     decoded = jwt.verify(token, secret);

@@ -33,7 +33,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
       },
     });
 
-    const secret = process.env.JWT_SECRET || "familywall_secret_key";
+    const secret = process.env.JWT_SECRET || "kinflow_secret_key";
     const token = jwt.sign(
       { userId: user.id, email: user.email, familyId: user.familyId },
       secret,
@@ -78,7 +78,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Credenciales inválidas" });
     }
 
-    const secret = process.env.JWT_SECRET || "familywall_secret_key";
+    const secret = process.env.JWT_SECRET || "kinflow_secret_key";
     const token = jwt.sign(
       { userId: user.id, email: user.email, familyId: user.familyId },
       secret,

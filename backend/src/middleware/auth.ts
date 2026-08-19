@@ -21,7 +21,7 @@ export const authenticateToken = (
     return res.status(401).json({ message: "Token de acceso no proporcionado" });
   }
 
-  const secret = process.env.JWT_SECRET || "familywall_secret_key";
+  const secret = process.env.JWT_SECRET || "kinflow_secret_key";
 
   jwt.verify(token, secret, (err, decoded: any) => {
     if (err) {
