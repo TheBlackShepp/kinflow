@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import {
   ArrowLeft,
@@ -17,7 +17,7 @@ import {
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
-import type { ListItem, ListType } from "../lib/types";
+import type { ListItem, ListType, Product } from "../lib/types";
 import {
   LIST_TYPE_ICON,
   LIST_TYPE_CATEGORIES,
@@ -62,7 +62,7 @@ export default function ListDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const { lists, ready, addItem, updateItem, deleteItem, deleteList } = useData();
+  const { lists, ready, addItem, updateItem, deleteItem, deleteList, searchProducts } = useData();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("General");
   const [qtyNum, setQtyNum] = useState("");
@@ -85,12 +85,57 @@ export default function ListDetail() {
   const [priceEdit, setPriceEdit] = useState<{ item: ListItem; value: string } | null>(null);
   const [priceEditError, setPriceEditError] = useState("");
 
+  const [catalogResults, setCatalogResults] = useState<Product[]>([]);
+  const [catalogOpen, setCatalogOpen] = useState(false);
+  const catalogRef = useRef<HTMLDivElement>(null);
+  const searchTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   const list = lists.find((l) => l.id === id);
   const isOwner = !!list && list.ownerId === user?.id;
   const familyUsers = user?.family?.users ?? [];
   const listType: ListType = list?.type ?? "shopping";
+  const isShopping = listType === "shopping";
   const cats = LIST_TYPE_CATEGORIES[listType] ?? [];
   const defaultCat = cats[0] ?? "General";
+
+  const handleNameChange = useCallback(
+    (value: string) => {
+      setName(value);
+      if (listType !== "shopping" || value.trim().length < 2) {
+        setCatalogOpen(false);
+        setCatalogResults([]);
+        return;
+      }
+      if (searchTimerRef.current) clearTimeout(searchTimerRef.current);
+      searchTimerRef.current = setTimeout(async () => {
+        const results = await searchProducts(value.trim());
+        setCatalogResults(results);
+        setCatalogOpen(results.length > 0);
+      }, 300);
+    },
+    [listType, searchProducts]
+  );
+
+  const selectCatalogProduct = (product: Product) => {
+    setName(product.name);
+    setCategory(product.category);
+    if (product.unit) setUnit(product.unit);
+    const latestPrice = product.prices?.[0]?.price;
+    if (latestPrice) setPrice(latestPrice);
+    setCatalogOpen(false);
+    setCatalogResults([]);
+    setAddExpanded(true);
+  };
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (catalogRef.current && !catalogRef.current.contains(e.target as Node)) {
+        setCatalogOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const isDone = (item: ListItem) =>
     listType === "media" ? (item.status ?? "pendiente") === "hecho" : item.completed;
@@ -145,6 +190,8 @@ export default function ListDetail() {
     setPriority("");
     setDueDate("");
     setPriceError("");
+    setCatalogOpen(false);
+    setCatalogResults([]);
   };
 
   const submitItem = async () => {
@@ -258,6 +305,16 @@ export default function ListDetail() {
   const done = list?.items.filter(isDone).length ?? 0;
   const total = list?.items.length ?? 0;
   const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+
+  const totalPrice = isShopping
+    ? list?.items.reduce((sum, item) => {
+        const p = parseFloat((item.price ?? "").replace(",", "."));
+        if (isNaN(p)) return sum;
+        const qtyMatch = item.quantity.match(/^([\d.]+)/);
+        const qty = qtyMatch ? parseFloat(qtyMatch[1]) : 1;
+        return sum + p * qty;
+      }, 0) ?? 0
+    : 0;
 
   const assigneeName = (uid: string) =>
     familyUsers.find((u) => u.id === uid)?.name ?? "Asignado";
@@ -636,6 +693,15 @@ export default function ListDetail() {
         />
       </div>
 
+      {isShopping && totalPrice > 0 && (
+        <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5 ring-1 ring-emerald-100">
+          <span className="text-sm font-medium text-emerald-700">Total estimado</span>
+          <span className="text-lg font-bold text-emerald-800">
+            {totalPrice.toFixed(2).replace(".", ",")} €
+          </span>
+        </div>
+      )}
+
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -643,14 +709,42 @@ export default function ListDetail() {
         }}
         className="hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 lg:block"
       >
-        <div className="flex gap-2">
+        <div className="relative flex gap-2" ref={isShopping ? catalogRef : undefined}>
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Agregar artículo..."
-            className="flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
+            placeholder={isShopping ? "Buscar o agregar artículo..." : "Agregar artículo..."}
+            className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
           />
+          {catalogOpen && catalogResults.length > 0 && (
+            <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
+              <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                Catálogo de productos
+              </p>
+              <ul className="max-h-48 overflow-y-auto">
+                {catalogResults.map((product) => (
+                  <li key={product.id}>
+                    <button
+                      type="button"
+                      onClick={() => selectCatalogProduct(product)}
+                      className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50"
+                    >
+                      <div>
+                        <p className="text-sm font-medium text-slate-700">{product.name}</p>
+                        <p className="text-xs text-slate-400">{product.category} · {product.unit}</p>
+                      </div>
+                      {product.prices?.[0] && (
+                        <span className="text-xs font-semibold text-emerald-600">
+                          {product.prices[0].price}€
+                        </span>
+                      )}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <button
             type="submit"
             disabled={!name.trim()}
@@ -803,15 +897,43 @@ export default function ListDetail() {
       <div className="fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="mx-auto max-w-5xl px-4 pb-4">
           <div className="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-100">
-            <div className="flex items-center gap-2">
+            <div className="relative flex items-center gap-2" ref={isShopping ? catalogRef : undefined}>
               <input
                 type="text"
                 value={name}
-                onChange={(e) => setName(e.target.value)}
+                onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
                 onFocus={() => setAddExpanded(true)}
-                placeholder={listType === "todo" ? "Agregar tarea..." : "Agregar artículo..."}
+                placeholder={isShopping ? "Buscar o agregar artículo..." : listType === "todo" ? "Agregar tarea..." : "Agregar artículo..."}
                 className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               />
+              {catalogOpen && catalogResults.length > 0 && (
+                <div className="absolute left-0 bottom-full z-50 mb-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
+                  <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                    Catálogo de productos
+                  </p>
+                  <ul className="max-h-48 overflow-y-auto">
+                    {catalogResults.map((product) => (
+                      <li key={product.id}>
+                        <button
+                          type="button"
+                          onClick={() => selectCatalogProduct(product)}
+                          className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-slate-700">{product.name}</p>
+                            <p className="text-xs text-slate-400">{product.category} · {product.unit}</p>
+                          </div>
+                          {product.prices?.[0] && (
+                            <span className="text-xs font-semibold text-emerald-600">
+                              {product.prices[0].price}€
+                            </span>
+                          )}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
               <button
                 onClick={submitItem}
                 disabled={!name.trim()}
