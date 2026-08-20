@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       .catch((err) => {
         if (err instanceof OfflineError) {
-          // Mantener la sesión local en modo offline
+          // keep local session in offline mode
           setUser(readCachedUser());
         } else {
           clearToken();

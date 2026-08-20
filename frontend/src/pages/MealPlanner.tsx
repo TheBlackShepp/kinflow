@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import i18n from "i18next";
 import { useTranslation } from "react-i18next";
 import {
   ChevronLeft,
@@ -46,7 +47,7 @@ function getWeekdays(t: TFunction) {
 }
 
 function dateLabel(d: string) {
-  return new Date(`${d}T12:00:00`).toLocaleDateString("es", {
+  return new Date(`${d}T12:00:00`).toLocaleDateString(i18n.language === "es" ? "es" : "en", {
     weekday: "long",
     day: "numeric",
     month: "long",
@@ -143,7 +144,7 @@ export default function MealPlanner() {
   const rangeLabel =
     view === "week"
       ? `${dates.start.slice(8, 10)}/${dates.start.slice(5, 7)} – ${dates.end.slice(8, 10)}/${dates.end.slice(5, 7)}`
-      : new Date(anchor.getFullYear(), anchor.getMonth(), 1).toLocaleDateString("es", {
+      : new Date(anchor.getFullYear(), anchor.getMonth(), 1).toLocaleDateString(i18n.language === "es" ? "es" : "en", {
           month: "long",
           year: "numeric",
         });

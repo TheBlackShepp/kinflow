@@ -50,7 +50,7 @@ export const LIST_TYPE_ICON: Record<ListType, string> = {
 };
 
 const CATEGORY_KEYS: Record<ListType, string[]> = {
-  shopping: ["categories.general", "categories.fruitsVegetables", "categories.dairy", "categories.meatFish", "categories.bakery", "categories.cleaning", "categories.supermarket"],
+  shopping: ["categories.general", "categories.fruitsVegetables", "categories.dairy", "categories.meatFish", "categories.bakery", "categories.cleaning"],
   todo: [],
   packing: ["categories.documentation", "categories.clothing", "categories.toiletry", "categories.electronics", "categories.medications", "categories.others"],
   wishlist: ["categories.general", "categories.toys", "categories.clothing", "categories.electronics", "categories.books", "categories.home", "categories.sports", "categories.others"],

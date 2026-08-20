@@ -43,7 +43,7 @@ export default function Register() {
             value={name}
             onChange={(e) => setName(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            placeholder="Tu nombre"
+            placeholder={t("auth.register.namePlaceholder")}
           />
         </div>
         <div>
@@ -54,7 +54,7 @@ export default function Register() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            placeholder="tucorreo@ejemplo.com"
+            placeholder={t("auth.register.emailPlaceholder")}
           />
         </div>
         <div>
@@ -65,7 +65,7 @@ export default function Register() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            placeholder="Mínimo 6 caracteres"
+            placeholder={t("auth.register.passwordPlaceholder")}
           />
         </div>
         <button

@@ -64,7 +64,7 @@ const TODO_PRIORITY_STYLE: Record<string, string> = {
 const formatDate = (iso: string) => iso.split("-").reverse().join("/");
 
 export default function ListDetail() {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
@@ -354,7 +354,7 @@ export default function ListDetail() {
                   inputMode="decimal"
                   value={qtyNum}
                   onChange={(e) => setQtyNum(e.target.value)}
-                  placeholder="Ej: 500"
+                  placeholder={t("listDetail.quantityPlaceholder")}
                   className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
                 />
               </div>
@@ -385,7 +385,7 @@ export default function ListDetail() {
                   setPrice(e.target.value);
                   if (priceError) setPriceError("");
                 }}
-                placeholder="Ej: 2,50"
+                placeholder={t("listDetail.pricePlaceholder")}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
@@ -473,7 +473,7 @@ export default function ListDetail() {
                 inputMode="numeric"
                 value={qtyNum}
                 onChange={(e) => setQtyNum(e.target.value)}
-                placeholder="Ej: 2"
+                placeholder={t("listDetail.quantityPlaceholderShort")}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
@@ -508,7 +508,7 @@ export default function ListDetail() {
                   setPrice(e.target.value);
                   if (priceError) setPriceError("");
                 }}
-                placeholder="Ej: 19,99"
+                placeholder={t("listDetail.pricePlaceholderWish")}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
@@ -520,7 +520,7 @@ export default function ListDetail() {
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Ej: el cumple de Lucas"
+                placeholder={t("listDetail.forWhomPlaceholder")}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
@@ -551,7 +551,7 @@ export default function ListDetail() {
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
-                placeholder="Ej: Ana"
+                placeholder={t("listDetail.whoRecommendedPlaceholder")}
                 className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
@@ -870,7 +870,7 @@ export default function ListDetail() {
                                   className="flex justify-between text-xs text-slate-500 dark:text-slate-400"
                                 >
                                   <span>
-                                    {new Date(ph.recordedAt).toLocaleDateString("es-ES")}
+                                    {new Date(ph.recordedAt).toLocaleDateString(i18n.language === "es" ? "es-ES" : "en-US")}
                                   </span>
                                   <span className="font-semibold text-slate-700 dark:text-slate-200">{ph.price} €</span>
                                 </li>
@@ -984,7 +984,7 @@ export default function ListDetail() {
                 setPriceEdit((p) => (p ? { ...p, value: e.target.value } : p));
                 if (priceEditError) setPriceEditError("");
               }}
-              placeholder="Ej: 19,99"
+              placeholder={t("listDetail.pricePlaceholderWish")}
               className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
                 priceEditError
                   ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-800"

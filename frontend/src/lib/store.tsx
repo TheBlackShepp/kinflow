@@ -10,6 +10,7 @@ import type { ReactNode } from "react";
 import { api, OfflineError, isNavigatorOnline, getToken } from "./api";
 import { db, uid, type SyncAction, type SyncTable } from "./db";
 import { useAuth } from "./auth";
+import i18n from "../i18n";
 import type {
   ShoppingList,
   ListItem,
@@ -476,7 +477,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
           syncNow();
         }
       } catch {
-        // ignorar eventos malformados
+        // ignore malformed events
       }
     };
 
@@ -1121,7 +1122,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     async (mealIds: string[], listId?: string) => {
       const meals = mealPlans.filter((m) => m.recipeId && mealIds.includes(m.id));
       if (meals.length === 0) {
-        throw new Error("No hay recetas planificadas para exportar");
+        throw new Error(i18n.t("meals.noPlannedForExport"));
       }
 
       const aggregated = new Map<

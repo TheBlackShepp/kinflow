@@ -78,7 +78,7 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="sticky top-0 z-30 -mx-4 bg-white/80 px-4 pb-4 backdrop-blur-md dark:bg-slate-900/80 sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+      <div className="sticky top-0 z-30 -mx-4 px-4 pb-4 backdrop-blur-md sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
         <div className="flex items-start justify-between">
           <div>
             <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
@@ -105,14 +105,14 @@ export default function Dashboard() {
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 <Globe className="h-4 w-4" />
-                {i18n.language === "es" ? "English" : "Español"}
+                {i18n.language === "es" ? t("settings.languageEnglish") : t("settings.languageSpanish")}
               </button>
               <button
                 onClick={toggleDark}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-                {dark ? "Light mode" : "Dark mode"}
+                {dark ? t("settings.lightMode") : t("settings.darkMode")}
               </button>
               <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
               <button

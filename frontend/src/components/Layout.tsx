@@ -110,7 +110,7 @@ export default function Layout({ children }: { children: ReactNode }) {
           </div>
           <div>
             <p className="text-lg font-bold leading-tight">{t("app.name")}</p>
-            <p className="text-xs text-slate-400">{user?.family?.name ?? "Mi hogar"}</p>
+            <p className="text-xs text-slate-400">{user?.family?.name ?? t("family.defaultName")}</p>
           </div>
         </div>
         <div className="px-6">

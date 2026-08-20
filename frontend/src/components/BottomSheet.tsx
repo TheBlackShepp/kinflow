@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { ArrowLeft, X } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export default function BottomSheet({
   open,
@@ -18,6 +19,7 @@ export default function BottomSheet({
   steps?: number;
   children: ReactNode;
 }) {
+  const { t } = useTranslation();
   if (!open) return null;
 
   return (
@@ -30,7 +32,7 @@ export default function BottomSheet({
             <button
               onClick={onBack}
               className="rounded-lg p-1 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
-              aria-label="Volver"
+              aria-label={t("app.back")}
             >
               <ArrowLeft className="h-5 w-5" />
             </button>
@@ -41,7 +43,7 @@ export default function BottomSheet({
           <button
             onClick={onClose}
             className="rounded-lg p-1 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
-            aria-label="Cerrar"
+              aria-label={t("app.close")}
           >
             <X className="h-5 w-5" />
           </button>
