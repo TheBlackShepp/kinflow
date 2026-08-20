@@ -130,11 +130,11 @@ export default function Recipes() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+      <div className="relative -mx-4 -mt-8 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-slate-100 dark:sm:ring-slate-700">
         <img
           src="/images/recipes-banner.svg"
           alt={t("recipes.bannerAlt")}
-          className="h-48 w-full object-cover sm:h-64"
+          className="h-56 w-full object-cover sm:h-64"
         />
         <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
           {t("recipes.title")}
