@@ -473,7 +473,7 @@ export default function Lists() {
 
   return (
     <div className="space-y-6">
-      <div className="relative -mx-4 -mt-8 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-slate-100">
+      <div className="relative -mx-4 -mt-8 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-slate-100 dark:sm:ring-slate-700">
         <img
           src="/images/list-banner.svg"
           alt={t("lists.bannerAlt")}
