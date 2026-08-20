@@ -11,9 +11,12 @@ import {
   Package,
   LogOut,
   Globe,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
+import { useDarkMode } from "../lib/useDarkMode";
 import { MEAL_TYPE_COLORS, type ListItem } from "../lib/types";
 
 export default function Dashboard() {
@@ -22,6 +25,7 @@ export default function Dashboard() {
   const navigate = useNavigate();
   const { lists, mealPlans, ready, updateItem } = useData();
   const [settingsOpen, setSettingsOpen] = useState(false);
+  const { dark, toggle: toggleDark } = useDarkMode();
 
   const today = new Date().toISOString().slice(0, 10);
   const todayMeals = mealPlans
@@ -74,13 +78,13 @@ export default function Dashboard() {
 
   return (
     <div className="space-y-6">
-      <div className="sticky top-0 z-30 -mx-4 bg-white/80 px-4 py-4 backdrop-blur-md sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
+      <div className="sticky top-0 z-30 -mx-4 bg-white/80 px-4 pb-4 backdrop-blur-md dark:bg-slate-900/80 sm:static sm:bg-transparent sm:px-0 sm:py-0 sm:backdrop-blur-none">
         <div className="flex items-start justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">
               {t("dashboard.hello", { name: user?.name.split(" ")[0] })}
             </h1>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               {t("dashboard.home", { name: user?.family?.name })}
             </p>
           </div>
@@ -95,18 +99,25 @@ export default function Dashboard() {
         {settingsOpen && (
           <>
             <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
-            <div className="absolute right-0 top-14 z-50 w-56 overflow-hidden rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-100">
+            <div className="absolute right-0 top-14 z-50 w-56 overflow-hidden rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
               <button
                 onClick={toggleLanguage}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"
               >
                 <Globe className="h-4 w-4" />
                 {i18n.language === "es" ? "English" : "Español"}
               </button>
-              <div className="my-1 border-t border-slate-100" />
+              <button
+                onClick={toggleDark}
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                {dark ? "Light mode" : "Dark mode"}
+              </button>
+              <div className="my-1 border-t border-slate-100 dark:border-slate-700" />
               <button
                 onClick={handleLogout}
-                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-50 dark:text-red-400 dark:hover:bg-slate-700"
               >
                 <LogOut className="h-4 w-4" />
                 {t("nav.logout")}
@@ -119,64 +130,64 @@ export default function Dashboard() {
       <div className="grid grid-cols-2 gap-4">
         <Link
           to="/lists"
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
         >
           <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100">
-              <ListTodo className="h-5 w-5 text-emerald-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+              <ListTodo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.lists")}</p>
+          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.lists")}</p>
         </Link>
         <Link
           to="/products"
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
         >
           <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100">
-              <Package className="h-5 w-5 text-cyan-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-cyan-100 dark:bg-cyan-900/40">
+              <Package className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.products")}</p>
+          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.products")}</p>
         </Link>
         <Link
           to="/recipes"
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
         >
           <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100">
-              <BookOpen className="h-5 w-5 text-violet-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-100 dark:bg-violet-900/40">
+              <BookOpen className="h-5 w-5 text-violet-600 dark:text-violet-400" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.recipes")}</p>
+          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.recipes")}</p>
         </Link>
         <Link
           to="/meals"
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
         >
           <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100">
-              <CalendarDays className="h-5 w-5 text-amber-600" />
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-100 dark:bg-amber-900/40">
+              <CalendarDays className="h-5 w-5 text-amber-600 dark:text-amber-400" />
             </div>
           </div>
-          <p className="mt-3 text-sm font-medium text-slate-600">{t("dashboard.meals")}</p>
+          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.meals")}</p>
         </Link>
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
           <div className="mb-4 flex items-center gap-2">
-            <UtensilsCrossed className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">{t("dashboard.whatsForDinner")}</h2>
+            <UtensilsCrossed className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{t("dashboard.whatsForDinner")}</h2>
           </div>
           {!ready ? (
             <p className="text-sm text-slate-400">{t("app.loading")}</p>
           ) : todayMeals.length === 0 ? (
             <div className="py-6 text-center">
-              <p className="text-sm text-slate-500">{t("dashboard.noMealsPlanned")}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.noMealsPlanned")}</p>
               <Link
                 to="/meals"
-                className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline"
+                className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
               >
                 {t("dashboard.planMenu")}
               </Link>
@@ -188,12 +199,12 @@ export default function Dashboard() {
                   <div className="flex items-center gap-3">
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                        MEAL_TYPE_COLORS[m.mealType] ?? "bg-slate-100 text-slate-600"
+                        MEAL_TYPE_COLORS[m.mealType] ?? "bg-slate-100 text-slate-600 dark:bg-slate-700 dark:text-slate-300"
                       }`}
                     >
                       {m.mealType}
                     </span>
-                    <span className="text-sm font-medium text-slate-700">
+                    <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                       {m.recipe?.title ?? m.customTitle}
                     </span>
                   </div>
@@ -203,19 +214,19 @@ export default function Dashboard() {
           )}
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
           <div className="mb-4 flex items-center gap-2">
-            <ListTodo className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">{t("dashboard.pendingShopping")}</h2>
+            <ListTodo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{t("dashboard.pendingShopping")}</h2>
           </div>
           {!ready ? (
             <p className="text-sm text-slate-400">{t("app.loading")}</p>
           ) : pendingItems.length === 0 ? (
             <div className="py-6 text-center">
-              <p className="text-sm text-slate-500">{t("dashboard.nothingPending")}</p>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{t("dashboard.nothingPending")}</p>
               <Link
                 to="/lists"
-                className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline"
+                className="mt-3 inline-block text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
               >
                 {t("dashboard.goToLists")}
               </Link>
@@ -228,19 +239,19 @@ export default function Dashboard() {
                     onClick={() => toggleItem(item)}
                     className="shrink-0"
                   >
-                    <Circle className="h-4 w-4 text-slate-300 transition hover:text-emerald-500" />
+                    <Circle className="h-4 w-4 text-slate-300 transition hover:text-emerald-500 dark:text-slate-500 dark:hover:text-emerald-400" />
                   </button>
-                  <span className="font-medium text-slate-700">{item.name}</span>
+                  <span className="font-medium text-slate-700 dark:text-slate-200">{item.name}</span>
                   {item.quantity && (
-                    <span className="text-slate-400">· {item.quantity}</span>
+                    <span className="text-slate-400 dark:text-slate-500">· {item.quantity}</span>
                   )}
-                  <span className="ml-auto text-xs text-slate-400">
+                  <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">
                     {item.listName}
                   </span>
                 </li>
               ))}
               {pendingItems.length > 8 && (
-                <li className="pt-2 text-center text-sm text-slate-500">
+                <li className="pt-2 text-center text-sm text-slate-500 dark:text-slate-400">
                   {t("dashboard.andMore", { count: pendingItems.length - 8 })}
                 </li>
               )}

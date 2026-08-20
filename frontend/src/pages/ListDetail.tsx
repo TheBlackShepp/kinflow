@@ -50,15 +50,15 @@ function getFilterOptions(t: (key: string) => string): { value: FilterMode; labe
 }
 
 const MEDIA_STATUS_STYLE: Record<string, string> = {
-  pendiente: "bg-amber-100 text-amber-700",
-  "en curso": "bg-sky-100 text-sky-700",
-  hecho: "bg-emerald-100 text-emerald-700",
+  pendiente: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  "en curso": "bg-sky-100 text-sky-700 dark:bg-sky-900/30 dark:text-sky-300",
+  hecho: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
 };
 
 const TODO_PRIORITY_STYLE: Record<string, string> = {
-  alta: "bg-red-100 text-red-700",
-  media: "bg-amber-100 text-amber-700",
-  baja: "bg-emerald-100 text-emerald-700",
+  alta: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
+  media: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-300",
+  baja: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
 };
 
 const formatDate = (iso: string) => iso.split("-").reverse().join("/");
@@ -331,11 +331,11 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 {cats.map((c) => (
                   <option key={c} value={c}>
@@ -346,7 +346,7 @@ export default function ListDetail() {
             </div>
             <div className="flex gap-2">
               <div className="flex-1">
-                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.quantity")}</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.quantity")}</label>
                 <input
                   type="number"
                   min="0"
@@ -355,15 +355,15 @@ export default function ListDetail() {
                   value={qtyNum}
                   onChange={(e) => setQtyNum(e.target.value)}
                   placeholder="Ej: 500"
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
                 />
               </div>
               <div className="w-28">
-                <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.unit")}</label>
+                <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.unit")}</label>
                 <select
                   value={unit}
                   onChange={(e) => setUnit(e.target.value)}
-                  className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                  className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
                 >
                   {UNITS.map((u) => (
                     <option key={u} value={u}>
@@ -374,7 +374,7 @@ export default function ListDetail() {
               </div>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.price")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.price")}</label>
               <input
                 type="number"
                 min="0"
@@ -386,7 +386,7 @@ export default function ListDetail() {
                   if (priceError) setPriceError("");
                 }}
                 placeholder="Ej: 2,50"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
           </>
@@ -395,11 +395,11 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.assignedTo")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.assignedTo")}</label>
               <select
                 value={assigneeId}
                 onChange={(e) => setAssigneeId(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 <option value="">{t("listDetail.unassigned")}</option>
                 {familyUsers.map((u) => (
@@ -410,11 +410,11 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.priority")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.priority")}</label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 <option value="">{t("listDetail.noPriority")}</option>
                 {TODO_PRIORITIES.map((p) => (
@@ -425,24 +425,24 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {t("listDetail.dueDate")}
               </label>
               <input
                 type="date"
                 value={dueDate}
                 onChange={(e) => setDueDate(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
             <div className="sm:col-span-2 lg:col-span-3">
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.note")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.note")}</label>
               <input
                 type="text"
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder={t("listDetail.taskDetails")}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
           </>
@@ -451,11 +451,11 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 {cats.map((c) => (
                   <option key={c} value={c}>
@@ -465,7 +465,7 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.quantity")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.quantity")}</label>
               <input
                 type="number"
                 min="0"
@@ -474,7 +474,7 @@ export default function ListDetail() {
                 value={qtyNum}
                 onChange={(e) => setQtyNum(e.target.value)}
                 placeholder="Ej: 2"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
           </>
@@ -483,11 +483,11 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 {cats.map((c) => (
                   <option key={c} value={c}>
@@ -497,7 +497,7 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.price")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.price")}</label>
               <input
                 type="number"
                 min="0"
@@ -509,11 +509,11 @@ export default function ListDetail() {
                   if (priceError) setPriceError("");
                 }}
                 placeholder="Ej: 19,99"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {t("listDetail.forWhom")}
               </label>
               <input
@@ -521,7 +521,7 @@ export default function ListDetail() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Ej: el cumple de Lucas"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
           </>
@@ -530,11 +530,11 @@ export default function ListDetail() {
         return (
           <>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">{t("listDetail.category")}</label>
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">{t("listDetail.category")}</label>
               <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               >
                 {cats.map((c) => (
                   <option key={c} value={c}>
@@ -544,7 +544,7 @@ export default function ListDetail() {
               </select>
             </div>
             <div>
-              <label className="mb-1 block text-xs font-semibold text-slate-500">
+              <label className="mb-1 block text-xs font-semibold text-slate-500 dark:text-slate-400">
                 {t("listDetail.whoRecommended")}
               </label>
               <input
@@ -552,7 +552,7 @@ export default function ListDetail() {
                 value={note}
                 onChange={(e) => setNote(e.target.value)}
                 placeholder="Ej: Ana"
-                className="w-full rounded-xl border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 dark:border-slate-600 px-3 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
             </div>
           </>
@@ -560,36 +560,36 @@ export default function ListDetail() {
     }
   };
 
-  if (!ready) return <p className="text-sm text-slate-400">{t("app.loading")}</p>;
-  if (!list) return <p className="text-sm text-red-500">{t("listDetail.notFound")}</p>;
+  if (!ready) return <p className="text-sm text-slate-400 dark:text-slate-500">{t("app.loading")}</p>;
+  if (!list) return <p className="text-sm text-red-500 dark:text-red-400">{t("listDetail.notFound")}</p>;
 
   return (
     <div className="space-y-6 pb-36 lg:pb-0">
       <div className="flex items-center gap-4">
         <Link
           to="/lists"
-          className="rounded-xl bg-white p-2 text-slate-500 shadow-sm ring-1 ring-slate-100 hover:text-slate-700"
+          className="rounded-xl bg-white dark:bg-slate-800 p-2 text-slate-500 dark:text-slate-400 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
         >
           <ArrowLeft className="h-5 w-5" />
         </Link>
         <div className="flex-1">
           <div className="flex items-center gap-2">
-            <h1 className="text-2xl font-bold text-slate-800">{list.name}</h1>
+            <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{list.name}</h1>
             <span className="text-xl">{LIST_TYPE_ICON[listType]}</span>
             {list.visibility === "private" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                 <Lock className="h-3 w-3" />
                 {t("lists.private")}
               </span>
             )}
             {list.visibility === "custom" && (
-              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-semibold text-slate-500">
+              <span className="inline-flex items-center gap-1 rounded-full bg-slate-100 dark:bg-slate-700/50 px-2 py-0.5 text-[10px] font-semibold text-slate-500 dark:text-slate-400">
                 <Users className="h-3 w-3" />
                 {t("lists.shared")}
               </span>
             )}
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-slate-500 dark:text-slate-400">
             {done}/{total} {done === 1 ? t("listDetail.completed", { count: done }) : t("listDetail.completedPlural", { count: done })}
           </p>
         </div>
@@ -600,19 +600,19 @@ export default function ListDetail() {
           )}
           <button
             onClick={() => (menuOpen ? setMenuOpen(false) : openMenu())}
-            className="rounded-xl bg-white p-2 text-slate-500 shadow-sm ring-1 ring-slate-100 hover:text-slate-700"
+            className="rounded-xl bg-white dark:bg-slate-800 p-2 text-slate-500 dark:text-slate-400 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 hover:text-slate-700 dark:hover:text-slate-200"
             aria-label={t("listDetail.optionsLabel")}
           >
             <MoreVertical className="h-5 w-5" />
           </button>
           {menuOpen && (
-            <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl bg-white shadow-xl ring-1 ring-slate-100">
+            <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-1 ring-slate-100 dark:ring-slate-700">
               {menuPanel === "main" ? (
                 <>
                   {isOwner && (
                     <button
                       onClick={openEdit}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                     >
                       <Pencil className="h-4 w-4" />
                       {t("listDetail.editList")}
@@ -620,14 +620,14 @@ export default function ListDetail() {
                   )}
                   <button
                     onClick={() => setMenuPanel("sort")}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     <ArrowUpDown className="h-4 w-4" />
                     {t("listDetail.sort")}
                   </button>
                   <button
                     onClick={() => setMenuPanel("filter")}
-                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                    className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     <Filter className="h-4 w-4" />
                     {t("listDetail.filter")}
@@ -638,8 +638,8 @@ export default function ListDetail() {
                         setHideCategories((v) => !v);
                         setMenuOpen(false);
                       }}
-                      className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition hover:bg-slate-50 ${
-                        hideCategories ? "text-emerald-600" : "text-slate-700"
+                      className={`flex w-full items-center gap-3 px-4 py-3 text-sm font-medium transition hover:bg-slate-50 dark:hover:bg-slate-700 ${
+                        hideCategories ? "text-emerald-600 dark:text-emerald-400" : "text-slate-700 dark:text-slate-200"
                       }`}
                     >
                       <Layers className="h-4 w-4" />
@@ -647,13 +647,13 @@ export default function ListDetail() {
                       {hideCategories && <Check className="h-4 w-4" />}
                     </button>
                   )}
-                  <div className="border-t border-slate-100">
+                  <div className="border-t border-slate-100 dark:border-slate-700">
                     <button
                       onClick={() => {
                         setMenuOpen(false);
                         setDeleteOpen(true);
                       }}
-                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                      className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-red-600 dark:text-red-400 transition hover:bg-red-50 dark:hover:bg-red-900/20"
                     >
                       <Trash2 className="h-4 w-4" />
                       {t("listDetail.deleteList")}
@@ -664,7 +664,7 @@ export default function ListDetail() {
                 <>
                   <button
                     onClick={() => setMenuPanel("main")}
-                    className="flex w-full items-center gap-2 border-b border-slate-100 px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                    className="flex w-full items-center gap-2 border-b border-slate-100 dark:border-slate-700 px-4 py-3 text-sm font-semibold text-slate-600 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                   >
                     <ArrowLeft className="h-4 w-4" />
                     {menuPanel === "sort" ? t("listDetail.sortBy") : t("listDetail.filterBy")}
@@ -677,11 +677,11 @@ export default function ListDetail() {
                         else setFilter(opt.value as FilterMode);
                         setMenuOpen(false);
                       }}
-                      className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                      className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700"
                     >
                       {opt.label}
                       {(menuPanel === "sort" ? sortMode === opt.value : filter === opt.value) && (
-                        <Check className="h-4 w-4 text-emerald-500" />
+                        <Check className="h-4 w-4 text-emerald-500 dark:text-emerald-400" />
                       )}
                     </button>
                   ))}
@@ -692,7 +692,7 @@ export default function ListDetail() {
         </div>
       </div>
 
-      <div className="h-2.5 overflow-hidden rounded-full bg-slate-100">
+      <div className="h-2.5 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-700">
         <div
           className="h-full rounded-full bg-emerald-500 transition-all"
           style={{ width: `${pct}%` }}
@@ -700,9 +700,9 @@ export default function ListDetail() {
       </div>
 
       {isShopping && totalPrice > 0 && (
-        <div className="flex items-center justify-between rounded-xl bg-emerald-50 px-4 py-2.5 ring-1 ring-emerald-100">
-          <span className="text-sm font-medium text-emerald-700">{t("listDetail.totalEstimated")}</span>
-          <span className="text-lg font-bold text-emerald-800">
+        <div className="flex items-center justify-between rounded-xl bg-emerald-50 dark:bg-emerald-900/20 px-4 py-2.5 ring-1 ring-emerald-100 dark:ring-emerald-800">
+          <span className="text-sm font-medium text-emerald-700 dark:text-emerald-300">{t("listDetail.totalEstimated")}</span>
+          <span className="text-lg font-bold text-emerald-800 dark:text-emerald-200">
             {totalPrice.toFixed(2).replace(".", ",")} €
           </span>
         </div>
@@ -713,7 +713,7 @@ export default function ListDetail() {
           e.preventDefault();
           submitItem();
         }}
-        className="hidden rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100 lg:block"
+        className="hidden rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 lg:block"
       >
         <div className="relative flex gap-2" ref={isShopping ? catalogRef : undefined}>
           <input
@@ -721,11 +721,11 @@ export default function ListDetail() {
             value={name}
             onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
             placeholder={isShopping ? t("listDetail.searchOrAdd") : t("listDetail.addArticle")}
-            className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="min-w-0 flex-1 rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
           />
           {catalogOpen && catalogResults.length > 0 && (
-            <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
-              <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+            <div className="absolute left-0 top-full z-50 mt-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
+              <p className="border-b border-slate-100 dark:border-slate-700 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                 {t("listDetail.productCatalog")}
               </p>
               <ul className="max-h-48 overflow-y-auto">
@@ -734,14 +734,14 @@ export default function ListDetail() {
                     <button
                       type="button"
                       onClick={() => selectCatalogProduct(product)}
-                      className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50"
+                      className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50 dark:hover:bg-slate-700"
                     >
                       <div>
-                        <p className="text-sm font-medium text-slate-700">{product.name}</p>
-                        <p className="text-xs text-slate-400">{product.category} · {product.unit}</p>
+                        <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{product.name}</p>
+                        <p className="text-xs text-slate-400 dark:text-slate-500">{product.category} · {product.unit}</p>
                       </div>
                       {product.prices?.[0] && (
-                        <span className="text-xs font-semibold text-emerald-600">
+                        <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                           {product.prices[0].price}€
                         </span>
                       )}
@@ -763,29 +763,29 @@ export default function ListDetail() {
         <div className="mt-3 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
           {renderItemFields()}
         </div>
-        {priceError && <p className="mt-2 text-xs text-red-600">{priceError}</p>}
+        {priceError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{priceError}</p>}
       </form>
 
       {total === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
+        <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 py-16 text-center">
           <span className="mx-auto mb-3 block text-5xl opacity-60">{LIST_TYPE_ICON[listType]}</span>
-          <p className="font-medium text-slate-600">{t("listDetail.empty")}</p>
-          <p className="text-sm text-slate-400">{t("listDetail.emptyDesc")}</p>
+          <p className="font-medium text-slate-600 dark:text-slate-300">{t("listDetail.empty")}</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{t("listDetail.emptyDesc")}</p>
         </div>
       ) : grouped.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <Filter className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-          <p className="font-medium text-slate-600">{t("listDetail.noMatchFilter")}</p>
-          <p className="text-sm text-slate-400">{t("listDetail.noMatchFilterDesc")}</p>
+        <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 py-16 text-center">
+          <Filter className="mx-auto mb-3 h-10 w-10 text-slate-300 dark:text-slate-600" />
+          <p className="font-medium text-slate-600 dark:text-slate-300">{t("listDetail.noMatchFilter")}</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{t("listDetail.noMatchFilterDesc")}</p>
         </div>
       ) : (
         <div className="space-y-4">
           {grouped.map(([cat, items]) => (
-            <section key={cat} className="rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-              <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+            <section key={cat} className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
+              <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                 {cat}
               </h3>
-              <ul className="divide-y divide-slate-100">
+              <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                 {items.map((item) => (
                   <li key={item.id} className="flex items-center gap-3 py-2.5">
                     <button onClick={() => toggleItem(item)} className="shrink-0">
@@ -799,15 +799,15 @@ export default function ListDetail() {
                           {item.status ?? "pendiente"}
                         </span>
                       ) : item.completed ? (
-                        <CheckCircle2 className="h-5 w-5 text-emerald-500" />
+                        <CheckCircle2 className="h-5 w-5 text-emerald-500 dark:text-emerald-400" />
                       ) : (
-                        <Circle className="h-5 w-5 text-slate-300 hover:text-emerald-400" />
+                        <Circle className="h-5 w-5 text-slate-300 dark:text-slate-600 hover:text-emerald-400 dark:hover:text-emerald-400" />
                       )}
                     </button>
                     <div className="flex-1 min-w-0">
                       <p
                         className={`text-sm font-medium ${
-                          isDone(item) ? "text-slate-400 line-through" : "text-slate-700"
+                          isDone(item) ? "text-slate-400 dark:text-slate-500 line-through" : "text-slate-700 dark:text-slate-200"
                         }`}
                       >
                         {item.name}
@@ -817,41 +817,41 @@ export default function ListDetail() {
                           {item.priority && (
                             <span
                               className={`rounded-full px-2 py-0.5 font-semibold ${
-                                TODO_PRIORITY_STYLE[item.priority] ?? "bg-slate-100 text-slate-600"
+                                TODO_PRIORITY_STYLE[item.priority] ?? "bg-slate-100 text-slate-600 dark:bg-slate-700/50 dark:text-slate-300"
                               }`}
                             >
                               {item.priority}
                             </span>
                           )}
-                          {item.dueDate && <span className="text-slate-500">📅 {formatDate(item.dueDate)}</span>}
+                          {item.dueDate && <span className="text-slate-500 dark:text-slate-400">📅 {formatDate(item.dueDate)}</span>}
                           {item.assigneeId && (
-                            <span className="text-slate-500">👤 {assigneeName(item.assigneeId)}</span>
+                            <span className="text-slate-500 dark:text-slate-400">👤 {assigneeName(item.assigneeId)}</span>
                           )}
-                          {item.note && <span className="text-slate-400">{item.note}</span>}
+                          {item.note && <span className="text-slate-400 dark:text-slate-500">{item.note}</span>}
                         </div>
                       ) : listType === "media" ? (
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
                           {item.category}
                           {item.note ? ` · ${item.note}` : ""}
                         </p>
                       ) : listType === "wishlist" ? (
                         <div className="mt-0.5 flex flex-wrap items-center gap-1.5 text-xs">
-                          {item.category && <span className="text-slate-400">{item.category}</span>}
-                          {item.note && <span className="text-slate-400">· {item.note}</span>}
+                          {item.category && <span className="text-slate-400 dark:text-slate-500">{item.category}</span>}
+                          {item.note && <span className="text-slate-400 dark:text-slate-500">· {item.note}</span>}
                           {item.price && (
-                            <span className="font-semibold text-slate-600">{item.price} €</span>
+                            <span className="font-semibold text-slate-600 dark:text-slate-300">{item.price} €</span>
                           )}
                           <button
                             onClick={() =>
                               setExpandedId(expandedId === item.id ? null : item.id)
                             }
-                            className="text-emerald-600 hover:underline"
+                            className="text-emerald-600 dark:text-emerald-400 hover:underline"
                           >
                             {t("listDetail.history")}
                           </button>
                         </div>
                       ) : (
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="mt-0.5 text-xs text-slate-400 dark:text-slate-500">
                           {item.quantity !== "1" && item.quantity}
                           {item.quantity !== "1" && item.price ? " · " : ""}
                           {item.price ? `${item.price} €` : ""}
@@ -859,27 +859,27 @@ export default function ListDetail() {
                         </p>
                       )}
                       {listType === "wishlist" && expandedId === item.id && (
-                        <div className="mt-2 rounded-lg bg-slate-50 p-2.5">
+                        <div className="mt-2 rounded-lg bg-slate-50 dark:bg-slate-700/30 p-2.5">
                           {(item.priceHistory ?? []).length === 0 ? (
-                            <p className="text-xs text-slate-400">{t("listDetail.noHistory")}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">{t("listDetail.noHistory")}</p>
                           ) : (
                             <ul className="space-y-0.5">
                               {(item.priceHistory ?? []).map((ph) => (
                                 <li
                                   key={ph.id}
-                                  className="flex justify-between text-xs text-slate-500"
+                                  className="flex justify-between text-xs text-slate-500 dark:text-slate-400"
                                 >
                                   <span>
                                     {new Date(ph.recordedAt).toLocaleDateString("es-ES")}
                                   </span>
-                                  <span className="font-semibold text-slate-700">{ph.price} €</span>
+                                  <span className="font-semibold text-slate-700 dark:text-slate-200">{ph.price} €</span>
                                 </li>
                               ))}
                             </ul>
                           )}
                           <button
                             onClick={() => openPriceEdit(item)}
-                            className="mt-1.5 text-xs font-semibold text-emerald-600 hover:underline"
+                            className="mt-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                           >
                             {t("listDetail.changePrice")}
                           </button>
@@ -888,7 +888,7 @@ export default function ListDetail() {
                     </div>
                     <button
                       onClick={() => handleDeleteItem(item)}
-                      className="rounded-lg p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500"
+                      className="rounded-lg p-1.5 text-slate-300 dark:text-slate-600 transition hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -902,7 +902,7 @@ export default function ListDetail() {
 
       <div className="fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="mx-auto max-w-5xl px-4 pb-4">
-          <div className="rounded-2xl bg-white p-3 shadow-xl ring-1 ring-slate-100">
+          <div className="rounded-2xl bg-white dark:bg-slate-800 p-3 shadow-xl ring-1 ring-slate-100 dark:ring-slate-700">
             <div className="relative flex items-center gap-2" ref={isShopping ? catalogRef : undefined}>
               <input
                 type="text"
@@ -910,11 +910,11 @@ export default function ListDetail() {
                 onChange={(e) => isShopping ? handleNameChange(e.target.value) : setName(e.target.value)}
                 onFocus={() => setAddExpanded(true)}
                 placeholder={isShopping ? t("listDetail.searchOrAdd") : listType === "todo" ? t("listDetail.addTask") : t("listDetail.addArticle")}
-                className="min-w-0 flex-1 rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="min-w-0 flex-1 rounded-xl border border-slate-300 dark:border-slate-600 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               />
               {catalogOpen && catalogResults.length > 0 && (
-                <div className="absolute left-0 bottom-full z-50 mb-1 w-full rounded-xl border border-slate-200 bg-white shadow-lg">
-                  <p className="border-b border-slate-100 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <div className="absolute left-0 bottom-full z-50 mb-1 w-full rounded-xl border border-slate-200 dark:border-slate-600 bg-white dark:bg-slate-800 shadow-lg">
+                  <p className="border-b border-slate-100 dark:border-slate-700 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                     {t("listDetail.productCatalog")}
                   </p>
                   <ul className="max-h-48 overflow-y-auto">
@@ -923,14 +923,14 @@ export default function ListDetail() {
                         <button
                           type="button"
                           onClick={() => selectCatalogProduct(product)}
-                          className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50"
+                          className="flex w-full items-center justify-between px-3 py-2 text-left transition hover:bg-slate-50 dark:hover:bg-slate-700"
                         >
                           <div>
-                            <p className="text-sm font-medium text-slate-700">{product.name}</p>
-                            <p className="text-xs text-slate-400">{product.category} · {product.unit}</p>
+                            <p className="text-sm font-medium text-slate-700 dark:text-slate-200">{product.name}</p>
+                            <p className="text-xs text-slate-400 dark:text-slate-500">{product.category} · {product.unit}</p>
                           </div>
                           {product.prices?.[0] && (
-                            <span className="text-xs font-semibold text-emerald-600">
+                            <span className="text-xs font-semibold text-emerald-600 dark:text-emerald-400">
                               {product.prices[0].price}€
                             </span>
                           )}
@@ -950,9 +950,9 @@ export default function ListDetail() {
               </button>
             </div>
             {addExpanded && (
-              <div className="mt-3 space-y-3 border-t border-slate-100 pt-3">
+              <div className="mt-3 space-y-3 border-t border-slate-100 dark:border-slate-700 pt-3">
                 {renderItemFields()}
-                {priceError && <p className="text-xs text-red-600">{priceError}</p>}
+                {priceError && <p className="text-xs text-red-600 dark:text-red-400">{priceError}</p>}
               </div>
             )}
           </div>
@@ -970,10 +970,10 @@ export default function ListDetail() {
       >
         <div className="space-y-4">
           {priceEdit && (
-            <p className="text-sm text-slate-500">{priceEdit.item.name}</p>
+            <p className="text-sm text-slate-500 dark:text-slate-400">{priceEdit.item.name}</p>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">{t("listDetail.price")}</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("listDetail.price")}</label>
             <input
               type="number"
               min="0"
@@ -987,11 +987,11 @@ export default function ListDetail() {
               placeholder="Ej: 19,99"
               className={`w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:ring-2 ${
                 priceEditError
-                  ? "border-red-400 focus:border-red-500 focus:ring-red-200"
-                  : "border-slate-300 focus:border-emerald-500 focus:ring-emerald-200"
+                  ? "border-red-400 dark:border-red-500 focus:border-red-500 focus:ring-red-200 dark:focus:ring-red-800"
+                  : "border-slate-300 dark:border-slate-600 focus:border-emerald-500 focus:ring-emerald-200 dark:focus:ring-emerald-800"
               }`}
             />
-            {priceEditError && <p className="mt-1 text-xs text-red-600">{priceEditError}</p>}
+            {priceEditError && <p className="mt-1 text-xs text-red-600 dark:text-red-400">{priceEditError}</p>}
           </div>
           <button
             onClick={handleSavePrice}
@@ -1003,13 +1003,13 @@ export default function ListDetail() {
       </Modal>
 
       <Modal open={deleteOpen} onClose={() => setDeleteOpen(false)} title={t("listDetail.confirmDeleteTitle")}>
-        <p className="text-sm text-slate-600">
+        <p className="text-sm text-slate-600 dark:text-slate-300">
           {t("listDetail.confirmDeleteDesc", { name: list?.name })}
         </p>
         <div className="mt-5 flex gap-3">
           <button
             onClick={() => setDeleteOpen(false)}
-            className="flex-1 rounded-xl bg-slate-100 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-200"
+            className="flex-1 rounded-xl bg-slate-100 dark:bg-slate-700/50 py-2.5 text-sm font-semibold text-slate-700 dark:text-slate-200 transition hover:bg-slate-200 dark:hover:bg-slate-600"
           >
             {t("app.cancel")}
           </button>

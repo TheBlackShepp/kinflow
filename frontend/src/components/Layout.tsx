@@ -31,7 +31,7 @@ function SyncBadge() {
 
   if (syncStatus === "offline") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-red-100 px-2.5 py-0.5 text-[11px] font-semibold text-red-700 dark:bg-red-900/30 dark:text-red-400">
         <WifiOff className="h-3 w-3" />
         {pendingCount > 0 ? t("sync.offlinePending", { count: pendingCount }) : t("sync.offline")}
       </span>
@@ -39,14 +39,14 @@ function SyncBadge() {
   }
   if (syncStatus === "syncing") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-100 px-2.5 py-0.5 text-[11px] font-semibold text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
         <RefreshCw className="h-3 w-3 animate-spin" />
         {t("sync.syncing")}
       </span>
     );
   }
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700">
+      <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-100 px-2.5 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400">
       <Wifi className="h-3 w-3" />
       {t("sync.online")}
     </span>
@@ -90,13 +90,13 @@ export default function Layout({ children }: { children: ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen">
+    <div className="min-h-screen dark:bg-slate-900 dark:text-slate-100">
       <StatusBanner />
 
       {!isHome && !location.pathname.startsWith("/lists/") && (
         <Link
           to="/"
-          className="fixed left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100 transition hover:scale-105 lg:hidden"
+          className="fixed left-4 top-4 z-40 flex h-11 w-11 items-center justify-center rounded-full bg-white shadow-lg ring-1 ring-slate-100 transition hover:scale-105 dark:bg-slate-800 dark:ring-slate-700 lg:hidden"
           aria-label={t("nav.goHome")}
         >
           <Home className="h-5 w-5 text-emerald-600" />
@@ -163,8 +163,8 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
       </aside>
 
-      <main className="lg:ml-60">
-        <div className="mx-auto max-w-5xl px-4 pb-8 sm:px-6">{children}</div>
+      <main className="lg:ml-60 dark:bg-slate-900 dark:text-slate-100">
+        <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6 dark:bg-slate-900 dark:text-slate-100">{children}</div>
       </main>
     </div>
   );

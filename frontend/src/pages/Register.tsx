@@ -33,38 +33,38 @@ export default function Register() {
     <AuthShell title={t("auth.register.title")} subtitle={t("auth.register.subtitle")}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.name")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.name")}</label>
           <input
             type="text"
             required
             value={name}
             onChange={(e) => setName(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder="Tu nombre"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.email")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.email")}</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder="tucorreo@ejemplo.com"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.register.password")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.password")}</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder="Mínimo 6 caracteres"
           />
         </div>
@@ -75,9 +75,9 @@ export default function Register() {
         >
           {loading ? t("auth.register.submitting") : t("auth.register.submit")}
         </button>
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           {t("auth.register.hasAccount")}{" "}
-          <Link to="/login" className="font-medium text-emerald-600 hover:underline">
+          <Link to="/login" className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
             {t("auth.register.login")}
           </Link>
         </p>

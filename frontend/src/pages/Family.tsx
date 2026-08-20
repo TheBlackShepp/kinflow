@@ -55,24 +55,24 @@ export default function Family() {
     return (
       <div className="space-y-6">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">{t("family.title")}</h1>
-          <p className="text-sm text-slate-500">{t("family.subtitle")}</p>
+          <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t("family.title")}</h1>
+          <p className="text-sm text-slate-500 dark:text-slate-400">{t("family.subtitle")}</p>
         </div>
 
         <div className="grid gap-6 md:grid-cols-2">
           <form
             onSubmit={createFamily}
-            className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100"
+            className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100">
-              <HomeIcon className="h-6 w-6 text-emerald-600" />
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-100 dark:bg-emerald-900/20">
+              <HomeIcon className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-800">{t("family.createHome")}</h2>
-            <p className="mb-4 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t("family.createHome")}</h2>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
               {t("family.createHomeDesc")}
             </p>
             {error && (
-              <div className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className="mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
                 {error}
               </div>
             )}
@@ -82,7 +82,7 @@ export default function Family() {
               value={createName}
               onChange={(e) => setCreateName(e.target.value)}
               placeholder={t("family.homeNamePlaceholder")}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-500 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
             <button
               type="submit"
@@ -95,17 +95,17 @@ export default function Family() {
 
           <form
             onSubmit={joinFamily}
-            className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100"
+            className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700"
           >
-            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100">
-              <UserPlus className="h-6 w-6 text-violet-600" />
+            <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-100 dark:bg-violet-900/20">
+              <UserPlus className="h-6 w-6 text-violet-600 dark:text-violet-400" />
             </div>
-            <h2 className="text-lg font-semibold text-slate-800">{t("family.joinHome")}</h2>
-            <p className="mb-4 text-sm text-slate-500">
+            <h2 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{t("family.joinHome")}</h2>
+            <p className="mb-4 text-sm text-slate-500 dark:text-slate-400">
               {t("family.joinHomeDesc")}
             </p>
             {error && (
-              <div className="mb-3 rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">
+              <div className="mb-3 rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">
                 {error}
               </div>
             )}
@@ -116,7 +116,7 @@ export default function Family() {
               onChange={(e) => setJoinCode(e.target.value.toUpperCase())}
               placeholder={t("family.inviteCodePlaceholder")}
               maxLength={6}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm uppercase tracking-[0.3em] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-xl border border-slate-300 dark:border-slate-500 px-4 py-2.5 text-sm uppercase tracking-[0.3em] outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             />
             <button
               type="submit"
@@ -136,8 +136,8 @@ export default function Family() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold text-slate-800">{t("family.title")}</h1>
-        <p className="text-sm text-slate-500">{t("family.homeAndCode")}</p>
+        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t("family.title")}</h1>
+        <p className="text-sm text-slate-500 dark:text-slate-400">{t("family.homeAndCode")}</p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
@@ -165,27 +165,27 @@ export default function Family() {
           </p>
         </section>
 
-        <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100">
+        <section className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
           <div className="mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5 text-emerald-600" />
-            <h2 className="font-semibold text-slate-800">{t("family.homeMembers")}</h2>
+            <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{t("family.homeMembers")}</h2>
           </div>
           <ul className="space-y-3">
             {family.users?.map((member) => (
               <li key={member.id} className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 text-sm font-bold text-emerald-700">
+                <div className="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/20 text-sm font-bold text-emerald-700 dark:text-emerald-400">
                   {member.name.charAt(0).toUpperCase()}
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">
+                  <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
                     {member.name}
                     {member.id === user.id && (
-                      <span className="ml-2 rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-600">
+                      <span className="ml-2 rounded-full bg-emerald-50 dark:bg-emerald-900/20 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400">
                         {t("family.you")}
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-400">{member.email}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{member.email}</p>
                 </div>
               </li>
             ))}

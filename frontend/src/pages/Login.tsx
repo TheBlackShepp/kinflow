@@ -32,27 +32,27 @@ export default function Login() {
     <AuthShell title={t("auth.login.title")} subtitle={t("auth.login.subtitle")}>
       <form onSubmit={handleSubmit} className="space-y-4">
         {error && (
-          <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+          <div className="rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.login.email")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.login.email")}</label>
           <input
             type="email"
             required
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder="tucorreo@ejemplo.com"
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700">{t("auth.login.password")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.login.password")}</label>
           <input
             type="password"
             required
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+            className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder="••••••••"
           />
         </div>
@@ -63,9 +63,9 @@ export default function Login() {
         >
           {loading ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
-        <p className="text-center text-sm text-slate-500">
+        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
           {t("auth.login.noAccount")}{" "}
-          <Link to="/register" className="font-medium text-emerald-600 hover:underline">
+          <Link to="/register" className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
             {t("auth.login.register")}
           </Link>
         </p>

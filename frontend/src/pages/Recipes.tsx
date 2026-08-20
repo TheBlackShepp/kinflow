@@ -119,7 +119,7 @@ export default function Recipes() {
 
   if (!user?.familyId) {
     return (
-      <div className="rounded-2xl bg-amber-50 p-6 text-amber-700">
+      <div className="rounded-2xl bg-amber-50 p-6 text-amber-700 dark:bg-amber-900/20 dark:text-amber-300">
         <div className="flex items-center gap-3">
           <AlertCircle className="h-6 w-6" />
           <p className="font-medium">{t("recipes.needsHome")}</p>
@@ -130,7 +130,7 @@ export default function Recipes() {
 
   return (
     <div className="space-y-6">
-      <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100">
+      <div className="relative overflow-hidden rounded-2xl shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
         <img
           src="/images/recipes-banner.svg"
           alt={t("recipes.bannerAlt")}
@@ -142,42 +142,42 @@ export default function Recipes() {
       </div>
 
       {!ready ? (
-        <p className="text-sm text-slate-400">{t("app.loading")}</p>
+        <p className="text-sm text-slate-400 dark:text-slate-500">{t("app.loading")}</p>
       ) : recipes.length === 0 ? (
-        <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center">
-          <BookOpen className="mx-auto mb-3 h-10 w-10 text-slate-300" />
-          <p className="font-medium text-slate-600">{t("recipes.empty")}</p>
-          <p className="text-sm text-slate-400">{t("recipes.emptyDesc")}</p>
+        <div className="rounded-2xl border-2 border-dashed border-slate-200 py-16 text-center dark:border-slate-600">
+          <BookOpen className="mx-auto mb-3 h-10 w-10 text-slate-300 dark:text-slate-500" />
+          <p className="font-medium text-slate-600 dark:text-slate-300">{t("recipes.empty")}</p>
+          <p className="text-sm text-slate-400 dark:text-slate-500">{t("recipes.emptyDesc")}</p>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {recipes.map((recipe) => (
             <div
               key={recipe.id}
-              className="flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md"
+              className="flex flex-col rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
             >
               <div className="flex items-start justify-between">
-                <h3 className="font-semibold text-slate-800">{recipe.title}</h3>
+                <h3 className="font-semibold text-slate-800 dark:text-slate-100">{recipe.title}</h3>
                 <div className="flex shrink-0 items-center gap-1">
                   <button
                     onClick={() => openEdit(recipe)}
-                    className="rounded-lg p-1.5 text-slate-300 transition hover:bg-emerald-50 hover:text-emerald-600"
+                    className="rounded-lg p-1.5 text-slate-300 transition hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
                     title={t("recipes.editRecipe")}
                   >
                     <Pencil className="h-4 w-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(recipe.id)}
-                    className="rounded-lg p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500"
+                    className="rounded-lg p-1.5 text-slate-300 transition hover:bg-red-50 hover:text-red-500 dark:text-slate-500 dark:hover:bg-red-900/20 dark:hover:text-red-400"
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
                 </div>
               </div>
               {recipe.description && (
-                <p className="mt-1 line-clamp-2 text-sm text-slate-500">{recipe.description}</p>
+                <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-400">{recipe.description}</p>
               )}
-              <div className="mt-3 flex items-center gap-4 text-xs text-slate-500">
+              <div className="mt-3 flex items-center gap-4 text-xs text-slate-500 dark:text-slate-400">
                 {recipe.prepTime && (
                   <span className="flex items-center gap-1">
                     <Clock className="h-3.5 w-3.5" /> {recipe.prepTime}
@@ -190,7 +190,7 @@ export default function Recipes() {
               </div>
               <button
                 onClick={() => setExpanded(expanded === recipe.id ? null : recipe.id)}
-                className="mt-4 flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:underline"
+                className="mt-4 flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
               >
                 {expanded === recipe.id ? t("recipes.hideRecipe") : t("recipes.viewRecipe")}
                 {expanded === recipe.id ? (
@@ -200,15 +200,15 @@ export default function Recipes() {
                 )}
               </button>
               {expanded === recipe.id && (
-                <div className="mt-3 border-t border-slate-100 pt-3">
-                  <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                <div className="mt-3 border-t border-slate-100 pt-3 dark:border-slate-700">
+                  <h4 className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                     {t("recipes.ingredientsTitle")}
                   </h4>
                   <ul className="space-y-1">
                     {recipe.ingredients.map((ing, i) => (
                       <li key={ing.id ?? i} className="flex justify-between text-sm">
-                        <span className="text-slate-700">{ing.name}</span>
-                        <span className="text-slate-400">
+                        <span className="text-slate-700 dark:text-slate-200">{ing.name}</span>
+                        <span className="text-slate-400 dark:text-slate-500">
                           {ing.amount} {ing.unit}
                         </span>
                       </li>
@@ -216,10 +216,10 @@ export default function Recipes() {
                   </ul>
                   {recipe.instructions && (
                     <>
-                      <h4 className="mb-2 mt-4 text-xs font-bold uppercase tracking-wide text-slate-400">
+                      <h4 className="mb-2 mt-4 text-xs font-bold uppercase tracking-wide text-slate-400 dark:text-slate-500">
                         {t("recipes.instructionsTitle")}
                       </h4>
-                      <p className="whitespace-pre-line text-sm text-slate-600">
+                      <p className="whitespace-pre-line text-sm text-slate-600 dark:text-slate-300">
                         {recipe.instructions}
                       </p>
                     </>
@@ -242,65 +242,65 @@ export default function Recipes() {
       <Modal open={open} onClose={() => setOpen(false)} title={editingId ? t("recipes.editRecipe") : t("recipes.newRecipe")}>
         <form onSubmit={submit} className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">
           {error && (
-            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600">{error}</div>
+            <div className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-600 dark:bg-red-900/20 dark:text-red-400">{error}</div>
           )}
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">{t("recipes.title")}</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.title")}</label>
             <input
               type="text"
               required
               value={form.title}
               onChange={(e) => setForm({ ...form, title: e.target.value })}
               placeholder={t("recipes.titlePlaceholder")}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">{t("recipes.description")}</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.description")}</label>
             <input
               type="text"
               value={form.description}
               onChange={(e) => setForm({ ...form, description: e.target.value })}
               placeholder={t("recipes.descriptionPlaceholder")}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{t("recipes.time")}</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.time")}</label>
               <input
                 type="text"
                 value={form.prepTime}
                 onChange={(e) => setForm({ ...form, prepTime: e.target.value })}
                 placeholder={t("recipes.timePlaceholder")}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
             <div>
-              <label className="mb-1 block text-sm font-medium text-slate-700">{t("recipes.servingsLabel")}</label>
+              <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.servingsLabel")}</label>
               <input
                 type="number"
                 min={1}
                 value={form.servings}
                 onChange={(e) => setForm({ ...form, servings: Number(e.target.value) })}
-                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+                className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
               />
             </div>
           </div>
 
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-medium text-slate-700">{t("recipes.ingredientsTitle")}</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.ingredientsTitle")}</label>
               <button
                 type="button"
                 onClick={addIngredientRow}
-                className="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:underline"
+                className="flex items-center gap-1 text-sm font-semibold text-emerald-600 hover:underline dark:text-emerald-400"
               >
                 <Plus className="h-4 w-4" /> {t("recipes.addIngredient")}
               </button>
             </div>
             {form.ingredients.length === 0 ? (
-              <p className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400">
+              <p className="rounded-xl bg-slate-50 px-4 py-3 text-sm text-slate-400 dark:bg-slate-700/30 dark:text-slate-500">
                 {t("recipes.noIngredients")}
               </p>
             ) : (
@@ -312,26 +312,26 @@ export default function Recipes() {
                       value={ing.name}
                       onChange={(e) => updateIngredient(i, "name", e.target.value)}
                       placeholder={t("recipes.ingredientPlaceholder")}
-                      className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                      className="flex-1 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                     />
                     <input
                       type="text"
                       value={ing.amount}
                       onChange={(e) => updateIngredient(i, "amount", e.target.value)}
                       placeholder={t("recipes.amountPlaceholder")}
-                      className="w-16 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                      className="w-16 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                     />
                     <input
                       type="text"
                       value={ing.unit}
                       onChange={(e) => updateIngredient(i, "unit", e.target.value)}
                       placeholder={t("recipes.unitPlaceholder")}
-                      className="w-20 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500"
+                      className="w-20 rounded-xl border border-slate-300 px-3 py-2 text-sm outline-none focus:border-emerald-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
                     />
                     <button
                       type="button"
                       onClick={() => removeIngredientRow(i)}
-                      className="rounded-xl px-2 text-slate-400 hover:text-red-500"
+                      className="rounded-xl px-2 text-slate-400 hover:text-red-500 dark:text-slate-500 dark:hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
@@ -342,13 +342,13 @@ export default function Recipes() {
           </div>
 
           <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">{t("recipes.instructionsTitle")}</label>
+            <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("recipes.instructionsTitle")}</label>
             <textarea
               value={form.instructions}
               onChange={(e) => setForm({ ...form, instructions: e.target.value })}
               rows={4}
               placeholder={t("recipes.instructionsPlaceholder")}
-              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
+              className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-100"
             />
           </div>
           <button
