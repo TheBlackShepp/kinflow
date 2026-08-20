@@ -590,7 +590,7 @@ export default function ListDetail() {
             )}
           </div>
           <p className="text-sm text-slate-500 dark:text-slate-400">
-            {done}/{total} {done === 1 ? t("listDetail.completed", { count: done }) : t("listDetail.completedPlural", { count: done })}
+            {done}/{total} {done === 1 ? t("listDetail.completed") : t("listDetail.completedPlural")}
           </p>
         </div>
 

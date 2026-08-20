@@ -125,8 +125,8 @@
   "listDetail": {
     "loading": "Loading...",
     "notFound": "List not found",
-    "completed": "{{done}} completed",
-    "completedPlural": "{{done}} completed",
+    "completed": "completed",
+    "completedPlural": "completed",
     "totalEstimated": "Estimated total",
     "empty": "This list is empty",
     "emptyDesc": "Add items to get started",

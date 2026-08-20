@@ -125,8 +125,8 @@
   "listDetail": {
     "loading": "Cargando...",
     "notFound": "Lista no encontrada",
-    "completed": "{{done}} completado",
-    "completedPlural": "{{done}} completados",
+    "completed": "completado",
+    "completedPlural": "completados",
     "totalEstimated": "Total estimado",
     "empty": "Esta lista está vacía",
     "emptyDesc": "Agrega artículos para empezar",
