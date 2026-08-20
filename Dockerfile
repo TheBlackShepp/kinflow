@@ -30,6 +30,7 @@ COPY --from=backend-build /app/backend/node_modules/.prisma ./backend/node_modul
 COPY --from=backend-build /app/backend/node_modules/@prisma ./backend/node_modules/@prisma
 COPY --from=backend-build /app/backend/node_modules/better-sqlite3 ./backend/node_modules/better-sqlite3
 COPY backend/prisma/schema.prisma ./backend/prisma/schema.prisma
+COPY backend/prisma.config.ts ./backend/prisma.config.ts
 COPY --from=frontend-build /app/frontend/dist ./frontend/dist
 
 RUN mkdir -p /app/data
@@ -40,4 +41,4 @@ ENV NODE_ENV=production
 
 EXPOSE 4000
 
-CMD ["sh", "-c", "cd backend && npx prisma db push --skip-generate && cd /app && node backend/dist/index.js"]
+CMD ["sh", "-c", "cd backend && npx prisma db push && cd /app && node backend/dist/index.js"]
