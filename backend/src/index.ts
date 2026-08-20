@@ -37,5 +37,5 @@ app.get("/{*path}", (_req, res) => {
 });
 
 app.listen(port, () => {
-  console.log(`🚀 Servidor API corriendo en http://localhost:${port}`);
+  console.log(`🚀 API server running at http://localhost:${port}`);
 });

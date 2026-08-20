@@ -16,7 +16,7 @@ async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.familyId) {
-    res.status(400).json({ message: "Necesitas pertenecer a un hogar" });
+    res.status(400).json({ message: "You need to belong to a home" });
     return null;
   }
   return user.familyId;
@@ -84,8 +84,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 
     res.json(lists);
   } catch (error) {
-    console.error("Error obteniendo listas:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching lists:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -98,7 +98,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
     const { name, icon, id, visibility, memberIds, type, color } = req.body;
     if (!name) {
-      return res.status(400).json({ message: "El nombre de la lista es requerido" });
+      return res.status(400).json({ message: "List name is required" });
     }
 
     const vis = VISIBILITIES.includes(visibility) ? visibility : "family";
@@ -132,8 +132,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     notifyListChange(familyId, list, "list.created", userId);
     res.status(201).json(list);
   } catch (error) {
-    console.error("Error creando lista:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error creating list:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -145,7 +145,7 @@ router.patch("/reorder", async (req: AuthRequest, res: Response) => {
     const userId = req.user!.userId;
     const { ids } = req.body;
     if (!Array.isArray(ids) || !ids.every((id: unknown) => typeof id === "string")) {
-      return res.status(400).json({ message: "Se espera un array de IDs" });
+      return res.status(400).json({ message: "An array of IDs is expected" });
     }
 
     await prisma.$transaction(
@@ -172,8 +172,8 @@ router.patch("/reorder", async (req: AuthRequest, res: Response) => {
 
     res.json(lists);
   } catch (error) {
-    console.error("Error reordenando listas:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error reordering lists:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -190,13 +190,13 @@ router.get("/:id", async (req: AuthRequest, res: Response) => {
     });
 
     if (!list || list.familyId !== familyId || !canAccess(list, userId)) {
-      return res.status(404).json({ message: "Lista no encontrada" });
+      return res.status(404).json({ message: "List not found" });
     }
 
     res.json(list);
   } catch (error) {
-    console.error("Error obteniendo lista:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching list:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -213,10 +213,10 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     });
 
     if (!list || list.familyId !== familyId) {
-      return res.status(404).json({ message: "Lista no encontrada" });
+      return res.status(404).json({ message: "List not found" });
     }
     if (list.ownerId !== userId) {
-      return res.status(403).json({ message: "Solo el propietario puede modificar la lista" });
+      return res.status(403).json({ message: "Only the owner can modify the list" });
     }
 
     const data: Prisma.ListUpdateInput = {};
@@ -224,13 +224,13 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     if (req.body.icon !== undefined) data.icon = String(req.body.icon);
     if (req.body.type !== undefined) {
       if (!LIST_TYPES.includes(req.body.type)) {
-        return res.status(400).json({ message: "Tipo de lista no válido" });
+        return res.status(400).json({ message: "Invalid list type" });
       }
       data.type = req.body.type;
     }
     if (req.body.visibility !== undefined) {
       if (!VISIBILITIES.includes(req.body.visibility)) {
-        return res.status(400).json({ message: "Visibilidad no válida" });
+        return res.status(400).json({ message: "Invalid visibility" });
       }
       data.visibility = req.body.visibility;
     }
@@ -273,8 +273,8 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     notifyListChange(familyId, updated, "list.updated", userId);
     res.json(updated);
   } catch (error) {
-    console.error("Error actualizando lista:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error updating list:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -290,15 +290,15 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
       include: { members: { select: { userId: true } } },
     });
     if (!list || list.familyId !== familyId || !canAccess(list, userId)) {
-      return res.status(404).json({ message: "Lista no encontrada" });
+      return res.status(404).json({ message: "List not found" });
     }
 
     await prisma.list.delete({ where: { id: list.id } });
     notifyListChange(familyId, list, "list.deleted", userId);
-    res.json({ message: "Lista eliminada" });
+    res.json({ message: "List deleted" });
   } catch (error) {
-    console.error("Error eliminando lista:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting list:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -314,13 +314,13 @@ router.post("/:id/items", async (req: AuthRequest, res: Response) => {
       include: { members: { select: { userId: true } } },
     });
     if (!list || list.familyId !== familyId || !canAccess(list, userId)) {
-      return res.status(404).json({ message: "Lista no encontrada" });
+      return res.status(404).json({ message: "List not found" });
     }
 
     const { name, quantity, category, price, note, assigneeId, dueDate, priority, status, id } =
       req.body;
     if (!name) {
-      return res.status(400).json({ message: "El nombre del artículo es requerido" });
+      return res.status(400).json({ message: "Item name is required" });
     }
 
     const item = await prisma.listItem.create({
@@ -346,8 +346,8 @@ router.post("/:id/items", async (req: AuthRequest, res: Response) => {
     notifyListChange(familyId, list, "item.created", userId);
     res.status(201).json(item);
   } catch (error) {
-    console.error("Error agregando artículo:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error adding item:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -366,7 +366,7 @@ router.patch("/items/:itemId", async (req: AuthRequest, res: Response) => {
     });
 
     if (!item || item.list.familyId !== familyId || !canAccess(item.list, userId)) {
-      return res.status(404).json({ message: "Artículo no encontrado" });
+      return res.status(404).json({ message: "Item not found" });
     }
 
     const data: Prisma.ListItemUpdateInput = {
@@ -401,8 +401,8 @@ router.patch("/items/:itemId", async (req: AuthRequest, res: Response) => {
     notifyListChange(familyId, item.list, "item.updated", userId);
     res.json(updated);
   } catch (error) {
-    console.error("Error actualizando artículo:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error updating item:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -421,7 +421,7 @@ router.get("/items/:itemId/prices", async (req: AuthRequest, res: Response) => {
     });
 
     if (!item || item.list.familyId !== familyId || !canAccess(item.list, userId)) {
-      return res.status(404).json({ message: "Artículo no encontrado" });
+      return res.status(404).json({ message: "Item not found" });
     }
 
     const prices = await prisma.priceEntry.findMany({
@@ -431,8 +431,8 @@ router.get("/items/:itemId/prices", async (req: AuthRequest, res: Response) => {
 
     res.json(prices);
   } catch (error) {
-    console.error("Error obteniendo historial de precios:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching price history:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -451,15 +451,15 @@ router.delete("/items/:itemId", async (req: AuthRequest, res: Response) => {
     });
 
     if (!item || item.list.familyId !== familyId || !canAccess(item.list, userId)) {
-      return res.status(404).json({ message: "Artículo no encontrado" });
+      return res.status(404).json({ message: "Item not found" });
     }
 
     await prisma.listItem.delete({ where: { id: item.id } });
     notifyListChange(familyId, item.list, "item.deleted", userId);
-    res.json({ message: "Artículo eliminado" });
+    res.json({ message: "Item deleted" });
   } catch (error) {
-    console.error("Error eliminando artículo:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting item:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

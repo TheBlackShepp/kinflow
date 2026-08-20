@@ -12,7 +12,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
     const { name, email, password } = req.body;
 
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Todos los campos son requeridos" });
+      return res.status(400).json({ message: "All fields are required" });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -20,7 +20,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "El correo electrónico ya está registrado" });
+      return res.status(400).json({ message: "Email is already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -50,8 +50,8 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Error en registro:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Registration error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -61,7 +61,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Correo y contraseña requeridos" });
+      return res.status(400).json({ message: "Email and password required" });
     }
 
     const user = await prisma.user.findUnique({
@@ -70,12 +70,12 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
     });
 
     if (!user) {
-      return res.status(400).json({ message: "Credenciales inválidas" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isValidPassword = await bcrypt.compare(password, user.password);
     if (!isValidPassword) {
-      return res.status(400).json({ message: "Credenciales inválidas" });
+      return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const secret = process.env.JWT_SECRET || "kinflow_secret_key";
@@ -96,8 +96,8 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
       },
     });
   } catch (error) {
-    console.error("Error en login:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -105,7 +105,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
 router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
-    if (!userId) return res.status(401).json({ message: "No autorizado" });
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
 
     const user = await prisma.user.findUnique({
       where: { id: userId },
@@ -121,7 +121,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
     });
 
     if (!user) {
-      return res.status(404).json({ message: "Usuario no encontrado" });
+      return res.status(404).json({ message: "User not found" });
     }
 
     res.json({
@@ -132,8 +132,8 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
       family: user.family,
     });
   } catch (error) {
-    console.error("Error en me:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error in /me:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

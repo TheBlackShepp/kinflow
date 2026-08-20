@@ -5,7 +5,7 @@ import { addClient } from "../events";
 
 const router = Router();
 
-// SSE endpoint: mantiene la conexión abierta y reenvía eventos de la familia
+// SSE endpoint: keeps connection open and re-sends family events
 router.get("/", async (req: any, res: Response) => {
   const authHeader = req.headers["authorization"];
   const queryToken =
@@ -13,7 +13,7 @@ router.get("/", async (req: any, res: Response) => {
   const token = (authHeader && authHeader.split(" ")[1]) || queryToken;
 
   if (!token) {
-    return res.status(401).json({ message: "Token de acceso no proporcionado" });
+    return res.status(401).json({ message: "Access token not provided" });
   }
 
   const secret = process.env.JWT_SECRET || "kinflow_secret_key";
@@ -21,12 +21,12 @@ router.get("/", async (req: any, res: Response) => {
   try {
     decoded = jwt.verify(token, secret);
   } catch {
-    return res.status(403).json({ message: "Token inválido o expirado" });
+    return res.status(403).json({ message: "Invalid or expired token" });
   }
 
   const user = await prisma.user.findUnique({ where: { id: decoded.userId } });
   if (!user) {
-    return res.status(401).json({ message: "Usuario no encontrado" });
+    return res.status(401).json({ message: "User not found" });
   }
 
   res.setHeader("Content-Type", "text/event-stream");

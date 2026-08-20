@@ -11,7 +11,7 @@ async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.familyId) {
-    res.status(400).json({ message: "Necesitas pertenecer a un hogar" });
+    res.status(400).json({ message: "You need to belong to a home" });
     return null;
   }
   return user.familyId;
@@ -38,8 +38,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 
     res.json(products);
   } catch (error) {
-    console.error("Error obteniendo productos:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching products:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -67,8 +67,8 @@ router.get("/search", async (req: AuthRequest, res: Response) => {
 
     res.json(products);
   } catch (error) {
-    console.error("Error buscando productos:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error searching products:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -80,7 +80,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
     const { name, category, unit } = req.body;
     if (!name?.trim()) {
-      res.status(400).json({ message: "Nombre es obligatorio" });
+      res.status(400).json({ message: "Name is required" });
       return;
     }
 
@@ -88,7 +88,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       where: { familyId_name: { familyId, name: name.trim() } },
     });
     if (existing) {
-      res.status(409).json({ message: "Ya existe un producto con ese nombre" });
+      res.status(409).json({ message: "A product with that name already exists" });
       return;
     }
 
@@ -105,8 +105,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "product-created", req.user!.userId);
     res.status(201).json(product);
   } catch (error) {
-    console.error("Error creando producto:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error creating product:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -119,7 +119,7 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     const id = String(req.params.id);
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing || existing.familyId !== familyId) {
-      res.status(404).json({ message: "Producto no encontrado" });
+      res.status(404).json({ message: "Product not found" });
       return;
     }
 
@@ -137,8 +137,8 @@ router.patch("/:id", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "product-updated", req.user!.userId);
     res.json(product);
   } catch (error) {
-    console.error("Error actualizando producto:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error updating product:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -151,7 +151,7 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     const id = String(req.params.id);
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing || existing.familyId !== familyId) {
-      res.status(404).json({ message: "Producto no encontrado" });
+      res.status(404).json({ message: "Product not found" });
       return;
     }
 
@@ -159,8 +159,8 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "product-deleted", req.user!.userId);
     res.json({ ok: true });
   } catch (error) {
-    console.error("Error eliminando producto:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting product:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -173,19 +173,19 @@ router.post("/:id/prices", async (req: AuthRequest, res: Response) => {
     const id = String(req.params.id);
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing || existing.familyId !== familyId) {
-      res.status(404).json({ message: "Producto no encontrado" });
+      res.status(404).json({ message: "Product not found" });
       return;
     }
 
     const { supermarketId, price } = req.body;
     if (!supermarketId || !price?.trim()) {
-      res.status(400).json({ message: "Supermercado y precio son obligatorios" });
+      res.status(400).json({ message: "Supermarket and price are required" });
       return;
     }
 
     const supermarket = await prisma.supermarket.findUnique({ where: { id: String(supermarketId) } });
     if (!supermarket || supermarket.familyId !== familyId) {
-      res.status(404).json({ message: "Supermercado no encontrado" });
+      res.status(404).json({ message: "Supermarket not found" });
       return;
     }
 
@@ -198,8 +198,8 @@ router.post("/:id/prices", async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(productPrice);
   } catch (error) {
-    console.error("Error añadiendo precio:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error adding price:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -215,15 +215,15 @@ router.delete("/prices/:priceId", async (req: AuthRequest, res: Response) => {
       include: { product: true },
     });
     if (!priceEntry || priceEntry.product.familyId !== familyId) {
-      res.status(404).json({ message: "Precio no encontrado" });
+      res.status(404).json({ message: "Price not found" });
       return;
     }
 
     await prisma.productPrice.delete({ where: { id: priceId } });
     res.json({ ok: true });
   } catch (error) {
-    console.error("Error eliminando precio:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting price:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

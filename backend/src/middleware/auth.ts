@@ -18,14 +18,14 @@ export const authenticateToken = (
   const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) {
-    return res.status(401).json({ message: "Token de acceso no proporcionado" });
+    return res.status(401).json({ message: "Access token not provided" });
   }
 
   const secret = process.env.JWT_SECRET || "kinflow_secret_key";
 
   jwt.verify(token, secret, (err, decoded: any) => {
     if (err) {
-      return res.status(403).json({ message: "Token inválido o expirado" });
+      return res.status(403).json({ message: "Invalid or expired token" });
     }
     req.user = decoded;
     next();

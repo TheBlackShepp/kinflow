@@ -11,7 +11,7 @@ async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.familyId) {
-    res.status(400).json({ message: "Necesitas pertenecer a un hogar" });
+    res.status(400).json({ message: "You need to belong to a home" });
     return null;
   }
   return user.familyId;
@@ -31,8 +31,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 
     res.json(recipes);
   } catch (error) {
-    console.error("Error obteniendo recetas:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching recipes:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -45,13 +45,13 @@ router.get("/:id", async (req: AuthRequest, res: Response) => {
     });
 
     if (!recipe) {
-      return res.status(404).json({ message: "Receta no encontrada" });
+      return res.status(404).json({ message: "Recipe not found" });
     }
 
     res.json(recipe);
   } catch (error) {
-    console.error("Error obteniendo receta:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching recipe:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -64,7 +64,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     const { title, description, prepTime, servings, instructions, ingredients, id } = req.body;
 
     if (!title) {
-      return res.status(400).json({ message: "El título de la receta es requerido" });
+      return res.status(400).json({ message: "Recipe title is required" });
     }
 
     const recipe = await prisma.recipe.create({
@@ -93,8 +93,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "recipe.created", req.user!.userId);
     res.status(201).json(recipe);
   } catch (error) {
-    console.error("Error creando receta:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error creating recipe:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -106,7 +106,7 @@ router.put("/:id", async (req: AuthRequest, res: Response) => {
 
     const existing = await prisma.recipe.findUnique({ where: { id: String(req.params.id) } });
     if (!existing || existing.familyId !== familyId) {
-      return res.status(404).json({ message: "Receta no encontrada" });
+      return res.status(404).json({ message: "Recipe not found" });
     }
 
     const { title, description, prepTime, servings, instructions, ingredients } = req.body;
@@ -142,8 +142,8 @@ router.put("/:id", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "recipe.updated", req.user!.userId);
     res.json(recipe);
   } catch (error) {
-    console.error("Error actualizando receta:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error updating recipe:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -155,15 +155,15 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
 
     const existing = await prisma.recipe.findUnique({ where: { id: String(req.params.id) } });
     if (!existing || existing.familyId !== familyId) {
-      return res.status(404).json({ message: "Receta no encontrada" });
+      return res.status(404).json({ message: "Recipe not found" });
     }
 
     await prisma.recipe.delete({ where: { id: existing.id } });
     notifyFamily(familyId, "recipe.deleted", req.user!.userId);
-    res.json({ message: "Receta eliminada" });
+    res.json({ message: "Recipe deleted" });
   } catch (error) {
-    console.error("Error eliminando receta:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting recipe:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

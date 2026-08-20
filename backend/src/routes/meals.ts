@@ -11,7 +11,7 @@ async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.familyId) {
-    res.status(400).json({ message: "Necesitas pertenecer a un hogar" });
+    res.status(400).json({ message: "You need to belong to a home" });
     return null;
   }
   return user.familyId;
@@ -40,8 +40,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 
     res.json(mealPlans);
   } catch (error) {
-    console.error("Error obteniendo menús:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching meals:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -54,17 +54,17 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     const { date, mealType, recipeId, customTitle, id } = req.body;
 
     if (!date || !mealType) {
-      return res.status(400).json({ message: "Fecha y tipo de comida son requeridos" });
+      return res.status(400).json({ message: "Date and meal type are required" });
     }
 
     if (!customTitle && !recipeId) {
-      return res.status(400).json({ message: "Se necesita una receta o un título" });
+      return res.status(400).json({ message: "A recipe or title is needed" });
     }
 
     if (recipeId) {
       const recipe = await prisma.recipe.findUnique({ where: { id: recipeId } });
       if (!recipe || recipe.familyId !== familyId) {
-        return res.status(404).json({ message: "Receta no encontrada" });
+        return res.status(404).json({ message: "Recipe not found" });
       }
     }
 
@@ -83,8 +83,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "meal.updated", req.user!.userId);
     res.status(201).json(mealPlan);
   } catch (error) {
-    console.error("Error guardando menú:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error saving meal:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -98,15 +98,15 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
       where: { id: String(req.params.id) },
     });
     if (!meal || meal.familyId !== familyId) {
-      return res.status(404).json({ message: "Entrada de menú no encontrada" });
+      return res.status(404).json({ message: "Meal entry not found" });
     }
 
     await prisma.mealPlan.delete({ where: { id: meal.id } });
     notifyFamily(familyId, "meal.updated", req.user!.userId);
-    res.json({ message: "Entrada eliminada" });
+    res.json({ message: "Entry deleted" });
   } catch (error) {
-    console.error("Error eliminando menú:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting meal:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -119,7 +119,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
     const { start, end, listId } = req.body;
 
     if (!start || !end) {
-      return res.status(400).json({ message: "Se requiere un rango de fechas" });
+      return res.status(400).json({ message: "A date range is required" });
     }
 
     const mealPlans = await prisma.mealPlan.findMany({
@@ -132,7 +132,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
     });
 
     if (mealPlans.length === 0) {
-      return res.status(400).json({ message: "No hay recetas planificadas en ese rango" });
+      return res.status(400).json({ message: "No recipes planned in that range" });
     }
 
     // Pick target list: provided, or first list, or create one
@@ -140,7 +140,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
     if (listId) {
       list = await prisma.list.findUnique({ where: { id: listId } });
       if (!list || list.familyId !== familyId) {
-        return res.status(404).json({ message: "Lista no encontrada" });
+        return res.status(404).json({ message: "List not found" });
       }
     } else {
       list = await prisma.list.findFirst({
@@ -149,7 +149,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
       });
       if (!list) {
         list = await prisma.list.create({
-          data: { name: "Supermercado", familyId },
+          data: { name: "Supermarket", familyId },
         });
       }
     }
@@ -189,7 +189,7 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
             listId: list.id,
             name: ing.name,
             quantity: ing.quantity,
-            category: "Supermercado",
+            category: "Supermarket",
           },
         });
         createdCount += 1;
@@ -211,8 +211,8 @@ router.post("/export-to-list", async (req: AuthRequest, res: Response) => {
       })),
     });
   } catch (error) {
-    console.error("Error exportando ingredientes:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error exporting ingredients:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

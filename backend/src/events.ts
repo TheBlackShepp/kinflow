@@ -34,7 +34,7 @@ export function notifyFamily(familyId: string, type: string, byUserId: string) {
     try {
       client.res.write(payload);
     } catch {
-      // cliente desconectado, se limpiará en "close"
+      // client disconnected, will be cleaned up in "close"
     }
   }
 }
@@ -49,7 +49,7 @@ export function notifyUsers(familyId: string, userIds: string[], type: string, b
     try {
       client.res.write(payload);
     } catch {
-      // cliente desconectado, se limpiará en "close"
+      // client disconnected, will be cleaned up in "close"
     }
   }
 }

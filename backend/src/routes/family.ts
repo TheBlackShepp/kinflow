@@ -23,7 +23,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     const { name } = req.body;
 
     if (!name) {
-      return res.status(400).json({ message: "El nombre del hogar es requerido" });
+      return res.status(400).json({ message: "Home name is required" });
     }
 
     const existingUser = await prisma.user.findUnique({
@@ -32,7 +32,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     });
 
     if (existingUser?.familyId) {
-      return res.status(400).json({ message: "Ya perteneces a un hogar" });
+      return res.status(400).json({ message: "You already belong to a home" });
     }
 
     let inviteCode = generateInviteCode();
@@ -51,8 +51,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
     res.status(201).json(family);
   } catch (error) {
-    console.error("Error creando familia:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error creating family:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -63,12 +63,12 @@ router.post("/join", async (req: AuthRequest, res: Response) => {
     const { inviteCode } = req.body;
 
     if (!inviteCode) {
-      return res.status(400).json({ message: "El código de invitación es requerido" });
+      return res.status(400).json({ message: "Invite code is required" });
     }
 
     const user = await prisma.user.findUnique({ where: { id: userId } });
     if (user?.familyId) {
-      return res.status(400).json({ message: "Ya perteneces a un hogar" });
+      return res.status(400).json({ message: "You already belong to a home" });
     }
 
     const family = await prisma.family.findUnique({
@@ -76,7 +76,7 @@ router.post("/join", async (req: AuthRequest, res: Response) => {
     });
 
     if (!family) {
-      return res.status(404).json({ message: "Código de invitación inválido" });
+      return res.status(404).json({ message: "Invalid invite code" });
     }
 
     await prisma.user.update({
@@ -86,8 +86,8 @@ router.post("/join", async (req: AuthRequest, res: Response) => {
 
     res.json(family);
   } catch (error) {
-    console.error("Error uniendo a familia:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error joining family:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -109,13 +109,13 @@ router.get("/", async (req: AuthRequest, res: Response) => {
     });
 
     if (!user?.family) {
-      return res.status(404).json({ message: "No perteneces a ningún hogar" });
+      return res.status(404).json({ message: "You don't belong to any home" });
     }
 
     res.json(user.family);
   } catch (error) {
-    console.error("Error obteniendo familia:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching family:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 

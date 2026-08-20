@@ -11,7 +11,7 @@ async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;
   const user = await prisma.user.findUnique({ where: { id: userId } });
   if (!user?.familyId) {
-    res.status(400).json({ message: "Necesitas pertenecer a un hogar" });
+    res.status(400).json({ message: "You need to belong to a home" });
     return null;
   }
   return user.familyId;
@@ -30,8 +30,8 @@ router.get("/", async (req: AuthRequest, res: Response) => {
 
     res.json(supermarkets);
   } catch (error) {
-    console.error("Error obteniendo supermercados:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error fetching supermarkets:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -43,7 +43,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
     const { name } = req.body;
     if (!name?.trim()) {
-      res.status(400).json({ message: "Nombre es obligatorio" });
+      res.status(400).json({ message: "Name is required" });
       return;
     }
 
@@ -51,7 +51,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       where: { familyId_name: { familyId, name: name.trim() } },
     });
     if (existing) {
-      res.status(409).json({ message: "Ya existe un supermercado con ese nombre" });
+      res.status(409).json({ message: "A supermarket with that name already exists" });
       return;
     }
 
@@ -62,8 +62,8 @@ router.post("/", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "supermarket-created", req.user!.userId);
     res.status(201).json(supermarket);
   } catch (error) {
-    console.error("Error creando supermercado:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error creating supermarket:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
@@ -76,7 +76,7 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     const id = String(req.params.id);
     const existing = await prisma.supermarket.findUnique({ where: { id } });
     if (!existing || existing.familyId !== familyId) {
-      res.status(404).json({ message: "Supermercado no encontrado" });
+      res.status(404).json({ message: "Supermarket not found" });
       return;
     }
 
@@ -85,7 +85,7 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     });
     if (priceCount > 0) {
       res.status(409).json({
-        message: `No se puede eliminar: tiene ${priceCount} precio(s) asociado(s). Elimina los precios primero.`,
+        message: `Cannot delete: has ${priceCount} associated price(s). Delete the prices first.`,
       });
       return;
     }
@@ -94,8 +94,8 @@ router.delete("/:id", async (req: AuthRequest, res: Response) => {
     notifyFamily(familyId, "supermarket-deleted", req.user!.userId);
     res.json({ ok: true });
   } catch (error) {
-    console.error("Error eliminando supermercado:", error);
-    res.status(500).json({ message: "Error interno del servidor" });
+    console.error("Error deleting supermarket:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 });
 
