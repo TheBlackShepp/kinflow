@@ -88,4 +88,4 @@ La app queda accesible en `http://tu-ip:4000`. Los datos se guardan en el volume
 
 ## Licencia
 
-MIT
+This project is licensed under the **MIT** Licence. See the `LICENSE` file for further details.
