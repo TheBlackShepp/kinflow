@@ -576,7 +576,7 @@ export default function Lists() {
                     ))}
                   </div>
                 )}
-                <div className={`grid gap-3 ${pinnedLists.length > 0 ? "grid-cols-1" : "grid-cols-2"}`}>
+                <div className="grid grid-cols-1 gap-3">
                   {unpinnedLists.map((list) => (
                     <ListCard
                       key={list.id}
