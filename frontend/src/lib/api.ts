@@ -23,6 +23,12 @@ export function isNavigatorOnline(): boolean {
   return typeof navigator !== "undefined" && navigator.onLine;
 }
 
+function getBaseUrl(): string {
+  const envUrl = import.meta.env.VITE_API_URL;
+  if (envUrl) return envUrl;
+  return "";
+}
+
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   if (!isNavigatorOnline()) {
     throw new OfflineError();
@@ -39,7 +45,7 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 
   let res: Response;
   try {
-    res = await fetch(`/api${path}`, {
+    res = await fetch(`${getBaseUrl()}/api${path}`, {
       ...options,
       headers,
     });

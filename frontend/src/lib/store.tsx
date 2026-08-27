@@ -467,7 +467,7 @@ export function DataProvider({ children }: { children: ReactNode }) {
     if (!token) return;
 
     const source = new EventSource(
-      `/api/events?token=${encodeURIComponent(token)}`
+      `${import.meta.env.VITE_API_URL ?? ""}/api/events?token=${encodeURIComponent(token)}`
     );
 
     source.onmessage = (event) => {
