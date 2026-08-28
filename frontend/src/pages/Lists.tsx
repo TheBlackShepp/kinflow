@@ -845,7 +845,7 @@ export default function Lists() {
                           className="h-4 w-4 rounded border-slate-300 text-emerald-500 focus:ring-emerald-500 dark:border-slate-500"
                         />
                         <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{u.name}</span>
-                        <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">{u.email}</span>
+                        <span className="ml-auto text-xs text-slate-400 dark:text-slate-500">{u.username}</span>
                       </label>
                     ))}
                   {familyUsers.length <= 1 && (

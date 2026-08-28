@@ -142,7 +142,7 @@ export default function Layout({ children }: { children: ReactNode }) {
             </div>
             <div className="min-w-0">
               <p className="truncate text-sm font-semibold">{user?.name}</p>
-              <p className="truncate text-xs text-slate-400">{user?.email}</p>
+              <p className="truncate text-xs text-slate-400">{user?.username}</p>
             </div>
           </div>
           <div className="mb-2 flex gap-2">

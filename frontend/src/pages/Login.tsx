@@ -9,7 +9,7 @@ export default function Login() {
   const { t } = useTranslation();
   const { login } = useAuth();
   const navigate = useNavigate();
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -19,7 +19,7 @@ export default function Login() {
     setError("");
     setLoading(true);
     try {
-      await login(email, password);
+      await login(username, password);
       navigate("/");
     } catch (err: any) {
       setError(err.message);
@@ -35,14 +35,14 @@ export default function Login() {
           <div className="rounded-xl bg-red-50 dark:bg-red-900/20 px-4 py-3 text-sm text-red-600 dark:text-red-400">{error}</div>
         )}
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.login.email")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.login.username")}</label>
           <input
-            type="email"
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            placeholder={t("auth.login.emailPlaceholder")}
+            placeholder={t("auth.login.usernamePlaceholder")}
           />
         </div>
         <div>

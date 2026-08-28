@@ -10,7 +10,7 @@ export default function Register() {
   const { register } = useAuth();
   const navigate = useNavigate();
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -20,7 +20,7 @@ export default function Register() {
     setError("");
     setLoading(true);
     try {
-      await register(name, email, password);
+      await register(name, username, password);
       navigate("/");
     } catch (err: any) {
       setError(err.message);
@@ -47,14 +47,14 @@ export default function Register() {
           />
         </div>
         <div>
-          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.email")}</label>
+          <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.username")}</label>
           <input
-            type="email"
+            type="text"
             required
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
-            placeholder={t("auth.register.emailPlaceholder")}
+            placeholder={t("auth.register.usernamePlaceholder")}
           />
         </div>
         <div>

@@ -185,7 +185,7 @@ export default function Family() {
                       </span>
                     )}
                   </p>
-                  <p className="text-xs text-slate-400 dark:text-slate-500">{member.email}</p>
+                  <p className="text-xs text-slate-400 dark:text-slate-500">{member.username}</p>
                 </div>
               </li>
             ))}

@@ -1,7 +1,7 @@
 export interface User {
   id: string;
   name: string;
-  email: string;
+  username: string;
   familyId?: string | null;
   family?: Family | null;
 }
@@ -10,7 +10,7 @@ export interface Family {
   id: string;
   name: string;
   inviteCode: string;
-  users?: { id: string; name: string; email: string }[];
+  users?: { id: string; name: string; username: string }[];
 }
 
 export interface PriceEntry {
