@@ -6,6 +6,7 @@ dev-dist
 backend/dev.db
 backend/generated
 backend/prisma/dev.db
+backend/.test.db
 
 # Capacitor native builds
 frontend/ios/
