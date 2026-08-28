@@ -587,15 +587,28 @@ export default function Lists() {
                   ))}
                 </div>
               </div>
-              <div className="hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 sm:gap-3">
-                {sortedLists.map((list) => (
-                  <ListCard
-                    key={list.id}
-                    list={list}
-                    isDragging={activeId === list.id}
-                    onLongPress={handleLongPress}
-                  />
-                ))}
+              <div className="hidden sm:block">
+                {pinnedLists.length > 0 && (
+                  <div className="mb-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    {pinnedLists.map((list) => (
+                      <PinnedCard
+                        key={list.id}
+                        list={list}
+                        onLongPress={handleLongPress}
+                      />
+                    ))}
+                  </div>
+                )}
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                  {unpinnedLists.map((list) => (
+                    <ListCard
+                      key={list.id}
+                      list={list}
+                      isDragging={activeId === list.id}
+                      onLongPress={handleLongPress}
+                    />
+                  ))}
+                </div>
               </div>
             </SortableContext>
             <DragOverlay>
