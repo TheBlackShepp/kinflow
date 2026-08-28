@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useTranslation } from "react-i18next";
-import { Users, Copy, Check, Home as HomeIcon, Link2, ArrowRight, Loader2 } from "lucide-react";
+import { Users, Copy, Check, Home as HomeIcon, Link2, Loader2 } from "lucide-react";
 import { api } from "../lib/api";
 import { useAuth } from "../lib/auth";
 
@@ -10,7 +10,6 @@ export default function Family() {
   const [createName, setCreateName] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [copied, setCopied] = useState(false);
   const [copyInvite, setCopyInvite] = useState(false);
   const [inviteLink, setInviteLink] = useState<string | null>(null);
   const [inviteExpires, setInviteExpires] = useState<string | null>(null);
@@ -30,13 +29,6 @@ export default function Family() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const copyCode = async () => {
-    if (!user?.family?.inviteCode) return;
-    await navigator.clipboard.writeText(user.family.inviteCode);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
   };
 
   const generateInvite = async () => {
@@ -110,41 +102,23 @@ export default function Family() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800 dark:text-slate-100">{t("family.title")}</h1>
-        <p className="text-sm text-slate-500 dark:text-slate-400">{t("family.homeAndCode")}</p>
+      <div className="relative -mx-4 -mt-8 overflow-hidden sm:mx-0 sm:mt-0 sm:rounded-2xl sm:ring-1 sm:ring-slate-100 dark:sm:ring-slate-700">
+        <img
+          src="/images/family-banner.svg"
+          alt={t("family.bannerAlt")}
+          className="h-56 w-full object-cover sm:h-64"
+        />
+        <h1 className="absolute bottom-4 left-5 text-2xl font-bold text-white drop-shadow-md sm:bottom-6 sm:left-8 sm:text-3xl">
+          {family.name}
+        </h1>
       </div>
 
-      <div className="grid gap-6 md:grid-cols-2">
-        <section className="rounded-2xl bg-gradient-to-br from-emerald-500 to-teal-600 p-6 text-white shadow-lg">
-          <div className="flex items-center gap-3">
-            <HomeIcon className="h-6 w-6" />
-            <h2 className="text-lg font-bold">{family.name}</h2>
-          </div>
-          <p className="mt-4 text-sm text-emerald-50">{t("family.inviteCodeTitle")}</p>
-          <div className="mt-2 flex items-center gap-3">
-            <div className="rounded-2xl bg-white/20 px-6 py-4 text-3xl font-black tracking-[0.4em] backdrop-blur">
-              {family.inviteCode}
-            </div>
-            <button
-              onClick={copyCode}
-              className="flex items-center gap-2 rounded-xl bg-white px-4 py-3 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-50"
-            >
-              {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-              {copied ? t("family.copied") : t("family.copy")}
-            </button>
-          </div>
-          <p className="mt-3 flex items-center gap-1 text-xs text-emerald-100">
-            <ArrowRight className="h-3 w-3" />
-            {t("family.shareCode")}
-          </p>
-        </section>
-
+      <div className="grid gap-6 lg:grid-cols-2">
         <section className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
-          <div className="mb-4 flex items-center gap-2">
-            <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
-            <h2 className="font-semibold text-slate-800 dark:text-slate-100">{t("family.homeMembers")}</h2>
-          </div>
+        <div className="mb-4 flex items-center gap-2">
+          <Users className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+          <h2 className="font-semibold text-slate-800 dark:text-slate-100">{t("family.homeMembers")}</h2>
+        </div>
           <ul className="space-y-3">
             {family.users?.map((member) => (
               <li key={member.id} className="flex items-center gap-3">
@@ -171,7 +145,6 @@ export default function Family() {
             ))}
           </ul>
         </section>
-      </div>
 
       {isAdmin && (
         <section className="rounded-2xl bg-white dark:bg-slate-800 p-6 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
@@ -226,6 +199,7 @@ export default function Family() {
           )}
         </section>
       )}
+      </div>
     </div>
   );
 }
