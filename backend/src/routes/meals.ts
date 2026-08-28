@@ -1,11 +1,13 @@
 import { Router, Response } from "express";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { requireModule } from "../middleware/permissions";
 import { notifyFamily } from "../events";
 
 const router = Router();
 
 router.use(authenticateToken);
+router.use(requireModule("meals"));
 
 async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;

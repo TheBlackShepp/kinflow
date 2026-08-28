@@ -76,6 +76,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
         name: user.name,
         username: user.username,
         role: user.role,
+        permissions: user.permissions,
         familyId: user.familyId,
       },
     });
@@ -147,6 +148,7 @@ router.post("/invite/register", async (req: AuthRequest, res: Response) => {
         name: user.name,
         username: user.username,
         role: user.role,
+        permissions: user.permissions,
         familyId: user.familyId,
         family: invite.family,
       },
@@ -189,6 +191,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
         name: user.name,
         username: user.username,
         role: user.role,
+        permissions: user.permissions,
         familyId: user.familyId,
         family: user.family,
       },
@@ -211,7 +214,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
         family: {
           include: {
             users: {
-              select: { id: true, name: true, username: true },
+              select: { id: true, name: true, username: true, role: true, permissions: true },
             },
           },
         },
@@ -227,6 +230,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
       name: user.name,
       username: user.username,
       role: user.role,
+      permissions: user.permissions,
       familyId: user.familyId,
       family: user.family,
     });

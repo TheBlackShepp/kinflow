@@ -17,6 +17,7 @@ import {
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
 import { useDarkMode } from "../lib/useDarkMode";
+import { canReadModule, canWriteModule } from "../lib/permissions";
 import { MEAL_TYPE_COLORS, type ListItem } from "../lib/types";
 
 export default function Dashboard() {
@@ -127,7 +128,8 @@ export default function Dashboard() {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-2 gap-4 lg:hidden">
+        {canReadModule(user, "lists") && (
         <Link
           to="/lists"
           className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
@@ -139,6 +141,8 @@ export default function Dashboard() {
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.lists")}</p>
         </Link>
+        )}
+        {canReadModule(user, "products") && (
         <Link
           to="/products"
           className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
@@ -150,6 +154,8 @@ export default function Dashboard() {
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.products")}</p>
         </Link>
+        )}
+        {canReadModule(user, "recipes") && (
         <Link
           to="/recipes"
           className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
@@ -161,6 +167,8 @@ export default function Dashboard() {
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.recipes")}</p>
         </Link>
+        )}
+        {canReadModule(user, "meals") && (
         <Link
           to="/meals"
           className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700"
@@ -172,6 +180,7 @@ export default function Dashboard() {
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.meals")}</p>
         </Link>
+        )}
         {user?.role === "admin" && (
           <Link
             to="/family"
@@ -188,6 +197,7 @@ export default function Dashboard() {
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
+        {canReadModule(user, "meals") && (
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
           <div className="mb-4 flex items-center gap-2">
             <UtensilsCrossed className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -220,24 +230,15 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                       {m.recipe?.title ?? m.customTitle}
                     </span>
-        <Link
-          to="/family"
-          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700 lg:hidden"
-        >
-          <div className="flex items-center justify-between">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/40">
-              <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
-            </div>
-          </div>
-          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("nav.family")}</p>
-        </Link>
-      </div>
+                  </div>
                 </li>
               ))}
             </ul>
           )}
         </section>
+        )}
 
+        {canReadModule(user, "lists") && (
         <section className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
           <div className="mb-4 flex items-center gap-2">
             <ListTodo className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
@@ -260,7 +261,7 @@ export default function Dashboard() {
               {pendingItems.slice(0, 8).map((item) => (
                 <li key={item.id} className="flex items-center gap-3 text-sm">
                   <button
-                    onClick={() => toggleItem(item)}
+                    onClick={canWriteModule(user, "lists") ? () => toggleItem(item) : undefined}
                     className="shrink-0"
                   >
                     <Circle className="h-4 w-4 text-slate-300 transition hover:text-emerald-500 dark:text-slate-500 dark:hover:text-emerald-400" />
@@ -282,6 +283,7 @@ export default function Dashboard() {
             </ul>
           )}
         </section>
+        )}
       </div>
     </div>
   );

@@ -13,6 +13,8 @@ import {
   Package,
 } from "lucide-react";
 import { useData } from "../lib/store";
+import { useAuth } from "../lib/auth";
+import { canWriteModule } from "../lib/permissions";
 import { LIST_TYPE_CATEGORIES } from "../lib/listTypes";
 import type { Product } from "../lib/types";
 
@@ -21,6 +23,8 @@ const UNITS = ["u", "kg", "g", "l", "ml", "paq", "docena"];
 
 export default function Products() {
   const { t } = useTranslation();
+  const { user } = useAuth();
+  const canWrite = canWriteModule(user, "products");
 
   const {
     products,
@@ -186,6 +190,7 @@ export default function Products() {
             )}
           </div>
 
+          {canWrite && (
           <button
             onClick={() => {
               resetForm();
@@ -196,6 +201,7 @@ export default function Products() {
             <Plus className="h-4 w-4" />
             {t("products.newProduct")}
           </button>
+          )}
 
           {showForm && (
             <div className="rounded-2xl bg-white dark:bg-slate-800 p-4 shadow-sm ring-1 ring-slate-100 dark:ring-slate-700">
@@ -318,6 +324,8 @@ export default function Products() {
                                 <ChevronDown className="h-4 w-4" />
                               )}
                             </button>
+                            {canWrite && (
+                            <>
                             <button
                               onClick={() => openEdit(product)}
                               className="rounded-lg p-1.5 text-slate-400 dark:text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-600 dark:hover:text-slate-300"
@@ -338,6 +346,8 @@ export default function Products() {
                             >
                               <Trash2 className="h-4 w-4" />
                             </button>
+                            </>
+                            )}
                           </div>
                         </div>
 
@@ -360,12 +370,14 @@ export default function Products() {
                                       <span className="font-medium text-slate-800 dark:text-slate-100">
                                         {pp.price}€
                                       </span>
+                                      {canWrite && (
                                       <button
                                         onClick={() => deleteProductPrice(pp.id)}
                                         className="rounded p-0.5 text-slate-400 dark:text-slate-500 hover:text-red-500"
                                       >
                                         <X className="h-3 w-3" />
                                       </button>
+                                      )}
                                     </div>
                                   </li>
                                 ))}
@@ -375,7 +387,7 @@ export default function Products() {
                                 {t("products.noPrices")}
                               </p>
                             )}
-                            {supermarkets.length > 0 && (
+                            {supermarkets.length > 0 && canWrite && (
                               <div className="flex items-center gap-2">
                                 <select
                                   value={priceProductId === product.id ? priceSupermarketId : ""}
@@ -430,6 +442,7 @@ export default function Products() {
 
       {tab === "supermarkets" && (
         <>
+          {canWrite && (
           <div className="flex gap-2">
             <input
               type="text"
@@ -447,6 +460,7 @@ export default function Products() {
               <Plus className="h-4 w-4" />
             </button>
           </div>
+          )}
 
           {supermarkets.length === 0 ? (
             <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 py-12 text-center">
@@ -480,6 +494,7 @@ export default function Products() {
                             : t("products.productWithPricePlural", { count })}
                         </p>
                       </div>
+                      {canWrite && (
                       <button
                         onClick={() => {
                           if (
@@ -494,6 +509,7 @@ export default function Products() {
                       >
                         <Trash2 className="h-4 w-4" />
                       </button>
+                      )}
                     </li>
                   );
                 })}

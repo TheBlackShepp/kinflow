@@ -1,5 +1,6 @@
 import { Router, Response } from "express";
 import crypto from "crypto";
+import { Prisma } from "@prisma/client";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
 
@@ -149,8 +150,9 @@ router.get("/", async (req: AuthRequest, res: Response) => {
         family: {
           include: {
             users: {
-              select: { id: true, name: true, username: true, role: true },
+              select: { id: true, name: true, username: true, role: true, permissions: true },
             },
+            invites: true,
           },
         },
       },
@@ -163,6 +165,193 @@ router.get("/", async (req: AuthRequest, res: Response) => {
     res.json(user.family);
   } catch (error) {
     console.error("Error fetching family:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// List pending invitations (admin only)
+router.get("/invites", async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await getCurrentUser(req.user!.userId);
+    if (!user || !user.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can manage invitations" });
+    }
+    const invites = await prisma.familyInvite.findMany({
+      where: { familyId: user.familyId, usedAt: null },
+      orderBy: { createdAt: "desc" },
+    });
+    res.json(invites);
+  } catch (error) {
+    console.error("Error listing invites:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Revoke a pending invitation (admin only)
+router.delete("/invites/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    const user = await getCurrentUser(req.user!.userId);
+    if (!user || !user.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can manage invitations" });
+    }
+    const inviteId = String(req.params.id);
+    const invite = await prisma.familyInvite.findUnique({ where: { id: inviteId } });
+    if (!invite || invite.familyId !== user.familyId) {
+      return res.status(404).json({ message: "Invitation not found" });
+    }
+    if (invite.usedAt) {
+      return res.status(400).json({ message: "Invitation has already been used" });
+    }
+    await prisma.familyInvite.delete({ where: { id: inviteId } });
+    res.status(204).end();
+  } catch (error) {
+    console.error("Error revoking invite:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Update member permissions (admin only)
+router.patch("/members/:id/permissions", async (req: AuthRequest, res: Response) => {
+  try {
+    const admin = await getCurrentUser(req.user!.userId);
+    if (!admin || !admin.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (admin.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can manage permissions" });
+    }
+
+    const memberId = String(req.params.id);
+    const member = await prisma.user.findUnique({ where: { id: memberId } });
+    if (!member || member.familyId !== admin.familyId) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+    if (member.role === "admin") {
+      return res.status(400).json({ message: "Admins always have full access" });
+    }
+
+    const { permissions } = req.body;
+    if (!permissions || typeof permissions !== "object") {
+      return res.status(400).json({ message: "Permissions are required" });
+    }
+
+    const validLevels = ["full", "read", "none"];
+    const cleaned: Record<string, string> = {};
+    for (const mod of ["lists", "products", "recipes", "meals"]) {
+      const level = permissions[mod];
+      if (level && validLevels.includes(level)) {
+        cleaned[mod] = level;
+      }
+    }
+
+    await prisma.user.update({
+      where: { id: memberId },
+      data: { permissions: cleaned },
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Error updating permissions:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Change member role (admin only)
+router.patch("/members/:id/role", async (req: AuthRequest, res: Response) => {
+  try {
+    const admin = await getCurrentUser(req.user!.userId);
+    if (!admin || !admin.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (admin.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can manage roles" });
+    }
+
+    const memberId = String(req.params.id);
+    const member = await prisma.user.findUnique({ where: { id: memberId } });
+    if (!member || member.familyId !== admin.familyId) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    const { role } = req.body;
+    if (role !== "admin" && role !== "member") {
+      return res.status(400).json({ message: "Invalid role" });
+    }
+
+    if (role === "member") {
+      const adminsInFamily = await prisma.user.count({
+        where: { familyId: admin.familyId, role: "admin" },
+      });
+      if (adminsInFamily <= 1) {
+        return res.status(400).json({ message: "Cannot remove the last admin" });
+      }
+    }
+
+    // admin role reset permissions; member role needs default permissions
+    const permissions = role === "admin" ? { permissions: Prisma.JsonNull } : { permissions: { lists: "full", products: "full", recipes: "full", meals: "full" } };
+
+    await prisma.user.update({
+      where: { id: memberId },
+      data: { role, ...permissions },
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Error changing role:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+// Remove member from home (admin only)
+router.delete("/members/:id", async (req: AuthRequest, res: Response) => {
+  try {
+    const admin = await getCurrentUser(req.user!.userId);
+    if (!admin || !admin.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (admin.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can remove members" });
+    }
+
+    const memberId = String(req.params.id);
+    if (memberId === admin.id) {
+      return res.status(400).json({ message: "You cannot remove yourself" });
+    }
+
+    const member = await prisma.user.findUnique({ where: { id: memberId } });
+    if (!member || member.familyId !== admin.familyId) {
+      return res.status(404).json({ message: "Member not found" });
+    }
+
+    if (member.role === "admin") {
+      const adminsInFamily = await prisma.user.count({
+        where: { familyId: admin.familyId, role: "admin" },
+      });
+      if (adminsInFamily <= 1) {
+        return res.status(400).json({ message: "Cannot remove the last admin" });
+      }
+    }
+
+    // Reassign lists owned by the removed member to the admin, then detach from home
+    await prisma.list.updateMany({
+      where: { familyId: admin.familyId, ownerId: memberId },
+      data: { ownerId: admin.id },
+    });
+
+    await prisma.user.update({
+      where: { id: memberId },
+      data: { familyId: null, role: "member", permissions: Prisma.JsonNull },
+    });
+
+    res.json({ ok: true });
+  } catch (error) {
+    console.error("Error removing member:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });

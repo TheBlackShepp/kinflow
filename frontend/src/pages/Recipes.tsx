@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
+import { canWriteModule } from "../lib/permissions";
 import type { Recipe, Ingredient } from "../lib/types";
 import Modal from "../components/Modal";
 
@@ -38,6 +39,7 @@ export default function Recipes() {
   const { t } = useTranslation();
   const { user } = useAuth();
   const { recipes, ready, createRecipe, updateRecipe, deleteRecipe } = useData();
+  const canWrite = canWriteModule(user, "recipes");
   const [open, setOpen] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<string | null>(null);
@@ -159,6 +161,8 @@ export default function Recipes() {
               <div className="flex items-start justify-between">
                 <h3 className="font-semibold text-slate-800 dark:text-slate-100">{recipe.title}</h3>
                 <div className="flex shrink-0 items-center gap-1">
+                  {canWrite && (
+                    <>
                   <button
                     onClick={() => openEdit(recipe)}
                     className="rounded-lg p-1.5 text-slate-300 transition hover:bg-emerald-50 hover:text-emerald-600 dark:text-slate-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
@@ -172,6 +176,8 @@ export default function Recipes() {
                   >
                     <Trash2 className="h-4 w-4" />
                   </button>
+                    </>
+                  )}
                 </div>
               </div>
               {recipe.description && (
@@ -231,6 +237,7 @@ export default function Recipes() {
         </div>
       )}
 
+      {canWrite && (
       <button
         onClick={openCreate}
         className="fixed bottom-6 right-6 z-40 flex h-14 w-14 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg ring-1 ring-emerald-600 transition hover:bg-emerald-600 hover:shadow-xl"
@@ -238,6 +245,7 @@ export default function Recipes() {
       >
         <Plus className="h-7 w-7" />
       </button>
+      )}
 
       <Modal open={open} onClose={() => setOpen(false)} title={editingId ? t("recipes.editRecipe") : t("recipes.newRecipe")}>
         <form onSubmit={submit} className="max-h-[70vh] space-y-4 overflow-y-auto pr-1">

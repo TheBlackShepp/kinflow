@@ -2,6 +2,8 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useState, useEffect } from "react";
 import { AuthProvider, useAuth } from "./lib/auth";
+import { canReadModule } from "./lib/permissions";
+import type { Module } from "./lib/types";
 import { DataProvider } from "./lib/store";
 import Layout from "./components/Layout";import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -40,6 +42,21 @@ function AdminRoute({ children }: { children: React.ReactNode }) {
   }
   if (!user) return <Navigate to="/login" replace />;
   if (user.role !== "admin") return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
+function ModuleRoute({ module, children }: { module: Module; children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const { t } = useTranslation();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-slate-400">{t("app.loading")}</div>
+      </div>
+    );
+  }
+  if (!user) return <Navigate to="/login" replace />;
+  if (!canReadModule(user, module)) return <Navigate to="/" replace />;
   return <>{children}</>;
 }
 
@@ -119,51 +136,51 @@ export default function App() {
             <Route
               path="/lists"
               element={
-                <ProtectedRoute>
+                <ModuleRoute module="lists">
                   <Layout>
                     <Lists />
                   </Layout>
-                </ProtectedRoute>
+                </ModuleRoute>
               }
             />
             <Route
               path="/lists/:id"
               element={
-                <ProtectedRoute>
+                <ModuleRoute module="lists">
                   <Layout>
                     <ListDetail />
                   </Layout>
-                </ProtectedRoute>
+                </ModuleRoute>
               }
             />
             <Route
               path="/products"
               element={
-                <ProtectedRoute>
+                <ModuleRoute module="products">
                   <Layout>
                     <Products />
                   </Layout>
-                </ProtectedRoute>
+                </ModuleRoute>
               }
             />
             <Route
               path="/recipes"
               element={
-                <ProtectedRoute>
+                <ModuleRoute module="recipes">
                   <Layout>
                     <Recipes />
                   </Layout>
-                </ProtectedRoute>
+                </ModuleRoute>
               }
             />
             <Route
               path="/meals"
               element={
-                <ProtectedRoute>
+                <ModuleRoute module="meals">
                   <Layout>
                     <MealPlanner />
                   </Layout>
-                </ProtectedRoute>
+                </ModuleRoute>
               }
             />
             <Route

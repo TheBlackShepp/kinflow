@@ -18,6 +18,7 @@ import {
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
+import { canWriteModule } from "../lib/permissions";
 import type { ListItem, ListType, Product } from "../lib/types";
 import {
   LIST_TYPE_ICON,
@@ -68,6 +69,7 @@ export default function ListDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
+  const canWrite = canWriteModule(user, "lists");
   const { lists, ready, addItem, updateItem, deleteItem, deleteList, searchProducts } = useData();
   const [name, setName] = useState("");
   const [category, setCategory] = useState("General");
@@ -609,7 +611,7 @@ export default function ListDetail() {
             <div className="absolute right-0 top-12 z-50 w-64 overflow-hidden rounded-2xl bg-white dark:bg-slate-800 shadow-xl ring-1 ring-slate-100 dark:ring-slate-700">
               {menuPanel === "main" ? (
                 <>
-                  {isOwner && (
+                  {isOwner && canWrite && (
                     <button
                       onClick={openEdit}
                       className="flex w-full items-center gap-3 px-4 py-3 text-sm font-medium text-slate-700 dark:text-slate-200 transition hover:bg-slate-50 dark:hover:bg-slate-700"
@@ -647,6 +649,7 @@ export default function ListDetail() {
                       {hideCategories && <Check className="h-4 w-4" />}
                     </button>
                   )}
+                  {canWrite && (
                   <div className="border-t border-slate-100 dark:border-slate-700">
                     <button
                       onClick={() => {
@@ -659,6 +662,7 @@ export default function ListDetail() {
                       {t("listDetail.deleteList")}
                     </button>
                   </div>
+                  )}
                 </>
               ) : (
                 <>
@@ -708,6 +712,7 @@ export default function ListDetail() {
         </div>
       )}
 
+      {canWrite && (
       <form
         onSubmit={(e) => {
           e.preventDefault();
@@ -765,6 +770,7 @@ export default function ListDetail() {
         </div>
         {priceError && <p className="mt-2 text-xs text-red-600 dark:text-red-400">{priceError}</p>}
       </form>
+      )}
 
       {total === 0 ? (
         <div className="rounded-2xl border-2 border-dashed border-slate-200 dark:border-slate-600 py-16 text-center">
@@ -788,7 +794,7 @@ export default function ListDetail() {
               <ul className="divide-y divide-slate-100 dark:divide-slate-700">
                 {items.map((item) => (
                   <li key={item.id} className="flex items-center gap-3 py-2.5">
-                    <button onClick={() => toggleItem(item)} className="shrink-0">
+                    <button onClick={canWrite ? () => toggleItem(item) : undefined} className="shrink-0">
                       {listType === "media" ? (
                         <span
                           className={`rounded-full px-2.5 py-1 text-[10px] font-semibold ${
@@ -877,21 +883,25 @@ export default function ListDetail() {
                               ))}
                             </ul>
                           )}
+                          {canWrite && (
                           <button
                             onClick={() => openPriceEdit(item)}
                             className="mt-1.5 text-xs font-semibold text-emerald-600 dark:text-emerald-400 hover:underline"
                           >
                             {t("listDetail.changePrice")}
                           </button>
+                          )}
                         </div>
                       )}
                     </div>
+                    {canWrite && (
                     <button
                       onClick={() => handleDeleteItem(item)}
                       className="rounded-lg p-1.5 text-slate-300 dark:text-slate-600 transition hover:bg-red-50 dark:hover:bg-red-900/20 hover:text-red-500 dark:hover:text-red-400"
                     >
                       <Trash2 className="h-4 w-4" />
                     </button>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -900,6 +910,7 @@ export default function ListDetail() {
         </div>
       )}
 
+      {canWrite && (
       <div className="fixed inset-x-0 bottom-0 z-40 pb-[env(safe-area-inset-bottom)] lg:hidden">
         <div className="mx-auto max-w-5xl px-4 pb-4">
           <div className="rounded-2xl bg-white dark:bg-slate-800 p-3 shadow-xl ring-1 ring-slate-100 dark:ring-slate-700">
@@ -958,6 +969,7 @@ export default function ListDetail() {
           </div>
         </div>
       </div>
+      )}
 
       {list && (
         <EditListSheet open={editOpen} onClose={() => setEditOpen(false)} list={list} />

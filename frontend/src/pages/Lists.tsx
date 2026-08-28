@@ -33,6 +33,7 @@ import {
 } from "lucide-react";
 import { useData } from "../lib/store";
 import { useAuth } from "../lib/auth";
+import { canWriteModule } from "../lib/permissions";
 import type { ShoppingList, ListType, ListVisibility } from "../lib/types";
 import { getVISIBILITY_OPTIONS } from "../lib/listVisibility";
 import { getLIST_TYPES, LIST_TYPE_ICON } from "../lib/listTypes";
@@ -308,6 +309,7 @@ export default function Lists() {
   const VISIBILITY_OPTIONS = getVISIBILITY_OPTIONS();
 
   const { user } = useAuth();
+  const canWrite = canWriteModule(user, "lists");
   const { lists, ready, createList, deleteList, reorderLists, updateList } = useData();
   const navigate = useNavigate();
   const [createOpen, setCreateOpen] = useState(false);
@@ -428,9 +430,10 @@ export default function Lists() {
 
   const handleLongPress = useCallback(
     (list: ShoppingList, x: number, y: number) => {
+      if (!canWrite) return;
       setContextMenu({ listId: list.id, x, y });
     },
-    []
+    [canWrite]
   );
 
   const handleDragStart = useCallback(() => {
@@ -560,8 +563,8 @@ export default function Lists() {
           <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
+            onDragStart={canWrite ? handleDragStart : undefined}
+            onDragEnd={canWrite ? handleDragEnd : undefined}
           >
             <SortableContext items={listIds} strategy={rectSortingStrategy}>
               <div className="sm:hidden">
@@ -625,6 +628,7 @@ export default function Lists() {
         </>
       )}
 
+      {canWrite && (
       <button
         onClick={() => {
           setCreateStep("type");
@@ -636,6 +640,7 @@ export default function Lists() {
       >
         <Plus className="h-7 w-7" />
       </button>
+      )}
 
       {contextMenu && ctxList && (
         <div className="fixed inset-0 z-[60]" onClick={() => setContextMenu(null)}>

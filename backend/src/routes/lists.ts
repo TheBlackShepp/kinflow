@@ -2,6 +2,7 @@ import { Router, Response } from "express";
 import type { Prisma } from "@prisma/client";
 import prisma from "../prisma";
 import { authenticateToken, AuthRequest } from "../middleware/auth";
+import { requireModule } from "../middleware/permissions";
 import { notifyFamily, notifyUsers } from "../events";
 
 const router = Router();
@@ -11,6 +12,7 @@ const VISIBILITIES = ["private", "family", "custom"];
 const LIST_TYPES = ["shopping", "todo", "packing", "wishlist", "media"];
 
 router.use(authenticateToken);
+router.use(requireModule("lists"));
 
 async function requireFamily(req: AuthRequest, res: Response) {
   const userId = req.user!.userId;

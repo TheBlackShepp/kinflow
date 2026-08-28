@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
+import { canWriteModule } from "../lib/permissions";
 import type { TFunction } from "i18next";
 import { MEAL_TYPES } from "../lib/types";
 import Modal from "../components/Modal";
@@ -78,6 +79,7 @@ function addDays(d: Date, n: number) {
 export default function MealPlanner() {
   const { t } = useTranslation();
   const { user } = useAuth();
+  const canWrite = canWriteModule(user, "meals");
   const {
     ready,
     mealPlans,
@@ -292,6 +294,7 @@ export default function MealPlanner() {
                   )}
                 </h3>
                 {dayMeals.length === 0 ? (
+                  canWrite ? (
                   <button
                     onClick={() => openCell(d, "Almuerzo")}
                     className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-dashed border-slate-200 px-4 py-3 text-sm font-medium text-slate-400 transition hover:border-emerald-400 hover:bg-emerald-50 hover:text-emerald-600 dark:border-slate-600 dark:text-slate-500 dark:hover:border-emerald-500 dark:hover:bg-emerald-900/20 dark:hover:text-emerald-400"
@@ -299,16 +302,17 @@ export default function MealPlanner() {
                     <Plus className="h-4 w-4" />
                     {t("meals.planMeal")}
                   </button>
+                  ) : (
+                    <p className="mt-2 rounded-xl px-4 py-3 text-sm text-slate-400 dark:text-slate-500">
+                      —
+                    </p>
+                  )
                 ) : (
                   <div className="mt-2 grid gap-2 sm:grid-cols-2">
                     {dayMeals.map((m) => {
                       const style = MEAL_CARD_STYLES[m.mealType] ?? MEAL_CARD_STYLES.Almuerzo;
-                      return (
-                        <button
-                          key={m.id}
-                          onClick={() => openCell(d, m.mealType)}
-                          className={`rounded-xl border-l-4 px-3 py-2.5 text-left shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:ring-slate-700 ${style.card}`}
-                        >
+                      const content = (
+                        <>
                           <span className={`text-[10px] font-bold uppercase ${style.badge}`}>
                             {m.mealType}
                           </span>
@@ -318,7 +322,20 @@ export default function MealPlanner() {
                             )}
                             <span className="truncate">{m.recipe?.title ?? m.customTitle}</span>
                           </p>
+                        </>
+                      );
+                      return canWrite ? (
+                        <button
+                          key={m.id}
+                          onClick={() => openCell(d, m.mealType)}
+                          className={`rounded-xl border-l-4 px-3 py-2.5 text-left shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:ring-slate-700 ${style.card}`}
+                        >
+                          {content}
                         </button>
+                      ) : (
+                        <div key={m.id} className={`rounded-xl border-l-4 px-3 py-2.5 text-left shadow-sm ring-1 ring-slate-100 dark:ring-slate-700 ${style.card}`}>
+                          {content}
+                        </div>
                       );
                     })}
                   </div>

@@ -75,6 +75,7 @@ model User {
   role     String   @default("member")
   familyId String?
   family   Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
+  permissions Json?
   lists    ListMember[]
   createdAt DateTime @default(now())
 }

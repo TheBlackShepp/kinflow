@@ -1,8 +1,13 @@
+export type Module = "lists" | "products" | "recipes" | "meals";
+export type ModuleLevel = "full" | "read" | "none";
+export type UserPermissions = Partial<Record<Module, ModuleLevel>>;
+
 export interface User {
   id: string;
   name: string;
   username: string;
   role?: string;
+  permissions?: UserPermissions | null;
   familyId?: string | null;
   family?: Family | null;
 }
@@ -11,7 +16,18 @@ export interface Family {
   id: string;
   name: string;
   inviteCode: string;
-  users?: { id: string; name: string; username: string; role?: string }[];
+  users?: { id: string; name: string; username: string; role?: string; permissions?: UserPermissions | null }[];
+  invites?: FamilyInvite[];
+}
+
+export interface FamilyInvite {
+  id: string;
+  familyId: string;
+  token: string;
+  createdAt: string;
+  expiresAt: string;
+  usedAt?: string | null;
+  usedBy?: string | null;
 }
 
 export interface PriceEntry {

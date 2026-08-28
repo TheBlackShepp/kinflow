@@ -15,13 +15,15 @@ import {
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
+import { canReadModule } from "../lib/permissions";
+import type { Module } from "../lib/types";
 
-const navKeys = [
+const navKeys: { to: string; key: string; icon: typeof Home; end: boolean; module?: Module }[] = [
   { to: "/", key: "nav.home", icon: Home, end: true },
-  { to: "/lists", key: "nav.lists", icon: ShoppingBasket, end: false },
-  { to: "/products", key: "nav.products", icon: Package, end: false },
-  { to: "/recipes", key: "nav.recipes", icon: BookOpen, end: false },
-  { to: "/meals", key: "nav.meals", icon: CalendarDays, end: false },
+  { to: "/lists", key: "nav.lists", icon: ShoppingBasket, end: false, module: "lists" },
+  { to: "/products", key: "nav.products", icon: Package, end: false, module: "products" },
+  { to: "/recipes", key: "nav.recipes", icon: BookOpen, end: false, module: "recipes" },
+  { to: "/meals", key: "nav.meals", icon: CalendarDays, end: false, module: "meals" },
   { to: "/family", key: "nav.family", icon: Users, end: false },
 ];
 
@@ -118,7 +120,11 @@ export default function Layout({ children }: { children: ReactNode }) {
         </div>
         <nav className="mt-4 flex flex-1 flex-col gap-1 px-3">
           {navKeys
-            .filter(({ to }) => to !== "/family" || user?.role === "admin")
+            .filter(({ to, module: m }) => {
+              if (m) return canReadModule(user, m);
+              if (to === "/family") return user?.role === "admin";
+              return true;
+            })
             .map(({ to, key, icon: Icon, end }) => (
             <NavLink
               key={to}
