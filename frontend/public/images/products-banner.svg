@@ -1,0 +1,42 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="320" viewBox="0 0 1200 320">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#10b981"/>
+      <stop offset="1" stop-color="#059669"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="320" fill="url(#bg)"/>
+  <circle cx="1050" cy="60" r="130" fill="#ffffff" opacity="0.08"/>
+  <circle cx="1120" cy="290" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="80" cy="300" r="90" fill="#ffffff" opacity="0.08"/>
+  <circle cx="30" cy="50" r="60" fill="#ffffff" opacity="0.08"/>
+
+  <!-- price tag -->
+  <g transform="translate(790 150)">
+    <path d="M -60 -40 Q -70 -40 -70 -28 L -70 28 Q -70 40 -56 40 L 30 40 Q 44 40 44 28 L 44 -28 Q 44 -40 30 -40 Z" fill="#ffffff"/>
+    <circle cx="-12" cy="-4" r="9" fill="#a7f3d0"/>
+    <path d="M 2 14 L 24 36 M 24 14 L 2 36" stroke="#059669" stroke-width="6" stroke-linecap="round"/>
+  </g>
+
+  <!-- product box -->
+  <g transform="translate(230 210)">
+    <rect x="-40" y="0" width="80" height="70" rx="8" fill="#ecfdf5"/>
+    <rect x="-40" y="0" width="80" height="18" rx="8" fill="#a7f3d0"/>
+    <line x1="-10" y1="38" x2="36" y2="38" stroke="#34d399" stroke-width="7" stroke-linecap="round"/>
+    <line x1="-10" y1="54" x2="20" y2="54" stroke="#d1fae5" stroke-width="7" stroke-linecap="round"/>
+  </g>
+
+  <!-- shopping cart -->
+  <g transform="translate(1030 235)">
+    <path d="M -48 -8 L -38 40 L 40 40 L 50 -8 Z" fill="none" stroke="#ecfdf5" stroke-width="9" stroke-linejoin="round"/>
+    <circle cx="-26" cy="56" r="9" fill="#ffffff"/>
+    <circle cx="30" cy="56" r="9" fill="#ffffff"/>
+    <line x1="-60" y1="-14" x2="50" y2="-14" stroke="#ecfdf5" stroke-width="8" stroke-linecap="round"/>
+  </g>
+
+  <!-- tag clip -->
+  <g transform="translate(110 235)">
+    <path d="M 0 -12 Q 40 -20 44 16 L 6 26 Q 0 -4 0 -12 Z" fill="#ffffff"/>
+    <circle cx="24" cy="6" r="6" fill="#10b981"/>
+  </g>
+</svg>

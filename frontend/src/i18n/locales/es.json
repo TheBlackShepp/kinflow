@@ -187,6 +187,7 @@
   },
   "products": {
     "title": "Productos",
+    "bannerAlt": "Catálogo de productos",
     "subtitle": "Catálogo de productos del hogar",
     "loading": "Cargando productos...",
     "tabProducts": "Productos",
