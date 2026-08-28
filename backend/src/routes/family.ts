@@ -101,7 +101,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
         family: {
           include: {
             users: {
-              select: { id: true, name: true, email: true },
+              select: { id: true, name: true, username: true },
             },
           },
         },

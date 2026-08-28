@@ -2,6 +2,7 @@ import "dotenv/config";
 import express from "express";
 import cors from "cors";
 import path from "path";
+import fs from "fs";
 import authRoutes from "./routes/auth";
 import familyRoutes from "./routes/family";
 import listRoutes from "./routes/lists";
@@ -30,10 +31,15 @@ app.use("/api/events", eventRoutes);
 app.use("/api/products", productRoutes);
 app.use("/api/supermarkets", supermarketRoutes);
 
-const frontendDist = path.join(__dirname, "../../frontend/dist");
+const frontendDist = path.resolve(__dirname, "../../frontend/dist");
+const indexFile = path.join(frontendDist, "index.html");
 app.use(express.static(frontendDist));
 app.get("/{*path}", (_req, res) => {
-  res.sendFile(path.join(frontendDist, "index.html"));
+  if (!fs.existsSync(indexFile)) {
+    res.status(404).json({ message: "Not found" });
+    return;
+  }
+  res.sendFile(indexFile);
 });
 
 app.listen(port, () => {

@@ -9,18 +9,20 @@ const router = Router();
 // Register
 router.post("/register", async (req: AuthRequest, res: Response) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, username, password } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !username || !password) {
       return res.status(400).json({ message: "All fields are required" });
     }
 
+    const normalizedUsername = username.toLowerCase().trim();
+
     const existingUser = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { username: normalizedUsername },
     });
 
     if (existingUser) {
-      return res.status(400).json({ message: "Email is already registered" });
+      return res.status(400).json({ message: "Username is already registered" });
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -28,14 +30,14 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
     const user = await prisma.user.create({
       data: {
         name,
-        email: email.toLowerCase(),
+        username: normalizedUsername,
         password: hashedPassword,
       },
     });
 
     const secret = process.env.JWT_SECRET || "kinflow_secret_key";
     const token = jwt.sign(
-      { userId: user.id, email: user.email, familyId: user.familyId },
+      { userId: user.id, username: user.username, familyId: user.familyId },
       secret,
       { expiresIn: "7d" }
     );
@@ -45,7 +47,7 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
+        username: user.username,
         familyId: user.familyId,
       },
     });
@@ -58,14 +60,14 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
 // Login
 router.post("/login", async (req: AuthRequest, res: Response) => {
   try {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
 
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
     }
 
     const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase() },
+      where: { username: username.toLowerCase().trim() },
       include: { family: true },
     });
 
@@ -80,7 +82,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
 
     const secret = process.env.JWT_SECRET || "kinflow_secret_key";
     const token = jwt.sign(
-      { userId: user.id, email: user.email, familyId: user.familyId },
+      { userId: user.id, username: user.username, familyId: user.familyId },
       secret,
       { expiresIn: "7d" }
     );
@@ -90,7 +92,7 @@ router.post("/login", async (req: AuthRequest, res: Response) => {
       user: {
         id: user.id,
         name: user.name,
-        email: user.email,
+        username: user.username,
         familyId: user.familyId,
         family: user.family,
       },
@@ -113,7 +115,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
         family: {
           include: {
             users: {
-              select: { id: true, name: true, email: true },
+              select: { id: true, name: true, username: true },
             },
           },
         },
@@ -127,7 +129,7 @@ router.get("/me", authenticateToken, async (req: AuthRequest, res: Response) => 
     res.json({
       id: user.id,
       name: user.name,
-      email: user.email,
+      username: user.username,
       familyId: user.familyId,
       family: user.family,
     });
