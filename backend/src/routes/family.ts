@@ -14,6 +14,46 @@ function generateInviteCode() {
   return code;
 }
 
+function getInviteTTLHours(): number {
+  const raw = parseInt(process.env.INVITE_TTL_HOURS || "24", 10);
+  return Number.isFinite(raw) && raw > 0 ? raw : 24;
+}
+
+async function getCurrentUser(userId: string) {
+  return prisma.user.findUnique({ where: { id: userId } });
+}
+
+// Verify an invitation token (public, used by the invite page)
+router.get("/invites/:token/verify", async (req: AuthRequest, res: Response) => {
+  try {
+    const token = String(req.params.token);
+    const invite = await prisma.familyInvite.findUnique({
+      where: { token },
+      include: { family: { select: { id: true, name: true } } },
+    });
+
+    if (!invite) {
+      return res.status(404).json({ message: "Invitation not found" });
+    }
+
+    if (invite.usedAt) {
+      return res.status(400).json({ message: "Invitation has already been used" });
+    }
+
+    if (Date.now() > invite.expiresAt.getTime()) {
+      return res.status(410).json({ message: "Invitation has expired" });
+    }
+
+    res.json({
+      familyId: invite.familyId,
+      familyName: invite.family.name,
+    });
+  } catch (error) {
+    console.error("Error verifying invite:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
 router.use(authenticateToken);
 
 // Create family
@@ -26,13 +66,20 @@ router.post("/", async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Home name is required" });
     }
 
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
-      include: { family: true },
-    });
+    const existingUser = await getCurrentUser(userId);
+    if (!existingUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
 
-    if (existingUser?.familyId) {
+    if (existingUser.familyId) {
       return res.status(400).json({ message: "You already belong to a home" });
+    }
+
+    const familyCount = await prisma.family.count();
+    if (familyCount > 0) {
+      return res
+        .status(400)
+        .json({ message: "A home already exists. Use an invitation link to join." });
     }
 
     let inviteCode = generateInviteCode();
@@ -46,7 +93,7 @@ router.post("/", async (req: AuthRequest, res: Response) => {
 
     await prisma.user.update({
       where: { id: userId },
-      data: { familyId: family.id },
+      data: { familyId: family.id, role: "admin" },
     });
 
     res.status(201).json(family);
@@ -56,37 +103,38 @@ router.post("/", async (req: AuthRequest, res: Response) => {
   }
 });
 
-// Join family by invite code
-router.post("/join", async (req: AuthRequest, res: Response) => {
+// Create an invitation link (admin only)
+router.post("/invites", async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user!.userId;
-    const { inviteCode } = req.body;
+    const user = await getCurrentUser(userId);
 
-    if (!inviteCode) {
-      return res.status(400).json({ message: "Invite code is required" });
+    if (!user) return res.status(404).json({ message: "User not found" });
+    if (!user.familyId) {
+      return res.status(400).json({ message: "You don't belong to any home" });
+    }
+    if (user.role !== "admin") {
+      return res.status(403).json({ message: "Only the admin can create invitations" });
     }
 
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (user?.familyId) {
-      return res.status(400).json({ message: "You already belong to a home" });
-    }
+    const token = crypto.randomBytes(24).toString("hex");
+    const ttlHours = getInviteTTLHours();
+    const expiresAt = new Date(Date.now() + ttlHours * 60 * 60 * 1000);
 
-    const family = await prisma.family.findUnique({
-      where: { inviteCode: inviteCode.toUpperCase() },
+    const invite = await prisma.familyInvite.create({
+      data: {
+        familyId: user.familyId,
+        token,
+        expiresAt,
+      },
     });
 
-    if (!family) {
-      return res.status(404).json({ message: "Invalid invite code" });
-    }
-
-    await prisma.user.update({
-      where: { id: userId },
-      data: { familyId: family.id },
+    res.status(201).json({
+      token: invite.token,
+      expiresAt: invite.expiresAt.toISOString(),
     });
-
-    res.json(family);
   } catch (error) {
-    console.error("Error joining family:", error);
+    console.error("Error creating invite:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 });
@@ -101,7 +149,7 @@ router.get("/", async (req: AuthRequest, res: Response) => {
         family: {
           include: {
             users: {
-              select: { id: true, name: true, username: true },
+              select: { id: true, name: true, username: true, role: true },
             },
           },
         },

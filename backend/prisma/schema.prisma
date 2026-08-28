@@ -7,16 +7,28 @@ datasource db {
 }
 
 model Family {
-  id          String        @id @default(uuid())
+  id          String       @id @default(uuid())
   name        String
-  inviteCode  String        @unique
-  createdAt   DateTime      @default(now())
+  inviteCode  String       @unique
+  createdAt   DateTime     @default(now())
   users       User[]
   lists       List[]
   recipes     Recipe[]
   mealPlans   MealPlan[]
   products    Product[]
   supermarkets Supermarket[]
+  invites     FamilyInvite[]
+}
+
+model FamilyInvite {
+  id        String    @id @default(uuid())
+  familyId  String
+  family    Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  token     String    @unique
+  createdAt DateTime  @default(now())
+  expiresAt DateTime
+  usedAt    DateTime?
+  usedBy    String?
 }
 
 model Product {
@@ -60,6 +72,7 @@ model User {
   username String   @unique
   password String
   name     String
+  role     String   @default("member")
   familyId String?
   family   Family?  @relation(fields: [familyId], references: [id], onDelete: SetNull)
   lists    ListMember[]
