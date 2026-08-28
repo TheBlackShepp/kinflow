@@ -13,15 +13,23 @@ export default function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [hasUsers, setHasUsers] = useState(true);
 
   useEffect(() => {
+    let active = true;
     checkStatus()
       .then((s) => {
+        if (!active) return;
         if (!s.hasUsers) {
           navigate("/register", { replace: true });
+        } else {
+          setHasUsers(true);
         }
       })
       .catch(() => {});
+    return () => {
+      active = false;
+    };
   }, [checkStatus, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -73,12 +81,14 @@ export default function Login() {
         >
           {loading ? t("auth.login.submitting") : t("auth.login.submit")}
         </button>
-        <p className="text-center text-sm text-slate-500 dark:text-slate-400">
-          {t("auth.login.noAccount")}{" "}
-          <Link to="/register" className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
-            {t("auth.login.register")}
-          </Link>
-        </p>
+        {hasUsers === false && (
+          <p className="text-center text-sm text-slate-500 dark:text-slate-400">
+            {t("auth.login.noAccount")}{" "}
+            <Link to="/register" className="font-medium text-emerald-600 dark:text-emerald-400 hover:underline">
+              {t("auth.login.register")}
+            </Link>
+          </p>
+        )}
       </form>
     </AuthShell>
   );

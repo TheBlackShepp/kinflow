@@ -172,6 +172,19 @@ export default function Dashboard() {
           </div>
           <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("dashboard.meals")}</p>
         </Link>
+        {user?.role === "admin" && (
+          <Link
+            to="/family"
+            className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700 lg:hidden"
+          >
+            <div className="flex items-center justify-between">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/40">
+                <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+              </div>
+            </div>
+            <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("nav.family")}</p>
+          </Link>
+        )}
       </div>
 
       <div className="grid gap-3 lg:grid-cols-2">
@@ -207,7 +220,18 @@ export default function Dashboard() {
                     <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
                       {m.recipe?.title ?? m.customTitle}
                     </span>
-                  </div>
+        <Link
+          to="/family"
+          className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-slate-100 transition hover:shadow-md dark:bg-slate-800 dark:ring-slate-700 lg:hidden"
+        >
+          <div className="flex items-center justify-between">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-teal-100 dark:bg-teal-900/40">
+              <Users className="h-5 w-5 text-teal-600 dark:text-teal-400" />
+            </div>
+          </div>
+          <p className="mt-3 text-sm font-medium text-slate-600 dark:text-slate-300">{t("nav.family")}</p>
+        </Link>
+      </div>
                 </li>
               ))}
             </ul>

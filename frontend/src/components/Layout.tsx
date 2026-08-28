@@ -117,7 +117,9 @@ export default function Layout({ children }: { children: ReactNode }) {
           <SyncBadge />
         </div>
         <nav className="mt-4 flex flex-1 flex-col gap-1 px-3">
-          {navKeys.map(({ to, key, icon: Icon, end }) => (
+          {navKeys
+            .filter(({ to }) => to !== "/family" || user?.role === "admin")
+            .map(({ to, key, icon: Icon, end }) => (
             <NavLink
               key={to}
               to={to}
