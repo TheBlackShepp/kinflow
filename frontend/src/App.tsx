@@ -11,6 +11,7 @@ import Products from "./pages/Products";
 import Recipes from "./pages/Recipes";
 import MealPlanner from "./pages/MealPlanner";
 import Family from "./pages/Family";
+import Invite from "./pages/Invite";
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -33,6 +34,20 @@ function GuestRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function OnboardingOrResumeRoute({ children }: { children: React.ReactNode }) {
+  const { user, loading } = useAuth();
+  const { t } = useTranslation();
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-slate-400">{t("app.loading")}</div>
+      </div>
+    );
+  }
+  if (user && user.familyId) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -50,11 +65,12 @@ export default function App() {
             <Route
               path="/register"
               element={
-                <GuestRoute>
+                <OnboardingOrResumeRoute>
                   <Register />
-                </GuestRoute>
+                </OnboardingOrResumeRoute>
               }
             />
+            <Route path="/invite/:token" element={<Invite />} />
             <Route
               path="/"
               element={

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import type { FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -7,12 +7,22 @@ import AuthShell from "../components/AuthShell";
 
 export default function Login() {
   const { t } = useTranslation();
-  const { login } = useAuth();
+  const { login, checkStatus } = useAuth();
   const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    checkStatus()
+      .then((s) => {
+        if (!s.hasUsers) {
+          navigate("/register", { replace: true });
+        }
+      })
+      .catch(() => {});
+  }, [checkStatus, navigate]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();

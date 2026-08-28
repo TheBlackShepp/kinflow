@@ -27,8 +27,10 @@ interface AuthContextValue {
   loading: boolean;
   login: (username: string, password: string) => Promise<void>;
   register: (name: string, username: string, password: string) => Promise<void>;
+  registerViaInvite: (name: string, username: string, password: string, token: string) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  checkStatus: () => Promise<{ hasUsers: boolean; hasFamily: boolean }>;
 }
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
@@ -83,6 +85,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistUser(data.user);
   };
 
+  const registerViaInvite = async (name: string, username: string, password: string, token: string) => {
+    const data = await api.post<{ token: string; user: User }>("/auth/invite/register", {
+      name,
+      username,
+      password,
+      token,
+    });
+    setToken(data.token);
+    setUser(data.user);
+    persistUser(data.user);
+  };
+
   const logout = () => {
     clearToken();
     persistUser(null);
@@ -95,8 +109,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     persistUser(data);
   };
 
+  const checkStatus = async () => {
+    return api.get<{ hasUsers: boolean; hasFamily: boolean }>("/auth/status");
+  };
+
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, refreshUser }}>
+    <AuthContext.Provider value={{ user, loading, login, register, registerViaInvite, logout, refreshUser, checkStatus }}>
       {children}
     </AuthContext.Provider>
   );

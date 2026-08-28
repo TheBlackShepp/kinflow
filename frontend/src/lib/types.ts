@@ -2,6 +2,7 @@ export interface User {
   id: string;
   name: string;
   username: string;
+  role?: string;
   familyId?: string | null;
   family?: Family | null;
 }
@@ -10,7 +11,7 @@ export interface Family {
   id: string;
   name: string;
   inviteCode: string;
-  users?: { id: string; name: string; username: string }[];
+  users?: { id: string; name: string; username: string; role?: string }[];
 }
 
 export interface PriceEntry {
