@@ -15,6 +15,20 @@ function createToken(user: { id: string; username: string; familyId?: string | n
   );
 }
 
+function isStrongPassword(password: unknown): password is string {
+  return (
+    typeof password === "string" &&
+    password.length >= 6 &&
+    /[A-Z]/.test(password) &&
+    /[a-z]/.test(password) &&
+    /[0-9]/.test(password) &&
+    /[^A-Za-z0-9\s]/.test(password)
+  );
+}
+
+const PASSWORD_REQUIREMENTS_MESSAGE =
+  "Password must be at least 6 characters and include an uppercase letter, a lowercase letter, a number, and a symbol.";
+
 // System status: tells the client whether onboarding (first user) is needed
 router.get("/status", async (_req, res: Response) => {
   try {
@@ -37,6 +51,10 @@ router.post("/register", async (req: AuthRequest, res: Response) => {
 
     if (!name || !username || !password) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ message: PASSWORD_REQUIREMENTS_MESSAGE });
     }
 
     const userCount = await prisma.user.count();
@@ -93,6 +111,10 @@ router.post("/invite/register", async (req: AuthRequest, res: Response) => {
 
     if (!name || !username || !password || !token) {
       return res.status(400).json({ message: "All fields are required" });
+    }
+
+    if (!isStrongPassword(password)) {
+      return res.status(400).json({ message: PASSWORD_REQUIREMENTS_MESSAGE });
     }
 
     const invite = await prisma.familyInvite.findUnique({
