@@ -3,6 +3,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import Modal from "../components/Modal";
 import AuthShell from "../components/AuthShell";
+import PasswordRequirements from "../components/PasswordRequirements";
 
 describe("Modal", () => {
   it("renders nothing when closed", () => {
@@ -31,6 +32,24 @@ describe("Modal", () => {
     render(<Modal open onClose={onClose} title="Título">contenido</Modal>);
     await userEvent.click(screen.getByRole("button"));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});
+
+describe("PasswordRequirements", () => {
+  it("marks each requirement as met while the password changes", () => {
+    const { rerender } = render(<PasswordRequirements id="requirements" password="Aa1" />);
+
+    expect(screen.getByText("Una letra mayúscula")).toHaveAttribute("data-met", "true");
+    expect(screen.getByText("Una letra minúscula")).toHaveAttribute("data-met", "true");
+    expect(screen.getByText("Un número")).toHaveAttribute("data-met", "true");
+    expect(screen.getByText("6 caracteres como mínimo")).toHaveAttribute("data-met", "false");
+    expect(screen.getByText("Un símbolo")).toHaveAttribute("data-met", "false");
+
+    rerender(<PasswordRequirements id="requirements" password="Aa1!aa" />);
+
+    for (const requirement of screen.getAllByRole("listitem")) {
+      expect(requirement).toHaveAttribute("data-met", "true");
+    }
   });
 });
 
