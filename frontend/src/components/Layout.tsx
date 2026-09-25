@@ -12,10 +12,13 @@ import {
   WifiOff,
   RefreshCw,
   Package,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { useAuth } from "../lib/auth";
 import { useData } from "../lib/store";
 import { canReadModule } from "../lib/permissions";
+import { useDarkMode } from "../lib/useDarkMode";
 import type { Module } from "../lib/types";
 
 const navKeys: { to: string; key: string; icon: typeof Home; end: boolean; module?: Module }[] = [
@@ -78,6 +81,7 @@ export default function Layout({ children }: { children: ReactNode }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { dark, toggle: toggleDark } = useDarkMode();
   const isHome = location.pathname === "/";
 
   const handleLogout = () => {
@@ -156,9 +160,17 @@ export default function Layout({ children }: { children: ReactNode }) {
           <div className="mb-2 flex gap-2">
             <button
               onClick={toggleLanguage}
-              className="flex items-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+              className="flex flex-1 items-center justify-center gap-2 rounded-xl px-3 py-2 text-xs font-medium text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
             >
               🌐 {i18n.language === "es" ? "EN" : "ES"}
+            </button>
+            <button
+              onClick={toggleDark}
+              aria-label={dark ? t("settings.lightMode") : t("settings.darkMode")}
+              title={dark ? t("settings.lightMode") : t("settings.darkMode")}
+              className="flex h-9 w-9 items-center justify-center rounded-xl text-slate-300 transition-colors hover:bg-slate-800 hover:text-white"
+            >
+              {dark ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
             </button>
           </div>
           <button

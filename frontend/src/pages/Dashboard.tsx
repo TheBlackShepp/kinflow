@@ -91,7 +91,7 @@ export default function Dashboard() {
           </div>
           <button
             onClick={() => setSettingsOpen(!settingsOpen)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white shadow-md transition hover:scale-105 hover:bg-emerald-600"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-emerald-500 text-sm font-bold text-white shadow-md transition hover:scale-105 hover:bg-emerald-600 sm:hidden"
           >
             {user?.name?.charAt(0).toUpperCase()}
           </button>
@@ -99,8 +99,8 @@ export default function Dashboard() {
 
         {settingsOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={() => setSettingsOpen(false)} />
-            <div className="absolute right-0 top-14 z-50 w-56 overflow-hidden rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700">
+            <div className="fixed inset-0 z-40 sm:hidden" onClick={() => setSettingsOpen(false)} />
+            <div className="absolute right-0 top-14 z-50 w-56 overflow-hidden rounded-2xl bg-white p-2 shadow-xl ring-1 ring-slate-100 dark:bg-slate-800 dark:ring-slate-700 sm:hidden">
               <button
                 onClick={toggleLanguage}
                 className="flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 dark:text-slate-200 dark:hover:bg-slate-700"

@@ -68,6 +68,19 @@ describe("Dashboard", () => {
     expect(screen.getByText("Menús")).toBeInTheDocument();
   });
 
+  it("hides the settings menu trigger on desktop", async () => {
+    renderDashboard({
+      id: "a",
+      name: "Admin",
+      username: "admin",
+      role: "admin",
+      familyId: "f1",
+      family: { id: "f1", name: "Mi hogar", inviteCode: "x" },
+    });
+
+    expect(await screen.findByRole("button", { name: "A" })).toHaveClass("sm:hidden");
+  });
+
   it("hides the meals card for a member without meals access", async () => {
     renderDashboard({
       id: "m",
