@@ -4,8 +4,10 @@ import { Link, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { Home as HomeIcon, User as UserIcon, ArrowLeft, ArrowRight, Loader2 } from "lucide-react";
 import { useAuth } from "../lib/auth";
+import { isStrongPassword, PASSWORD_MIN_LENGTH } from "../lib/password";
 import { api } from "../lib/api";
 import AuthShell from "../components/AuthShell";
+import PasswordRequirements from "../components/PasswordRequirements";
 
 export default function Register() {
   const { t } = useTranslation();
@@ -26,6 +28,10 @@ export default function Register() {
   const handleCreateUser = async (e: FormEvent) => {
     e.preventDefault();
     setError("");
+    if (!isStrongPassword(password)) {
+      setError(t("auth.register.passwordRequirementsError"));
+      return;
+    }
     if (password !== confirmPassword) {
       setError(t("auth.register.passwordMismatch"));
       return;
@@ -118,11 +124,14 @@ export default function Register() {
             <input
               type="password"
               required
+              minLength={PASSWORD_MIN_LENGTH}
+              aria-describedby="register-password-requirements"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
               placeholder={t("auth.register.passwordPlaceholder")}
             />
+            <PasswordRequirements id="register-password-requirements" password={password} />
           </div>
           <div>
             <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-200">{t("auth.register.confirmPassword")}</label>

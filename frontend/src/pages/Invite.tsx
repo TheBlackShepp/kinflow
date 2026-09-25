@@ -3,7 +3,9 @@ import type { FormEvent } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "../lib/auth";
+import { isStrongPassword, PASSWORD_MIN_LENGTH } from "../lib/password";
 import AuthShell from "../components/AuthShell";
+import PasswordRequirements from "../components/PasswordRequirements";
 
 type VerifyState =
   | { status: "loading" }
@@ -55,6 +57,10 @@ export default function Invite() {
     e.preventDefault();
     if (!token) return;
     setError("");
+    if (!isStrongPassword(password)) {
+      setError(t("auth.register.passwordRequirementsError"));
+      return;
+    }
     setLoading(true);
     try {
       await registerViaInvite(name, username, password, token);
@@ -140,11 +146,14 @@ export default function Invite() {
           <input
             type="password"
             required
+            minLength={PASSWORD_MIN_LENGTH}
+            aria-describedby="invite-password-requirements"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             className="w-full rounded-xl border border-slate-300 dark:border-slate-500 bg-white dark:bg-slate-700/50 px-4 py-2.5 text-sm text-slate-800 dark:text-slate-100 outline-none focus:border-emerald-500 focus:ring-2 focus:ring-emerald-200"
             placeholder={t("auth.register.passwordPlaceholder")}
           />
+          <PasswordRequirements id="invite-password-requirements" password={password} />
         </div>
         <button
           type="submit"
