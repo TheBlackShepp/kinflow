@@ -74,12 +74,29 @@ describe("Invitations", () => {
     const res = await request(api).post("/api/auth/invite/register").send({
       name: "Newbie",
       username: "newbie",
-      password: "secret123",
+      password: "Secret1!",
       token: inv.body.token,
     });
     expect(res.status).toBe(201);
     expect(res.body.user.familyId).toBe(family.id);
     expect(res.body.user.role).toBe("member");
+  });
+
+  it("rejects invalid invite passwords without consuming the invitation", async () => {
+    const { token } = await setupAdminWithFamily();
+    const inv = await request(api).post("/api/family/invites").set("Authorization", `Bearer ${token}`);
+
+    const res = await request(api).post("/api/auth/invite/register").send({
+      name: "Newbie",
+      username: "newbie",
+      password: "alllower1!",
+      token: inv.body.token,
+    });
+
+    expect(res.status).toBe(400);
+    expect(await prisma.user.findUnique({ where: { username: "newbie" } })).toBeNull();
+    const pendingInvite = await prisma.familyInvite.findUnique({ where: { token: inv.body.token } });
+    expect(pendingInvite?.usedAt).toBeNull();
   });
 
   it("lists and revokes pending invitations", async () => {

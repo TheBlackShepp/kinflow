@@ -20,7 +20,7 @@ describe("POST /api/auth/register", () => {
     const res = await request(api).post("/api/auth/register").send({
       name: "Alice",
       username: "alice",
-      password: "secret123",
+      password: "Secret1!",
     });
     expect(res.status).toBe(201);
     expect(res.body.token).toBeTruthy();
@@ -28,12 +28,34 @@ describe("POST /api/auth/register", () => {
     expect(res.body.user.role).toBe("admin");
   });
 
+  it("rejects passwords that do not meet the requirements", async () => {
+    const res = await request(api).post("/api/auth/register").send({
+      name: "Alice",
+      username: "alice",
+      password: "alllower1!",
+    });
+
+    expect(res.status).toBe(400);
+    const status = await request(api).get("/api/auth/status");
+    expect(status.body.hasUsers).toBe(false);
+  });
+
+  it("registers a password with exactly six characters", async () => {
+    const res = await request(api).post("/api/auth/register").send({
+      name: "Alice",
+      username: "alice",
+      password: "Aa1!aa",
+    });
+
+    expect(res.status).toBe(201);
+  });
+
   it("rejects registration when users already exist", async () => {
     await createUser({ username: "bob" });
     const res = await request(api).post("/api/auth/register").send({
       name: "Carol",
       username: "carol",
-      password: "secret123",
+      password: "Secret1!",
     });
     expect(res.status).toBe(403);
   });
@@ -42,12 +64,12 @@ describe("POST /api/auth/register", () => {
     await request(api).post("/api/auth/register").send({
       name: "Alice",
       username: "alice",
-      password: "secret123",
+      password: "Secret1!",
     });
     const res = await request(api).post("/api/auth/register").send({
       name: "Alice 2",
       username: "ALICE", // would be normalized to lowercase if reached
-      password: "secret123",
+      password: "Secret1!",
     });
     expect(res.status).toBe(403);
   });
@@ -65,26 +87,36 @@ describe("POST /api/auth/login", () => {
     await request(api).post("/api/auth/register").send({
       name: "Alice",
       username: "alice",
-      password: "secret123",
+      password: "Secret1!",
     });
     const res = await request(api).post("/api/auth/login").send({
       username: "alice",
-      password: "secret123",
+      password: "Secret1!",
     });
     expect(res.status).toBe(200);
     expect(res.body.token).toBeTruthy();
     expect(res.body.user.username).toBe("alice");
   });
 
+  it("allows an existing account with a short password to log in", async () => {
+    await createUser({ username: "legacy", password: "old123" });
+    const res = await request(api).post("/api/auth/login").send({
+      username: "legacy",
+      password: "old123",
+    });
+
+    expect(res.status).toBe(200);
+  });
+
   it("rejects wrong password", async () => {
     await request(api).post("/api/auth/register").send({
       name: "Alice",
       username: "alice",
-      password: "secret123",
+      password: "Secret1!",
     });
     const res = await request(api).post("/api/auth/login").send({
       username: "alice",
-      password: "wrongpass",
+      password: "Wrong1!",
     });
     expect(res.status).toBe(400);
   });
@@ -92,7 +124,7 @@ describe("POST /api/auth/login", () => {
   it("rejects unknown user", async () => {
     const res = await request(api).post("/api/auth/login").send({
       username: "nobody",
-      password: "secret123",
+      password: "Secret1!",
     });
     expect(res.status).toBe(400);
   });
@@ -124,7 +156,7 @@ async function onboardFirst() {
   const reg = await request(api).post("/api/auth/register").send({
     name: "First Admin",
     username: "firstadmin",
-    password: "test1234",
+    password: "Test123!",
   });
   return { token: reg.body.token };
 }

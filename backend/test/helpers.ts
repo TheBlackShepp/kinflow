@@ -15,7 +15,7 @@ export async function createUser(overrides: {
   name?: string;
   password?: string;
 }): Promise<User> {
-  const { username, name = "Test User", password = "test1234" } = overrides;
+  const { username, name = "Test User", password = "Test123!" } = overrides;
   const hashed = await bcrypt.hash(password, 10);
   return prisma.user.create({
     data: {
@@ -76,7 +76,7 @@ export async function onboardAdmin(username = "firstadmin") {
   const reg = await request(api).post("/api/auth/register").send({
     name: "First Admin",
     username,
-    password: "test1234",
+    password: "Test123!",
   });
   const token = reg.body?.token;
   const me = await request(api)
